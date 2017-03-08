@@ -1,10 +1,10 @@
 import openpyxl
 import matrix
 import excel_transfer
-import lu
-import givensrotation
-import qrf
-import LVE
+#import lu
+#import givensrotation
+#import qrf
+#import LVE
 import jap
 
 import numpy as np
@@ -25,7 +25,8 @@ class Work:
             "show slist": 6,
             "show scount": 7,
             "acc": 8,
-            "mk": 9
+            "mk": 9,
+            "jap": 10
 
         }
         pass
@@ -78,6 +79,9 @@ class Work:
             elif (task == 9):
                 self.makedafault()
             elif (task == 10):
+                Task = jap.JAP()
+                Task.importparam(self.accuracy)
+                Task.dostaff()
                 pass
         pass
 
