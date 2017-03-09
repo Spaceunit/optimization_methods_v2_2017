@@ -233,41 +233,7 @@ class dm:
         pass
 
     def resolve(self):
-        #self.makedefault()
-        m = 0
-        j = 0
-        self.t = self.get_t()
-        self.er = (self.ab[1] - self.ab[0]) / (2 * math.pow(self.t, self.N))
-        x1 = self.findx1()
-        x2 = self.findx2()
 
-        y1 = self.execute_expression(self.expression, x1)
-        y2 = self.execute_expression(self.expression, x2)
-        m = 1
-        while self.ab[1] - self.ab[0] > self.epsilon:
-            if y1 < y2:
-                self.ab[1] = x2
-                x2 = x1
-                y2 = y1
-                x1 = self.findx1()
-                y1 = self.execute_expression(self.expression, x1)
-                print("m=", m, "; x1=", x1, "; x2=", x2, "; y1=", y1, "; y2=", y2, ";")
-            else:
-                self.ab[0] = x1
-                x1 = x2
-                y1 = y2
-                x2 = self.findx2()
-                y2 = self.execute_expression(self.expression, x2)
-                print("m=", m, "; x1=", x1, "; x2=", x2, "; y1=", y1, "; y2=", y2, ";")
-            m += 1
-        if y1 < y2:
-            self.ab[1] = x2
-        else:
-            self.ab[0] = x1
-            self.xmin = (self.ab[1] + self.ab[0]) / 2
-            self.ymin = self.execute_expression(self.expression, self.xmin)
-            self.ea = (self.ab[1] - self.ab[0]) / 2
-        print(self.xmin, self.ymin, self.er, self.ea)
         pass
 
     def findx1(self):

@@ -243,7 +243,7 @@ class GSS:
         y1 = self.execute_expression(self.expression, x1)
         y2 = self.execute_expression(self.expression, x2)
         m = 1
-        while self.ab[1] - self.ab[0] > self.epsilon:
+        while math.fabs(self.ab[1] - self.ab[0]) > self.epsilon:
             if y1 < y2:
                 self.ab[1] = x2
                 x2 = x1
