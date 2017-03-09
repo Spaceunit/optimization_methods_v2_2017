@@ -6,13 +6,14 @@ import matplotlib.pyplot as plt
 from matplotlib import mlab
 
 
-class DM:
+class NM:
     def __init__(self):
         self.epsilon = 0.001
         self.N = 600
         self.xmin = None
         self.ymin = None
         self.ea = None
+        self.x = 95
         self.ab = [0, 100]
         self.raw_data = {}
         self.result_data = {}
@@ -105,7 +106,7 @@ class DM:
         self.accuracy = 3
         self.epsilon = 10 ** (-self.accuracy)
         #self.expression = "10 * x * math.log10(x) / math.log10(2.7) - (x**2) / 2"
-        self.expression = "(x-12)**2"
+        self.expression = ["(x-12)**2", "2*(x-12)"]
         self.ab = [0, 100]
         pass
 
@@ -131,6 +132,7 @@ class DM:
                     print("Please enter positive number!")
                     task = 0
         self.epsilon = 10 ** (-self.accuracy)
+        pass
 
     def inputdata(self, data_name, data_type):
         task = 0
@@ -194,7 +196,7 @@ class DM:
         task = 0
         while (task != 1):
             print('')
-            print("Dichotomy method")
+            print("Newton's method")
             print('')
             task = self.enterCommand()
             if (task == 2):
@@ -230,60 +232,30 @@ class DM:
     def print_raw_data(self):
         pass
 
-    def resolve0(self):
-        i = 0
-        c = (self.ab[0] + self.ab[1]) / 2
-        while math.fabs(self.ab[1] - self.ab[0]) > self.epsilon and self.execute_expression(self.expression, c) != 0:
-            if self.execute_expression(self.expression, self.ab[0]) * self.execute_expression(self.expression, self.ab[1]) < 0:
-                self.ab[1] = c
-            else:
-                self.ab[0] = c
-                c = (self.ab[0] + self.ab[1]) / 2
-                i += 1
-                print("c =", c)
-        print("i =", i)
-
     def resolve(self):
         i = 0
-        way = True
-        #print("i =", i, "a =", self.ab[0], "b =", self.ab[1], "d =", self.d)
-        while math.fabs(self.ab[1] - self.ab[0]) > self.epsilon:
-            self.set_d()
-
-            x1 = self.findx1()
-            x2 = self.findx2()
-
-            y1 = self.execute_expression(self.expression, x1)
-            y2 = self.execute_expression(self.expression, x2)
-
-            if y1 < y2:
-                if way == False:
-                    self.ab[0] = x2
-                    self.set_d()
-                    print("Overjump - change direction, go to B-point...")
-                    way = True
-                else:
-                    self.ab[1] = x2
+        y = self.count_f(self.x)
+        dy = self.count_df(self.x)
+        while y > self.epsilon:
+            if dy != 0:
+                print("i =", i, "x =", self.x, "f(x) =", y, "df(x) =", dy)
+                self.x = self.count_g(self.x, y, dy)
+                y = self.count_f(self.x)
+                dy = self.count_df(self.x)
             else:
-                if way == False:
-                    self.ab[1] = x1
-                    self.set_d()
-                    print("Overjump - change direction, go to A-point...")
-                    way = True
-                else:
-                    self.ab[0] = x1
-            print("i =", i, "a =", self.ab[0], "b =", self.ab[1], "d =", self.d)
+                print("df(x) = 0: Stop")
+                break
             i += 1
         pass
 
-    def set_d(self):
-        self.d = math.fabs(self.ab[1] - self.ab[0]) / 4
+    def count_f(self, x):
+        return self.execute_expression(self.expression[0], x)
 
-    def findx1(self):
-        return (self.ab[1] + self.ab[0]) / 2 - self.d
+    def count_df(self, x):
+        return self.execute_expression(self.expression[1], x)
 
-    def findx2(self):
-        return (self.ab[1] + self.ab[0]) / 2 + self.d
+    def count_g(self, x, f, df):
+        return x - f / df
 
     def printresult(self):
         pass

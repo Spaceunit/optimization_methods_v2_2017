@@ -8,6 +8,7 @@ import excel_transfer
 import jap
 import golden_section_search
 import dichotomy_method
+import newtons_method
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -30,7 +31,8 @@ class Work:
             "mk": 9,
             "jap": 10,
             "gss": 11,
-            "dm": 12
+            "dm": 12,
+            "nm": 13
 
         }
         pass
@@ -94,6 +96,11 @@ class Work:
                 pass
             elif (task == 12):
                 Task = dichotomy_method.DM()
+                Task.importparam(self.accuracy)
+                Task.dostaff()
+                pass
+            elif (task == 13):
+                Task = newtons_method.NM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
