@@ -6,14 +6,14 @@ import matplotlib.pyplot as plt
 from matplotlib import mlab
 
 
-class DM:
+class BSM:
     def __init__(self):
         self.epsilon = 0.001
         self.N = 600
         self.xmin = None
         self.ymin = None
         self.ea = None
-        self.ab = [0, 100]
+        self.ab = [-10.0, 100.0]
         self.raw_data = {}
         self.result_data = {}
         self.commands = {
@@ -105,8 +105,8 @@ class DM:
         self.accuracy = 3
         self.epsilon = 10 ** (-self.accuracy)
         #self.expression = "10 * x * math.log10(x) / math.log10(2.7) - (x**2) / 2"
-        self.expression = "(x-12)**2"
-        self.ab = [0, 100]
+        self.expression = "(x-3)**3"
+        self.ab = [-10.0, 100.0]
         pass
 
     def makedefault2(self):
@@ -282,13 +282,16 @@ class DM:
         self.d = math.fabs(self.ab[1] - self.ab[0])
         self.fm = self.count_f(self.midle)
         while self.d > self.epsilon and self.fm != 0:
-            if math.copysign(1, self.count_f(self.ab[0])) != math.copysign(1, self.count_f(self.ab[1])):
+            self.d /= 2
+            self.midle = self.ab[0] + self.d
+            print("i =", i, "midle =", self.midle, "length =", self.d, "Xa =", self.ab[0], "Xb =", self.ab[1])
+            print(math.copysign(1, self.count_f(self.ab[0])))
+            print(math.copysign(1, self.count_f(self.midle)))
+            if math.copysign(1.0, self.count_f(self.ab[0])) != math.copysign(1.0, self.count_f(self.midle)):
                 self.ab[1] = self.midle
             else:
                 self.ab[0] = self.midle
-                self.midle = (self.ab[0] + self.ab[1]) / 2
-                print("midle =", self.midle)
-                i += 1
+            i += 1
         pass
 
     def set_d(self):

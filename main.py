@@ -10,6 +10,7 @@ import golden_section_search
 import dichotomy_method
 import newtons_method
 import sven_method
+import bisection_method
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -34,7 +35,8 @@ class Work:
             "gss": 11,
             "dm": 12,
             "nm": 13,
-            "sm": 14
+            "sm": 14,
+            "bsm": 15
 
         }
         pass
@@ -107,6 +109,11 @@ class Work:
                 Task.dostaff()
             elif (task == 14):
                 Task = sven_method.SM()
+                Task.importparam(self.accuracy)
+                Task.dostaff()
+                pass
+            elif (task == 15):
+                Task = bisection_method.BSM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
