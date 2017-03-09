@@ -234,8 +234,7 @@ class GSS:
 
     def resolve(self):
         #self.makedefault()
-        m = 0
-        j = 0
+        i = 0
         self.t = self.get_t()
         self.er = (self.ab[1] - self.ab[0]) / (2 * math.pow(self.t, self.N))
         x1 = self.findx1()
@@ -251,15 +250,15 @@ class GSS:
                 y2 = y1
                 x1 = self.findx1()
                 y1 = self.execute_expression(self.expression, x1)
-                print("m=", m, "; x1=", x1, "; x2=", x2, "; y1=", y1, "; y2=", y2, ";")
+                print("i=", m, "; x1=", x1, "; x2=", x2, "; y1=", y1, "; y2=", y2, ";")
             else:
                 self.ab[0] = x1
                 x1 = x2
                 y1 = y2
                 x2 = self.findx2()
                 y2 = self.execute_expression(self.expression, x2)
-                print("m=", m, "; x1=", x1, "; x2=", x2, "; y1=", y1, "; y2=", y2, ";")
-            m += 1
+                print("i=", m, "; x1=", x1, "; x2=", x2, "; y1=", y1, "; y2=", y2, ";")
+            i += 1
         if y1 < y2:
             self.ab[1] = x2
         else:
