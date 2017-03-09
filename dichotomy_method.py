@@ -6,8 +6,9 @@ import matplotlib.pyplot as plt
 from matplotlib import mlab
 
 
-class dm:
+class DM:
     def __init__(self):
+        self.epsilon = 0.001
         self.N = 600
         self.xmin = None
         self.ymin = None
@@ -189,14 +190,14 @@ class dm:
     def execute_expression(self, function, x):
         return eval(function)
 
-    def get_t(self):
-        return (1 + math.sqrt(5)) / 2
+    def set_d(self):
+        self.d = math.fabs(self.ab[1] - self.ab[0]) / 4
 
     def dostaff(self):
         task = 0
         while (task != 1):
             print('')
-            print("Golden section search")
+            print("Dichotomy method")
             print('')
             task = self.enterCommand()
             if (task == 2):
@@ -232,15 +233,58 @@ class dm:
     def print_raw_data(self):
         pass
 
-    def resolve(self):
+    def resolve0(self):
+        i = 0
+        c = (self.ab[0] + self.ab[1]) / 2
+        while math.fabs(self.ab[1] - self.ab[0]) > self.epsilon and self.execute_expression(self.expression, c) != 0:
+            if self.execute_expression(self.expression, self.ab[0]) * self.execute_expression(self.expression, self.ab[1]) < 0:
+                self.ab[1] = c
+            else:
+                self.ab[0] = c
+                c = (self.ab[0] + self.ab[1]) / 2
+                i += 1
+                print("c =", c)
+        print("i =", i)
 
+    def resolve(self):
+        i = 0
+        way = True
+        #print("i =", i, "a =", self.ab[0], "b =", self.ab[1], "d =", self.d)
+        while math.fabs(self.ab[1] - self.ab[0]) > self.epsilon:
+            self.set_d()
+
+            x1 = self.findx1()
+            x2 = self.findx2()
+
+            y1 = self.execute_expression(self.expression, x1)
+            y2 = self.execute_expression(self.expression, x2)
+
+            if y1 < y2:
+                if way == False:
+                    self.ab[0] = x2
+                    self.set_d()
+                    print("Overjump - change direction, go to B-point...")
+                    way = True
+                else:
+                    self.ab[1] = x2
+            else:
+                if way == False:
+                    self.ab[1] = x1
+                    self.set_d()
+                    print("Overjump - change direction, go to A-point...")
+                    way = True
+                else:
+                    self.ab[0] = x1
+            print("i =", i, "a =", self.ab[0], "b =", self.ab[1], "d =", self.d)
+            i += 1
         pass
 
+
     def findx1(self):
-        return self.ab[1] - (self.ab[1] - self.ab[0]) / self.t
+        return (self.ab[1] + self.ab[0]) / 2 - self.d
 
     def findx2(self):
-        return self.ab[0] + (self.ab[1] - self.ab[0]) / self.t
+        return (self.ab[1] + self.ab[0]) / 2 + self.d
 
     def printresult(self):
         pass
