@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import mlab
 
-
+# Not ready yet!
 class DSKP:
     def __init__(self):
         self.epsilon = 0.001
