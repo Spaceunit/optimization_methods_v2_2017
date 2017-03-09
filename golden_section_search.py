@@ -6,9 +6,13 @@ import matplotlib.pyplot as plt
 from matplotlib import mlab
 
 
-class JAP:
+class GSS:
     def __init__(self):
-        self.a = matrix.Matrix([[0]], "Initial matrix")
+        self.N = 600
+        self.xmin = None
+        self.ymin = None
+        self.ea = None
+        self.ab = [0, 100]
         self.raw_data = {}
         self.result_data = {}
         self.commands = {
@@ -27,6 +31,8 @@ class JAP:
             "image 2": 12,
             "mk2": 13
         }
+        self.accuracy = 3
+        self.expression = None
 
 
     def showCommands(self):
@@ -50,6 +56,12 @@ class JAP:
         print('')
         print("Help v0.001")
         self.showCommands()
+
+
+    def testfunc(self, x):
+        y = 10 * x * math.log10(x) / math.log10(2.7) - (x**2) / 2
+        return y
+
 
     #remake
     def inputnewdata0(self):
@@ -90,6 +102,10 @@ class JAP:
 
     def makedefault(self):
         self.accuracy = 3
+        self.epsilon = 10 ** (-self.accuracy)
+        #self.expression = "10 * x * math.log10(x) / math.log10(2.7) - (x**2) / 2"
+        self.expression = "(x-12)**2"
+        self.ab = [0, 100]
         pass
 
     def makedefault2(self):
@@ -144,6 +160,7 @@ class JAP:
     #        self.raw_data[value] = self.inputdata(value, 'float')
 
     def inputnewdata(self):
+        self.expression = str(input("enter expression ->"))
         pass
 
     def inputmatrix(self, num):
@@ -167,6 +184,13 @@ class JAP:
             task = 0
             i += 1
         return nm
+
+    #@staticmethod
+    def execute_expression(self, function, x):
+        return eval(function)
+
+    def get_t(self):
+        return (1 + math.sqrt(5)) / 2
 
     def dostaff(self):
         task = 0
@@ -209,7 +233,48 @@ class JAP:
         pass
 
     def resolve(self):
+        #self.makedefault()
+        m = 0
+        j = 0
+        self.t = self.get_t()
+        self.er = (self.ab[1] - self.ab[0]) / (2 * math.pow(self.t, self.N))
+        x1 = self.findx1()
+        x2 = self.findx2()
+
+        y1 = self.execute_expression(self.expression, x1)
+        y2 = self.execute_expression(self.expression, x2)
+        m = 1
+        while self.ab[1] - self.ab[0] > self.epsilon:
+            if y1 < y2:
+                self.ab[1] = x2
+                x2 = x1
+                y2 = y1
+                x1 = self.findx1()
+                y1 = self.execute_expression(self.expression, x1)
+                print("m=", m, "; x1=", x1, "; x2=", x2, "; y1=", y1, "; y2=", y2, ";")
+            else:
+                self.ab[0] = x1
+                x1 = x2
+                y1 = y2
+                x2 = self.findx2()
+                y2 = self.execute_expression(self.expression, x2)
+                print("m=", m, "; x1=", x1, "; x2=", x2, "; y1=", y1, "; y2=", y2, ";")
+            m += 1
+        if y1 < y2:
+            self.ab[1] = x2
+        else:
+            self.ab[0] = x1
+            self.xmin = (self.ab[1] + self.ab[0]) / 2
+            self.ymin = self.execute_expression(self.expression, self.xmin)
+            self.ea = (self.ab[1] - self.ab[0]) / 2
+        print(self.xmin, self.ymin, self.er, self.ea)
         pass
+
+    def findx1(self):
+        return self.ab[1] - (self.ab[1] - self.ab[0]) / self.t
+
+    def findx2(self):
+        return self.ab[0] + (self.ab[1] - self.ab[0]) / self.t
 
     def printresult(self):
         pass

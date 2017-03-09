@@ -6,6 +6,7 @@ import excel_transfer
 #import qrf
 #import LVE
 import jap
+import golden_section_search
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -26,7 +27,8 @@ class Work:
             "show scount": 7,
             "acc": 8,
             "mk": 9,
-            "jap": 10
+            "jap": 10,
+            "gss": 11
 
         }
         pass
@@ -80,6 +82,11 @@ class Work:
                 self.makedafault()
             elif (task == 10):
                 Task = jap.JAP()
+                Task.importparam(self.accuracy)
+                Task.dostaff()
+                pass
+            elif (task == 11):
+                Task = golden_section_search.GSS()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
