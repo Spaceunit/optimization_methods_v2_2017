@@ -9,6 +9,7 @@ import jap
 import golden_section_search
 import dichotomy_method
 import newtons_method
+import sven_method
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,7 +33,8 @@ class Work:
             "jap": 10,
             "gss": 11,
             "dm": 12,
-            "nm": 13
+            "nm": 13,
+            "sm": 14
 
         }
         pass
@@ -101,6 +103,10 @@ class Work:
                 pass
             elif (task == 13):
                 Task = newtons_method.NM()
+                Task.importparam(self.accuracy)
+                Task.dostaff()
+            elif (task == 14):
+                Task = sven_method.SM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
