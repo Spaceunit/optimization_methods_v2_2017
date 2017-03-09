@@ -190,9 +190,6 @@ class DM:
     def execute_expression(self, function, x):
         return eval(function)
 
-    def set_d(self):
-        self.d = math.fabs(self.ab[1] - self.ab[0]) / 4
-
     def dostaff(self):
         task = 0
         while (task != 1):
@@ -279,6 +276,8 @@ class DM:
             i += 1
         pass
 
+    def set_d(self):
+        self.d = math.fabs(self.ab[1] - self.ab[0]) / 4
 
     def findx1(self):
         return (self.ab[1] + self.ab[0]) / 2 - self.d
