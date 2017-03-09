@@ -243,7 +243,7 @@ class DM:
                 print("c =", c)
         print("i =", i)
 
-    def resolve(self):
+    def resolve1(self):
         i = 0
         way = True
         #print("i =", i, "a =", self.ab[0], "b =", self.ab[1], "d =", self.d)
@@ -276,6 +276,21 @@ class DM:
             i += 1
         pass
 
+    def resolve(self):
+        i = 0
+        self.midle = (self.ab[0] + self.ab[1]) / 2
+        self.d = math.fabs(self.ab[1] - self.ab[0])
+        self.fm = self.count_f(self.midle)
+        while self.d > self.epsilon and self.fm != 0:
+            if math.copysign(1, self.count_f(self.ab[0])) != math.copysign(1, self.count_f(self.ab[1])):
+                self.ab[1] = self.midle
+            else:
+                self.ab[0] = self.midle
+                self.midle = (self.ab[0] + self.ab[1]) / 2
+                print("midle =", self.midle)
+                i += 1
+        pass
+
     def set_d(self):
         self.d = math.fabs(self.ab[1] - self.ab[0]) / 4
 
@@ -284,6 +299,9 @@ class DM:
 
     def findx2(self):
         return (self.ab[1] + self.ab[0]) / 2 + self.d
+
+    def count_f(self, x):
+        return self.execute_expression(self.expression, x)
 
     def printresult(self):
         pass
