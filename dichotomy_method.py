@@ -24,10 +24,11 @@ class DM:
             "start": 10,
             "image 1": 11,
             "image 2": 12,
-            "mk2": 13
+            "start -g": 13
         }
         self.expression = expression.Expression("No name", "x**2")
         self.accuracy = 3
+        self.result = {"x1": [], "x2": [], "y": []}
         self.makedefault()
 
 
@@ -66,6 +67,7 @@ class DM:
         self.expression.range = [-10.0, 10.0]
         self.expression.parameters["unimodal"] = True
         self.x_start = -9.0
+        self.result = {"x1": [], "x2": [], "y": []}
         pass
 
     def importparam(self, accuracy):
@@ -191,6 +193,9 @@ class DM:
         i = 0
         ab = self.expression.range.copy()
         way = True
+
+        self.collect_result(i, ab)
+
         print("Begin...")
         print("i =", i, "a =", ab[0], "b =", ab[1])
         while math.fabs(ab[1] - ab[0]) > self.epsilon:
@@ -218,8 +223,14 @@ class DM:
                 else:
                     ab[0] = x1
             i += 1
+            self.collect_result(i, ab)
             print("i =", i, "a =", ab[0], "b =", ab[1], "d =", self.d)
-        pass
+
+
+    def collect_result(self, y, ab):
+        self.result["x1"].append(ab[0])
+        self.result["x2"].append(ab[1])
+        self.result["y"].append(y)
 
     def set_d(self, ab):
         self.d = math.fabs(ab[1] - ab[0]) / 4
@@ -231,7 +242,12 @@ class DM:
         return (ab[1] + ab[0]) / 2 + self.d
 
     def printresult(self):
-        pass
+        y = np.arange(0.0, float(self.result["y"][-1]), 1.0)
+        #y = np.arange(0.0, 5.0, 0.1)
+        fig = plt.figure(1)
+        dm = fig.add_subplot(111)
+        dm.hlines(y, self.result["x1"], self.result["x2"], lw=2)
+        plt.show()
 
     def printresult1(self):
         pass
