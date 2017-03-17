@@ -34,7 +34,7 @@ class SM:
         }
         self.accuracy = 3
         self.expression = None
-        self.x = None
+        self.x = 0.1
 
 
     def showCommands(self):
@@ -103,12 +103,15 @@ class SM:
         pass
 
     def makedefault(self):
-        self.accuracy = 3
+        self.accuracy = 2
         self.epsilon = 10 ** (-self.accuracy)
         #self.expression = "10 * x * math.log10(x) / math.log10(2.7) - (x**2) / 2"
-        self.expression = "(x-12)**2"
+        # self.expression = "(x-12)**2"
+        #self.expression = "x**2 - 6*x"
+        self.expression = "x**2 + 6/x"
         self.ab = [0, 100]
-        self.x = 5
+        #self.x = 3.9
+        self.x = 0.1
         pass
 
     def makedefault2(self):
@@ -164,6 +167,7 @@ class SM:
 
     def inputnewdata(self):
         self.expression = str(input("enter expression ->"))
+        self.ab = list(map(float, input("range-> ").split()))
         pass
 
     def inputmatrix(self, num):
@@ -244,24 +248,29 @@ class SM:
             self.h = -self.h
             self.x = self.x + self.h
             f2 = self.count_f(self.h)
+            print("Change walk direction...")
         else:
             self.x = x_temp
 
-        print("--------------------------------------------")
-        print("i =", i, "x =", self.x, "f(x1) =", f1, "h =", self.h)
-        print("i =", i, "x =", self.x, "f(x2) =", f2, "h =", self.h)
+        #print("--------------------------------------------")
+        #print("i =", i, "x =", self.x, "f(x1) =", f1, "h =", self.h)
+        #print("i =", i, "x =", self.x, "f(x2) =", f2, "h =", self.h)
 
         while f2 < f1:
+            print("--------------------------------------------")
+            print("i =", i, "x =", self.x, "f(x1) =", f1, "h =", self.h)
+            print("i =", i, "x =", self.x, "f(x2) =", f2, "h =", self.h)
             self.h *= 2
             f1 = self.count_f(self.x)
             self.x += self.h
             f2 = self.count_f(self.x)
-            print("i =", i, "x =", self.x, "h =", self.h)
+            #print("i =", i, "x =", self.x, "h =", self.h)
             i += 1
         pass
 
     def set_h(self):
-        self.h = self.x * self.epsilon * 10
+        #self.h = self.x * self.epsilon * 10
+        self.h = 0.1
 
     def count_f(self, x):
         return self.execute_expression(self.expression, x)
@@ -272,3 +281,4 @@ class SM:
     def printresult1(self):
         pass
     # 13
+    # [0.4, 0.8, 1.6]

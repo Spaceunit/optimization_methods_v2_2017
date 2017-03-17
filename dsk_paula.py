@@ -14,8 +14,10 @@ class DSKP:
         self.ymin = None
         self.ea = None
         self.ab = [0, 100]
+        self.intervals = [0.4, 0.8, 1.6]
         self.raw_data = {}
         self.result_data = {}
+        self.dx = 0.1
         self.commands = {
             "none": 0,
             "exit": 1,
@@ -33,7 +35,7 @@ class DSKP:
             "mk2": 13
         }
         self.accuracy = 3
-        self.expression = None
+        self.expression = "x**2 + 6/x"
 
 
     def showCommands(self):
@@ -102,11 +104,16 @@ class DSKP:
         pass
 
     def makedefault(self):
-        self.accuracy = 3
-        self.epsilon = 10 ** (-self.accuracy)
+        self.accuracy = 2
+        #self.epsilon = 10 ** (-self.accuracy)
+        self.epsilon = 0.01
         #self.expression = "10 * x * math.log10(x) / math.log10(2.7) - (x**2) / 2"
-        self.expression = "(x-12)**2"
-        self.ab = [0, 100]
+        #self.expression = "(x-12)**2"
+        #self.expression = "x**2 + 6/x"
+        self.expression = "x**2 - 6/x"
+        self.ab = [0.1, 3.0]
+        self.x = 0.1
+        self.dx = 0.1
         pass
 
     def makedefault2(self):
@@ -194,7 +201,7 @@ class DSKP:
         task = 0
         while (task != 1):
             print('')
-            print("Dichotomy method")
+            print("DSK Paul`s method")
             print('')
             task = self.enterCommand()
             if (task == 2):
@@ -216,7 +223,7 @@ class DSKP:
                 self.makedefault()
                 pass
             elif (task == 10):
-                self.resolve()
+                self.resolve_main()
                 pass
             elif (task == 11):
                 self.printresult()
@@ -230,51 +237,106 @@ class DSKP:
     def print_raw_data(self):
         pass
 
-    def resolve0(self):
-        i = 0
-        c = (self.ab[0] + self.ab[1]) / 2
-        while math.fabs(self.ab[1] - self.ab[0]) > self.epsilon and self.execute_expression(self.expression, c) != 0:
-            if self.execute_expression(self.expression, self.ab[0]) * self.execute_expression(self.expression, self.ab[1]) < 0:
-                self.ab[1] = c
-            else:
-                self.ab[0] = c
-                c = (self.ab[0] + self.ab[1]) / 2
-                i += 1
-                print("c =", c)
-        print("i =", i)
+    def resolve_sven(self):
+        i = 1
+        self.intervals = []
+        self.set_h()
+        print(self.expression)
+        f1 = self.count_f(self.x)
+        print("x1 =", self.x, "f(x1) =", f1, "h =", self.h)
+        x_temp = self.x + self.h
+        f2 = self.count_f(x_temp)
+        print("x2 =", x_temp, "f(x2) =", f2, "h =", self.h)
+        if f1 < f2:
+            self.h = -self.h
+            self.x = self.x + self.h
+            f2 = self.count_f(self.x)
+        else:
+            self.x = x_temp
 
-    def resolve(self):
-        i = 0
-        way = True
-        #print("i =", i, "a =", self.ab[0], "b =", self.ab[1], "d =", self.d)
-        while math.fabs(self.ab[1] - self.ab[0]) > self.epsilon:
-            self.set_d()
+        print("--------------------------------------------")
+        print("i =", i, "x =", self.x, "f(x1) =", f1, "h =", self.h)
+        print("Important")
+        print("i =", i, "x =", self.x, "f(x2) =", f2, "h =", self.h)
 
-            x1 = self.findx1()
-            x2 = self.findx2()
-
-            y1 = self.execute_expression(self.expression, x1)
-            y2 = self.execute_expression(self.expression, x2)
-
-            if y1 < y2:
-                if way == False:
-                    self.ab[0] = x2
-                    self.set_d()
-                    print("Overjump - change direction, go to B-point...")
-                    way = True
-                else:
-                    self.ab[1] = x2
-            else:
-                if way == False:
-                    self.ab[1] = x1
-                    self.set_d()
-                    print("Overjump - change direction, go to A-point...")
-                    way = True
-                else:
-                    self.ab[0] = x1
-            print("i =", i, "a =", self.ab[0], "b =", self.ab[1], "d =", self.d)
+        while f2 < f1:
+            x_temp = self.x
+            self.h *= 2
+            f1 = self.count_f(x_temp)
+            self.x += self.h
+            f2 = self.count_f(self.x)
+            #print("i =", i, "x =", self.x, "h =", self.h)
+            print("--------------------------------------------")
+            print("i =", i, "x =", self.x, "f(x1) =", f1, "h =", self.h)
+            print("Important")
+            print("i =", i, "x =", self.x, "f(x2) =", f2, "h =", self.h)
+            if f2 < f1:
+                self.intervals.append(self.x)
             i += 1
+
+        print(self.intervals)
         pass
+
+    def set_h(self):
+        self.h = self.dx
+
+    def count_f(self, x):
+        return self.execute_expression(self.expression, x)
+
+    def resolve_dsk(self):
+        self.func = []
+        for i in range(3):
+            self.func.append(self.count_f(self.intervals[i]))
+        print(self.func)
+        self.xnew = self.intervals[1] + self.dx * (self.func[0] - self.func[2]) /(2*(self.func[0] - 2 * self.func[1] + self.func[2]))
+        #self.x = self.xnew
+        print("x* = ", self.xnew)
+        pass
+
+    def resolve_paul(self):
+        # 0.2
+        # 0.01
+        x1 = self.xnew
+        x2 = self.xnew + self.dx
+        f1 = self.count_f(self.xnew)
+        f2 = self.count_f(x2)
+        if f1 > f2:
+            x3 = self.xnew + 2 * self.dx
+        else:
+            x3 = self.xnew - self.dx
+
+        x = [self.xnew, x2, x3]
+        f3 = self.count_f(min(x))
+        a1 = (f2 - f1) / (x2 - x1)
+        a2 = ((f3 - f1)/(x3 - x1) - (f2 - f1)/(x2 - x1))/ (x3 - x2)
+        xst = 0.5 *(x1 + x2) - a1 / a2
+        fs = self.count_f(xst)
+        while math.fabs(x2 - xst) < self.epsilon and math.fabs(f2 - fs) < self.epsilon:
+            f1 = self.count_f(x1)
+            x2 = x1 + self.dx
+            f2 = self.count_f(x2)
+            if f1 > f2:
+                x3 = self.xnew + 2 * self.dx
+            else:
+                x3 = self.xnew - self.dx
+
+            f3 = self.count_f(min(x))
+            a1 = (f2 - f1) / (x2 - x1)
+            a2 = ((f3 - f1) / (x3 - x1) - (f2 - f1) / (x2 - x1)) / (x3 - x2)
+            xst = 0.5 * (x1 + x2) - a1 / a2
+            fs = self.count_f(xst)
+        print("xst =", xst, "f(xst) =", fs)
+        pass
+
+    def resolve_main(self):
+        self.resolve_sven()
+        self.resolve_dsk()
+        self.resolve_paul()
+        pass
+
+    #def count_f(self, x):
+    #    self.execute_expression(self.expression, x)
+
 
     def set_d(self):
         self.d = math.fabs(self.ab[1] - self.ab[0]) / 4
@@ -290,4 +352,6 @@ class DSKP:
 
     def printresult1(self):
         pass
-    # 13
+
+    #xn = x2 + dx * (f1 - f3) /(2*(f1 - 2f2 + f3))
+    #[0.4, 0.8, 1.6]

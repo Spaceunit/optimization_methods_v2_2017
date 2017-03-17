@@ -13,7 +13,7 @@ class DM:
         self.xmin = None
         self.ymin = None
         self.ea = None
-        self.ab = [0, 100]
+        self.ab = [0, 4]
         self.raw_data = {}
         self.result_data = {}
         self.commands = {
@@ -102,11 +102,12 @@ class DM:
         pass
 
     def makedefault(self):
-        self.accuracy = 3
-        self.epsilon = 10 ** (-self.accuracy)
+        self.accuracy = 1
+        self.epsilon = 2 * 10 ** (-self.accuracy)
         #self.expression = "10 * x * math.log10(x) / math.log10(2.7) - (x**2) / 2"
-        self.expression = "(x-12)**2"
-        self.ab = [0, 100]
+        #self.expression = "(x-12)**2"
+        self.expression = "x**2 - 6*x"
+        self.ab = [2.8, 3.6]
         pass
 
     def makedefault2(self):

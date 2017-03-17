@@ -13,8 +13,8 @@ class NM:
         self.xmin = None
         self.ymin = None
         self.ea = None
-        self.x = 95
-        self.ab = [0, 100]
+        self.x = 0.1
+        self.ab = [0.1, 3.0]
         self.raw_data = {}
         self.result_data = {}
         self.commands = {
@@ -106,8 +106,8 @@ class NM:
         self.accuracy = 3
         self.epsilon = 10 ** (-self.accuracy)
         #self.expression = "10 * x * math.log10(x) / math.log10(2.7) - (x**2) / 2"
-        self.expression = ["(x-12)**2", "2*(x-12)"]
-        self.ab = [0, 100]
+        self.expression = ["x**2 + 6/x", "2*x - 6/(x**2)"]
+        self.ab = [0.1, 3.0]
         pass
 
     def makedefault2(self):

@@ -11,6 +11,7 @@ import dichotomy_method
 import newtons_method
 import sven_method
 import bisection_method
+import dsk_paula
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -36,7 +37,8 @@ class Work:
             "dm": 12,
             "nm": 13,
             "sm": 14,
-            "bsm": 15
+            "bsm": 15,
+            "dskp": 16
 
         }
         pass
@@ -114,6 +116,11 @@ class Work:
                 pass
             elif (task == 15):
                 Task = bisection_method.BSM()
+                Task.importparam(self.accuracy)
+                Task.dostaff()
+                pass
+            elif (task == 16):
+                Task = dsk_paula.DSKP()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
