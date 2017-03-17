@@ -42,8 +42,8 @@ class Expression:
         print("Parameters:", self.parameters)
         pass
 
-    def execute(self, function, x):
-        return eval(function)
+    def execute(self, x):
+        return eval(self.expression)
 
     def rename(self, name):
         self.name = name
