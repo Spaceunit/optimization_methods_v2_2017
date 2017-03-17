@@ -1,25 +1,3 @@
-def inputmatrix(self):
-    print('')
-    i = 0
-    task = 0
-    nm = matrix.Matrix([], "new matrix")
-    while (i < num):
-        print("Enter matrix row (use spaces)")
-        print("Row ", i + 1)
-        while (task != 1):
-            row = list(map(float, input("-> ").split()))
-            print("Input is correct? (enter - yes/n - no)")
-            command = input("-> ")
-            if (command != "n" and len(row) == num):
-                task = 1
-                nm.appendnrow(row)
-            elif (len(row) != num):
-                print('')
-                print("Incorrect input: count of items.")
-        task = 0
-        i += 1
-    return nm
-
 class Expression:
     def __init__(self, name, expression):
         self.name = name
@@ -27,6 +5,7 @@ class Expression:
         self.range = None
         self.local_min = None
         self.local_max = None
+        self.parameters = {}
 
     def input_expr(self):
         ans = False
@@ -41,7 +20,7 @@ class Expression:
             else:
                 ans = True
 
-    def input_expr(self):
+    def input_range(self):
         ans = False
         command = ""
         print('')
@@ -54,14 +33,20 @@ class Expression:
             else:
                 ans = True
 
-    def set_range(self):
-
-        pass
-
     def show_expr(self):
+        print("Expression name:", self.name)
+        print("Expression:", self.expression)
+        print("Range:", self.range)
+        print("Local minimum:", self.local_min)
+        print("Local maximum:", self.local_max)
+        print("Parameters:", self.parameters)
         pass
 
-    def rename(self):
+    def execute(self, function, x):
+        return eval(function)
+
+    def rename(self, name):
+        self.name = name
         pass
 
     def concatexp(self):
