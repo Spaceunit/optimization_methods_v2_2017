@@ -122,32 +122,30 @@ class DM:
             print("Dichotomy method")
             print('')
             task = self.enterCommand()
-            if (task == 2):
+            if task == 2:
                 pass
-            elif (task == 3):
+            elif task == 3:
                 pass
-            elif (task == 4):
+            elif task == 4:
                 self.showHelp()
-            elif (task == 5):
+            elif task == 5:
                 self.inputnewdata()
-                pass
-            elif (task == 6):
+            elif task == 6:
                 self.print_raw_data()
-                pass
-            elif (task == 8):
+            elif task == 8:
                 self.setaccuracy()
-                pass
-            elif (task == 9):
+            elif task == 9:
                 self.makedefault()
-                pass
-            elif (task == 10):
+            elif task == 10:
                 self.resolve()
-                pass
-            elif (task == 11):
+            elif task == 11:
                 self.printresult()
 
-            elif (task == 12):
+            elif task == 12:
                 self.printresult1()
+
+            elif task == 13:
+                self.resolve_with_grp()
         pass
 
     def print_raw_data(self):
@@ -156,6 +154,40 @@ class DM:
 
 
     def resolve(self):
+        i = 0
+        ab = self.expression.range.copy()
+        way = True
+        print("Begin...")
+        print("i =", i, "a =", ab[0], "b =", ab[1])
+        while math.fabs(ab[1] - ab[0]) > self.epsilon:
+            self.set_d(ab)
+            x1 = self.findx1(ab)
+            x2 = self.findx2(ab)
+
+            y1 = self.expression.execute(x1)
+            y2 = self.expression.execute(x2)
+
+            if y1 < y2:
+                if way == False:
+                    ab[0] = x2
+                    self.set_d(ab)
+                    print("Overjump - change direction, go to B-point...")
+                    way = True
+                else:
+                    ab[1] = x2
+            else:
+                if way == False:
+                    ab[1] = x1
+                    self.set_d(ab)
+                    print("Overjump - change direction, go to A-point...")
+                    way = True
+                else:
+                    ab[0] = x1
+            i += 1
+            print("i =", i, "a =", ab[0], "b =", ab[1], "d =", self.d)
+        pass
+
+    def resolve_with_grp(self):
         i = 0
         ab = self.expression.range.copy()
         way = True
