@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib import mlab
 
 
+
 class NM:
     def __init__(self):
         self.epsilon = 0.001

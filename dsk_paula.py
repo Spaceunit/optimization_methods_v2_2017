@@ -123,6 +123,7 @@ class DSKP:
     def importparam(self, accuracy):
         self.accuracy = accuracy
 
+
     def setaccuracy(self):
         task = 0
         print('')

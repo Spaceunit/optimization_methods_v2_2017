@@ -126,6 +126,7 @@ class Work:
                 pass
         pass
 
+
     def inputnewdata(self):
         task = 0
         self.a = matrix.Matrix([], "Initial matrix")

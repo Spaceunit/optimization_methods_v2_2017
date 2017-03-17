@@ -35,6 +35,7 @@ class GSS:
         self.expression = None
 
 
+
     def showCommands(self):
         print('')
         print("Commands...")

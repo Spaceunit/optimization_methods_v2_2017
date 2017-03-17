@@ -93,6 +93,7 @@ class SM:
             if (command != "n"):
                 task = 1
 
+
     def makedefault0(self):
         print("Setting up data for task#15")
         self.raw_data = {'a': 1.77, 'b': 2.17, 'c': 1.38, 'd': 0.89, 'x0': 3.39, 'y0': 2.13, 't0': 15, 't1': 45}

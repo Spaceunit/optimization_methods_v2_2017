@@ -29,6 +29,7 @@ class JAP:
         }
 
 
+
     def showCommands(self):
         print('')
         print("Commands...")

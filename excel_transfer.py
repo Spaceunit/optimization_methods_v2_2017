@@ -25,6 +25,7 @@ class Excel:
         self.setsheetname("Sheet1")
         pass
 
+
     def setpath(self, path):
         self.path = path
         pass
