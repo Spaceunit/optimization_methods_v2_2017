@@ -1,10 +1,12 @@
 import openpyxl
-import matrix
-import excel_transfer
-#import lu
-#import givensrotation
-#import qrf
-#import LVE
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import mlab
+
+
+from resource import matrix
+from resource import excel_transfer
+
 import jap
 import golden_section_search
 import dichotomy_method
@@ -13,9 +15,6 @@ import sven_method
 import bisection_method
 import dsk_paula
 
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib import mlab
 
 class Work:
     def __init__(self):
