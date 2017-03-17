@@ -5,17 +5,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import mlab
 
+from resource import expression
+
 
 class DM:
     def __init__(self):
-        self.epsilon = 0.001
-        self.N = 600
-        self.xmin = None
-        self.ymin = None
-        self.ea = None
-        self.ab = [0, 4]
-        self.raw_data = {}
-        self.result_data = {}
         self.commands = {
             "none": 0,
             "exit": 1,
@@ -32,8 +26,9 @@ class DM:
             "image 2": 12,
             "mk2": 13
         }
+        self.expression = expression.Expression("No name", "x**2")
         self.accuracy = 3
-        self.expression = None
+        self.makedefault()
 
 
 
@@ -66,12 +61,11 @@ class DM:
 
 
     def makedefault(self):
-        self.accuracy = 1
-        self.epsilon = 2 * 10 ** (-self.accuracy)
-        #self.expression = "10 * x * math.log10(x) / math.log10(2.7) - (x**2) / 2"
-        #self.expression = "(x-12)**2"
-        self.expression = "x**2 - 6*x"
-        self.ab = [2.8, 3.6]
+        self.epsilon = 10 ** (-self.accuracy)
+        self.expression = expression.Expression("Parabola", "x**2")
+        self.expression.range = [-10.0, 10.0]
+        self.expression.parameters["unimodal"] = True
+        self.x_start = -9.0
         pass
 
     def importparam(self, accuracy):
@@ -117,39 +111,9 @@ class DM:
         else:
             pass
 
-    #def inputnewdata(self):
-    #    for value in ['a', 'b', 'c', 'd', 'x0', 'y0', 't0', 't1']:
-    #        self.raw_data[value] = self.inputdata(value, 'float')
-
     def inputnewdata(self):
         self.expression = str(input("enter expression ->"))
         pass
-
-    def inputmatrix(self, num):
-        print('')
-        i = 0
-        task = 0
-        nm = matrix.Matrix([], "new matrix")
-        while (i < num):
-            print("Enter matrix row (use spaces)")
-            print("Row ", i + 1)
-            while (task != 1):
-                row = list(map(float, input("-> ").split()))
-                print("Input is correct? (enter - yes/n - no)")
-                command = input("-> ")
-                if (command != "n" and len(row) == num):
-                    task = 1
-                    nm.appendnrow(row)
-                elif (len(row) != num):
-                    print('')
-                    print("Incorrect input: count of items.")
-            task = 0
-            i += 1
-        return nm
-
-    #@staticmethod
-    def execute_expression(self, function, x):
-        return eval(function)
 
     def dostaff(self):
         task = 0
@@ -184,71 +148,58 @@ class DM:
 
             elif (task == 12):
                 self.printresult1()
-            elif (task == 13):
-                self.makedefault2()
         pass
 
     def print_raw_data(self):
+        self.expression.show_expr()
         pass
 
-    def resolve0(self):
-        i = 0
-        c = (self.ab[0] + self.ab[1]) / 2
-        while math.fabs(self.ab[1] - self.ab[0]) > self.epsilon and self.execute_expression(self.expression, c) != 0:
-            if self.execute_expression(self.expression, self.ab[0]) * self.execute_expression(self.expression, self.ab[1]) < 0:
-                self.ab[1] = c
-            else:
-                self.ab[0] = c
-                c = (self.ab[0] + self.ab[1]) / 2
-                i += 1
-                print("c =", c)
-        print("i =", i)
 
     def resolve(self):
         i = 0
+        ab = self.expression.range.copy()
         way = True
-        #print("i =", i, "a =", self.ab[0], "b =", self.ab[1], "d =", self.d)
-        while math.fabs(self.ab[1] - self.ab[0]) > self.epsilon:
-            self.set_d()
+        print("Begin...")
+        print("i =", i, "a =", ab[0], "b =", ab[1])
+        while math.fabs(ab[1] - ab[0]) > self.epsilon:
+            self.set_d(ab)
+            x1 = self.findx1(ab)
+            x2 = self.findx2(ab)
 
-            x1 = self.findx1()
-            x2 = self.findx2()
-
-            y1 = self.execute_expression(self.expression, x1)
-            y2 = self.execute_expression(self.expression, x2)
+            y1 = self.expression.execute(x1)
+            y2 = self.expression.execute(x2)
 
             if y1 < y2:
                 if way == False:
-                    self.ab[0] = x2
-                    self.set_d()
+                    ab[0] = x2
+                    self.set_d(ab)
                     print("Overjump - change direction, go to B-point...")
                     way = True
                 else:
-                    self.ab[1] = x2
+                    ab[1] = x2
             else:
                 if way == False:
-                    self.ab[1] = x1
-                    self.set_d()
+                    ab[1] = x1
+                    self.set_d(ab)
                     print("Overjump - change direction, go to A-point...")
                     way = True
                 else:
-                    self.ab[0] = x1
-            print("i =", i, "a =", self.ab[0], "b =", self.ab[1], "d =", self.d)
+                    ab[0] = x1
             i += 1
+            print("i =", i, "a =", ab[0], "b =", ab[1], "d =", self.d)
         pass
 
-    def set_d(self):
-        self.d = math.fabs(self.ab[1] - self.ab[0]) / 4
+    def set_d(self, ab):
+        self.d = math.fabs(ab[1] - ab[0]) / 4
 
-    def findx1(self):
-        return (self.ab[1] + self.ab[0]) / 2 - self.d
+    def findx1(self, ab):
+        return (ab[1] + ab[0]) / 2 - self.d
 
-    def findx2(self):
-        return (self.ab[1] + self.ab[0]) / 2 + self.d
+    def findx2(self, ab):
+        return (ab[1] + ab[0]) / 2 + self.d
 
     def printresult(self):
         pass
 
     def printresult1(self):
         pass
-    # 13
