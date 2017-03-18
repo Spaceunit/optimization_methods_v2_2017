@@ -5,10 +5,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import mlab
 
+from matplotlib.path import Path
+import matplotlib.patches as patches
+
 from resource import expression
 
 
-class DM:
+class SM:
     def __init__(self):
         self.commands = {
             "none": 0,
@@ -22,8 +25,8 @@ class DM:
             "acc": 8,
             "mk": 9,
             "start": 10,
-            "image 1": 11,
-            "image 2": 12,
+            "show result": 11,
+            "image 1": 12,
             "start -g": 13
         }
         self.expression = expression.Expression("No name", "x**2")
@@ -66,7 +69,7 @@ class DM:
         self.expression = expression.Expression("Parabola", "x**2")
         self.expression.range = [-10.0, 10.0]
         self.expression.parameters["unimodal"] = True
-        self.x_start = -9.0
+        self.x_start = 0.1
         self.result = {"x1": [], "x2": [], "x0": []}
         self.d = 0.1
         pass
@@ -123,7 +126,7 @@ class DM:
         task = 0
         while (task != 1):
             print('')
-            print("Dichotomy method")
+            print("Sven's method")
             print('')
             task = self.enterCommand()
             if task == 2:
@@ -146,7 +149,7 @@ class DM:
                 self.printresult()
 
             elif task == 12:
-                self.printresult1()
+                self.printresult_graph()
 
             elif task == 13:
                 pass
@@ -197,13 +200,18 @@ class DM:
                     xk.append(x_next)
                     d *= 2
                 elif fxk[-1] > fxk[-2]:
-                    x_next = xk[-1] - d / 2
+                    print("fxk[-1] > fxk[-2]")
+                    x_next = xk[-1] - d / 4
                     xk.append(xk[-1])
                     fxk.append(fxk[-1])
                     xk[-2] = x_next
                     fxk[-2] = self.expression.execute(x_next)
+                    print("x:", xk[-3], "f(x):", fxk[-3])
+                    print("x:", xk[-2], "f(x):", fxk[-2])
+                    print("x:", xk[-1], "f(x):", fxk[-1])
                     status = True
                 elif fxk[-1] >= fxk[-2] and fxk[-2] <= fxk[-3]:
+                    print("fxk[-1] >= fxk[-2] and fxk[-2] <= fxk[-3]")
                     status = True
                 else:
                     print("WTF")
@@ -229,14 +237,22 @@ class DM:
         return (ab[1] + ab[0]) / 2 + self.d
 
     def printresult_graph(self):
-        y = np.arange(0.0, float(self.result["x0"][-1]), 1.0)
-        #y = np.arange(0.0, 5.0, 0.1)
-        fig = plt.figure(1)
-        dm = fig.add_subplot(111)
-        dm.hlines(y, self.result["x1"], self.result["x2"], lw=2)
+        verts = []
+        for i in range(len(self.result["xk"])):
+            verts.append((self.result["xk"][i], self.result["fxk"][i]))
+        path = Path(verts)
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        patch = patches.PathPatch(path, facecolor='none', lw=2)
+        ax.add_patch(patch)
+
+        xs, ys = zip(*verts)
+        ax.plot(xs, ys, 'x--', lw=2, color='black', ms=10)
+
         plt.show()
 
     def printresult(self):
         for i in range(len(self.result["xk"])):
-            print("i:", i, "x:", self.result["xk"][i], "f(x):", self.result["fxk"])
+            print("i:", i, "x:", self.result["xk"][i], "f(x):", self.result["fxk"][i])
         pass

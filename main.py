@@ -12,6 +12,7 @@ import golden_section_search
 import dichotomy_method
 import newtons_method
 import sven_method
+import sven_method_v2
 import bisection_method
 import dsk_paula
 
@@ -108,7 +109,7 @@ class Work:
                 Task.importparam(self.accuracy)
                 Task.dostaff()
             elif (task == 14):
-                Task = sven_method.SM()
+                Task = sven_method_v2.SM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
