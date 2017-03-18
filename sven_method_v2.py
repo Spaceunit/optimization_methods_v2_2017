@@ -5,17 +5,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import mlab
 
+from resource import expression
 
-class SM:
+
+class DM:
     def __init__(self):
-        self.epsilon = 0.001
-        self.N = 600
-        self.xmin = None
-        self.ymin = None
-        self.ea = None
-        self.ab = [0, 3.0]
-        self.raw_data = {}
-        self.result_data = {}
         self.commands = {
             "none": 0,
             "exit": 1,
@@ -30,11 +24,13 @@ class SM:
             "start": 10,
             "image 1": 11,
             "image 2": 12,
-            "mk2": 13
+            "start -g": 13
         }
+        self.expression = expression.Expression("No name", "x**2")
         self.accuracy = 3
-        self.expression = None
-        self.x = 0.1
+        self.result = {"x1": [], "x2": [], "y": []}
+        self.makedefault()
+
 
 
     def showCommands(self):
@@ -65,46 +61,14 @@ class SM:
         return y
 
 
-    #remake
-    def inputnewdata0(self):
-        task = 0
-        self.am = matrix.Matrix([], "Initial matrix")
-        while (task != 1):
-            print('')
-            print("Enter matrix dimension:")
-            while (task != 1):
-                num = int(input("-> "))
-                print("Input is correct? (enter - yes/n - no)")
-                command = input("-> ")
-                if (command != "n"):
-                    self.am = self.inputmatrix(num)
-                    # self.dv = self.inputvector()
-                    task = 1
-            task = 0
-            self.am.rename("Initial matrix")
-            self.um = self.am.copy()
-            self.um.rename("U-matrix")
-            self.am.showmatrix()
-            print("Our matrix with accuracy: 3")
-            self.am.showmatrixaccuracy3()
-            # self.dv.showvector()
-            print("Matrix is correct? (enter - yes/n - no)")
-            command = input("-> ")
-            if (command != "n"):
-                task = 1
-
     def makedefault(self):
-        self.accuracy = 6
         self.epsilon = 10 ** (-self.accuracy)
-        #self.expression = "10 * x * math.log10(x) / math.log10(2.7) - (x**2) / 2"
-        # self.expression = "(x-12)**2"
-        #self.expression = "x**2 - 6*x"
-        self.expression = "x**2 + 6/x"
-        self.ab = [0.1, 3.0]
-        #self.x = 3.9
-        self.x = 0.1
+        self.expression = expression.Expression("Parabola", "x**2")
+        self.expression.range = [-10.0, 10.0]
+        self.expression.parameters["unimodal"] = True
+        self.x_start = -9.0
+        self.result = {"x1": [], "x2": [], "y": []}
         pass
-
 
     def importparam(self, accuracy):
         self.accuracy = accuracy
@@ -149,147 +113,142 @@ class SM:
         else:
             pass
 
-    #def inputnewdata(self):
-    #    for value in ['a', 'b', 'c', 'd', 'x0', 'y0', 't0', 't1']:
-    #        self.raw_data[value] = self.inputdata(value, 'float')
-
     def inputnewdata(self):
-        self.expression = str(input("enter expression ->"))
-        self.ab = list(map(float, input("range-> ").split()))
+        self.expression.input_expr()
+        self.expression.input_range()
         pass
-
-    def inputmatrix(self, num):
-        print('')
-        i = 0
-        task = 0
-        nm = matrix.Matrix([], "new matrix")
-        while (i < num):
-            print("Enter matrix row (use spaces)")
-            print("Row ", i + 1)
-            while (task != 1):
-                row = list(map(float, input("-> ").split()))
-                print("Input is correct? (enter - yes/n - no)")
-                command = input("-> ")
-                if (command != "n" and len(row) == num):
-                    task = 1
-                    nm.appendnrow(row)
-                elif (len(row) != num):
-                    print('')
-                    print("Incorrect input: count of items.")
-            task = 0
-            i += 1
-        return nm
-
-    #@staticmethod
-    def execute_expression(self, function, x):
-        return eval(function)
 
     def dostaff(self):
         task = 0
         while (task != 1):
             print('')
-            print("Sven's method")
+            print("Dichotomy method")
             print('')
             task = self.enterCommand()
-            if (task == 2):
+            if task == 2:
                 pass
-            elif (task == 3):
+            elif task == 3:
                 pass
-            elif (task == 4):
+            elif task == 4:
                 self.showHelp()
-            elif (task == 5):
+            elif task == 5:
                 self.inputnewdata()
-                pass
-            elif (task == 6):
+            elif task == 6:
                 self.print_raw_data()
-                pass
-            elif (task == 8):
+            elif task == 8:
                 self.setaccuracy()
-                pass
-            elif (task == 9):
+            elif task == 9:
                 self.makedefault()
-                pass
-            elif (task == 10):
+            elif task == 10:
                 self.resolve()
-                pass
-            elif (task == 11):
+            elif task == 11:
                 self.printresult()
 
-            elif (task == 12):
+            elif task == 12:
                 self.printresult1()
-            elif (task == 13):
-                pass
+
+            elif task == 13:
+                self.resolve_with_grp()
         pass
 
     def print_raw_data(self):
+        self.expression.show_expr()
         pass
 
-    def resolve0(self):
-        #x = 0.1
-        i = 1
-        self.set_h()
-        f1 = self.count_f(self.x)
-        print("x1 =", self.x, "f(x1) =", f1, "h =", self.h)
-        x_temp = self.x + self.h
-        f2 = self.count_f(x_temp)
-        print("x2 =", x_temp, "f(x2) =", f2, "h =", self.h)
-        if f1 < f2:
-            self.h = -self.h
-            self.x = self.x + self.h
-            f2 = self.count_f(self.h)
-            print("Change walk direction...")
-        else:
-            self.x = x_temp
-
-        while f2 < f1:
-            print("--------------------------------------------")
-            print("i =", i, "x =", self.x, "f(x1) =", f1, "h =", self.h)
-            print("i =", i, "x =", x_temp, "f(x2) =", f2, "h =", self.h)
-            self.h *= 2
-            f1 = self.count_f(self.x)
-            self.x += self.h
-            f2 = self.count_f(self.x)
-            i += 1
-        pass
 
     def resolve(self):
-        i = 1
-        self.set_h()
-        f1 = self.count_f(self.x)
-        print("x1 =", self.x, "f(x1) =", f1, "h =", self.h)
-        x_temp = self.x + self.h
-        f2 = self.count_f(x_temp)
-        print("x2 =", x_temp, "f(x2) =", f2, "h =", self.h)
-        if f1 < f2:
-            self.h = -self.h
-            self.x = self.x + self.h
-            f2 = self.count_f(self.h)
-            print("Change walk direction...")
-        else:
-            self.x = x_temp
+        i = 0
+        ab = self.expression.range.copy()
+        way = True
+        print("Begin...")
+        print("i =", i, "a =", ab[0], "b =", ab[1])
+        while math.fabs(ab[1] - ab[0]) > self.epsilon:
+            self.set_d(ab)
+            x1 = self.findx1(ab)
+            x2 = self.findx2(ab)
 
-        while f2 < f1:
-            print("--------------------------------------------")
-            print("i =", i, "x =", self.x, "f(x1) =", f1, "h =", self.h)
-            print("i =", i, "x =", x_temp, "f(x2) =", f2, "h =", self.h)
-            self.h *= 2
-            f1 = self.count_f(self.x)
-            self.x += self.h
-            f2 = self.count_f(self.x)
+            y1 = self.expression.execute(x1)
+            y2 = self.expression.execute(x2)
+
+            if y1 < y2:
+                if way == False:
+                    ab[0] = x2
+                    self.set_d(ab)
+                    print("Overjump - change direction, go to B-point...")
+                    way = True
+                else:
+                    ab[1] = x2
+            else:
+                if way == False:
+                    ab[1] = x1
+                    self.set_d(ab)
+                    print("Overjump - change direction, go to A-point...")
+                    way = True
+                else:
+                    ab[0] = x1
             i += 1
+            print("i =", i, "a =", ab[0], "b =", ab[1], "d =", self.d)
         pass
 
-    def set_h(self):
-        #self.h = self.x * self.epsilon * 10
-        self.h = 0.1
+    def resolve_with_grp(self):
+        i = 0
+        ab = self.expression.range.copy()
+        way = True
 
-    def count_f(self, x):
-        return self.execute_expression(self.expression, x)
+        self.collect_result(i, ab)
+
+        print("Begin...")
+        print("i =", i, "a =", ab[0], "b =", ab[1])
+        while math.fabs(ab[1] - ab[0]) > self.epsilon:
+            self.set_d(ab)
+            x1 = self.findx1(ab)
+            x2 = self.findx2(ab)
+
+            y1 = self.expression.execute(x1)
+            y2 = self.expression.execute(x2)
+
+            if y1 < y2:
+                if way == False:
+                    ab[0] = x2
+                    self.set_d(ab)
+                    print("Overjump - change direction, go to B-point...")
+                    way = True
+                else:
+                    ab[1] = x2
+            else:
+                if way == False:
+                    ab[1] = x1
+                    self.set_d(ab)
+                    print("Overjump - change direction, go to A-point...")
+                    way = True
+                else:
+                    ab[0] = x1
+            i += 1
+            self.collect_result(i, ab)
+            print("i =", i, "a =", ab[0], "b =", ab[1], "d =", self.d)
+
+
+    def collect_result(self, y, ab):
+        self.result["x1"].append(ab[0])
+        self.result["x2"].append(ab[1])
+        self.result["y"].append(y)
+
+    def set_d(self, ab):
+        self.d = math.fabs(ab[1] - ab[0]) / 4
+
+    def findx1(self, ab):
+        return (ab[1] + ab[0]) / 2 - self.d
+
+    def findx2(self, ab):
+        return (ab[1] + ab[0]) / 2 + self.d
 
     def printresult(self):
-        pass
+        y = np.arange(0.0, float(self.result["y"][-1]), 1.0)
+        #y = np.arange(0.0, 5.0, 0.1)
+        fig = plt.figure(1)
+        dm = fig.add_subplot(111)
+        dm.hlines(y, self.result["x1"], self.result["x2"], lw=2)
+        plt.show()
 
     def printresult1(self):
         pass
-    # 13
-    # [0.4, 0.8, 1.6]
