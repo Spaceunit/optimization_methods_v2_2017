@@ -93,16 +93,6 @@ class SM:
             if (command != "n"):
                 task = 1
 
-
-    def makedefault0(self):
-        print("Setting up data for task#15")
-        self.raw_data = {'a': 1.77, 'b': 2.17, 'c': 1.38, 'd': 0.89, 'x0': 3.39, 'y0': 2.13, 't0': 15, 't1': 45}
-        #self.raw_data = {'a': 1.89, 'b': 2.25, 'c': 1.49, 'd': 1.05, 'x0': 3.55, 'y0': 2.35, 't0': 18, 't1': 48}
-        self.accuracy = 3
-        self.print_raw_data()
-        print("Accuracy of calculations:",(10**(-self.accuracy)))
-        pass
-
     def makedefault(self):
         self.accuracy = 6
         self.epsilon = 10 ** (-self.accuracy)
@@ -113,9 +103,6 @@ class SM:
         self.ab = [0.1, 3.0]
         #self.x = 3.9
         self.x = 0.1
-        pass
-
-    def makedefault2(self):
         pass
 
 
@@ -257,7 +244,7 @@ class SM:
         while f2 < f1:
             print("--------------------------------------------")
             print("i =", i, "x =", self.x, "f(x1) =", f1, "h =", self.h)
-            print("i =", i, "x =", self.x, "f(x2) =", f2, "h =", self.h)
+            print("i =", i, "x =", x_temp, "f(x2) =", f2, "h =", self.h)
             self.h *= 2
             f1 = self.count_f(self.x)
             self.x += self.h
