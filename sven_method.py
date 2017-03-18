@@ -13,7 +13,7 @@ class SM:
         self.xmin = None
         self.ymin = None
         self.ea = None
-        self.ab = [0, 100]
+        self.ab = [0, 3.0]
         self.raw_data = {}
         self.result_data = {}
         self.commands = {
@@ -104,13 +104,13 @@ class SM:
         pass
 
     def makedefault(self):
-        self.accuracy = 2
+        self.accuracy = 6
         self.epsilon = 10 ** (-self.accuracy)
         #self.expression = "10 * x * math.log10(x) / math.log10(2.7) - (x**2) / 2"
         # self.expression = "(x-12)**2"
         #self.expression = "x**2 - 6*x"
         self.expression = "x**2 + 6/x"
-        self.ab = [0, 100]
+        self.ab = [0.1, 3.0]
         #self.x = 3.9
         self.x = 0.1
         pass
@@ -238,6 +238,7 @@ class SM:
         pass
 
     def resolve(self):
+        #x = 0.1
         i = 1
         self.set_h()
         f1 = self.count_f(self.x)
@@ -253,10 +254,6 @@ class SM:
         else:
             self.x = x_temp
 
-        #print("--------------------------------------------")
-        #print("i =", i, "x =", self.x, "f(x1) =", f1, "h =", self.h)
-        #print("i =", i, "x =", self.x, "f(x2) =", f2, "h =", self.h)
-
         while f2 < f1:
             print("--------------------------------------------")
             print("i =", i, "x =", self.x, "f(x1) =", f1, "h =", self.h)
@@ -265,7 +262,6 @@ class SM:
             f1 = self.count_f(self.x)
             self.x += self.h
             f2 = self.count_f(self.x)
-            #print("i =", i, "x =", self.x, "h =", self.h)
             i += 1
         pass
 

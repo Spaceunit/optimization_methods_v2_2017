@@ -7,7 +7,7 @@ class Expression:
         self.local_max = None
         self.parameters = {}
 
-    def input_expr(self):
+    def input_range(self):
         ans = False
         command = ""
         print('')
@@ -17,10 +17,11 @@ class Expression:
             command = input("-> ")
             if (command.lower() != "y" or command.lower() != "yes") and len(self.range) != 2:
                 print("Try again and input \"yes\" or \"y\"")
+                ans = True
             else:
                 ans = True
 
-    def input_range(self):
+    def input_expr(self):
         ans = False
         command = ""
         print('')
@@ -30,6 +31,7 @@ class Expression:
             command = input("-> ")
             if command.lower() != "y" or command.lower() != "yes":
                 print("Try again and input \"yes\" or \"y\"")
+                ans = True
             else:
                 ans = True
 

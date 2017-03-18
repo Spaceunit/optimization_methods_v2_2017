@@ -114,7 +114,8 @@ class DM:
             pass
 
     def inputnewdata(self):
-        self.expression = str(input("enter expression ->"))
+        self.expression.input_expr()
+        self.expression.input_range()
         pass
 
     def dostaff(self):
