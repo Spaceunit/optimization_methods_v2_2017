@@ -67,7 +67,8 @@ class DM:
         self.expression.range = [-10.0, 10.0]
         self.expression.parameters["unimodal"] = True
         self.x_start = -9.0
-        self.result = {"x1": [], "x2": [], "y": []}
+        self.result = {"x1": [], "x2": [], "x0": []}
+        self.d = 0.1
         pass
 
     def importparam(self, accuracy):
@@ -148,7 +149,7 @@ class DM:
                 self.printresult1()
 
             elif task == 13:
-                self.resolve_with_grp()
+                pass
         pass
 
     def print_raw_data(self):
@@ -157,98 +158,85 @@ class DM:
 
 
     def resolve(self):
-        i = 0
-        ab = self.expression.range.copy()
-        way = True
         print("Begin...")
-        print("i =", i, "a =", ab[0], "b =", ab[1])
-        while math.fabs(ab[1] - ab[0]) > self.epsilon:
-            self.set_d(ab)
-            x1 = self.findx1(ab)
-            x2 = self.findx2(ab)
-
-            y1 = self.expression.execute(x1)
-            y2 = self.expression.execute(x2)
-
-            if y1 < y2:
-                if way == False:
-                    ab[0] = x2
-                    self.set_d(ab)
-                    print("Overjump - change direction, go to B-point...")
-                    way = True
-                else:
-                    ab[1] = x2
-            else:
-                if way == False:
-                    ab[1] = x1
-                    self.set_d(ab)
-                    print("Overjump - change direction, go to A-point...")
-                    way = True
-                else:
-                    ab[0] = x1
-            i += 1
-            print("i =", i, "a =", ab[0], "b =", ab[1], "d =", self.d)
-        pass
-
-    def resolve_with_grp(self):
         i = 0
-        ab = self.expression.range.copy()
-        way = True
+        status = False
+        f = {}
+        f["xk"] = None
+        xk = []
+        fxk = []
+        f["x0"] = self.expression.execute(self.x_start)
+        fxk.append(f["x0"])
+        f["x0md"] = self.expression.execute(self.x_start - self.d)
+        f["x0pd"] = self.expression.execute(self.x_start + self.d)
 
-        self.collect_result(i, ab)
+        if f["x0"] < f["x0md"]:
+            self.d = np.copysign(self.d, 1.0)
+            fxk.append(f["x0pd"])
+            xk.append(self.x_start + self.d)
+        elif f["x0"] < f["x0pd"]:
+            self.d = np.copysign(self.d, -1.0)
+            fxk.append(f["x0md"])
+            xk.append(self.x_start - self.d)
+        elif f["x0"] >= f["x0md"] and f["x0"] <= f["x0pd"]:
+            self.result["xk"] = [self.x_start - self.d, self.x_start, self.x_start + self.d]
+            self.result["fxk"] = [f["x0md"], fxk[0], f["x0pd"]]
+            status = True
+        else:
+            print("WTF")
+            self.result = None
+            status = True
 
-        print("Begin...")
-        print("i =", i, "a =", ab[0], "b =", ab[1])
-        while math.fabs(ab[1] - ab[0]) > self.epsilon:
-            self.set_d(ab)
-            x1 = self.findx1(ab)
-            x2 = self.findx2(ab)
-
-            y1 = self.expression.execute(x1)
-            y2 = self.expression.execute(x2)
-
-            if y1 < y2:
-                if way == False:
-                    ab[0] = x2
-                    self.set_d(ab)
-                    print("Overjump - change direction, go to B-point...")
-                    way = True
+        if not status:
+            x_next = None
+            d = self.d
+            while not status:
+                if fxk[-1] < fxk[-2]:
+                    x_next = xk[-1] + d
+                    fxk.append(self.expression.execute(x_next))
+                    xk.append(x_next)
+                    d *= 2
+                elif fxk[-1] > fxk[-2]:
+                    x_next = xk[-1] - d / 2
+                    xk.append(xk[-1])
+                    fxk.append(fxk[-1])
+                    xk[-2] = x_next
+                    fxk[-2] = self.expression.execute(x_next)
+                    status = True
+                elif fxk[-1] >= fxk[-2] and fxk[-2] <= fxk[-3]:
+                    status = True
                 else:
-                    ab[1] = x2
-            else:
-                if way == False:
-                    ab[1] = x1
-                    self.set_d(ab)
-                    print("Overjump - change direction, go to A-point...")
-                    way = True
-                else:
-                    ab[0] = x1
-            i += 1
-            self.collect_result(i, ab)
-            print("i =", i, "a =", ab[0], "b =", ab[1], "d =", self.d)
+                    print("WTF")
+            self.result["xk"] = xk
+            self.result["fxk"] = fxk
 
+    def collect_final_result(self, x, f):
+        self.result["x0"].append(x[1])
+        self.result["x1"].append(x[0])
+        self.result["x2"].append(x[2])
 
-    def collect_result(self, y, ab):
-        self.result["x1"].append(ab[0])
-        self.result["x2"].append(ab[1])
-        self.result["y"].append(y)
+        self.result["f0"].append(f[1])
+        self.result["f1"].append(f[0])
+        self.result["f2"].append(f[2])
 
     def set_d(self, ab):
         self.d = math.fabs(ab[1] - ab[0]) / 4
 
-    def findx1(self, ab):
+    def find_f1(self, ab):
         return (ab[1] + ab[0]) / 2 - self.d
 
-    def findx2(self, ab):
+    def find_f2(self, ab):
         return (ab[1] + ab[0]) / 2 + self.d
 
-    def printresult(self):
-        y = np.arange(0.0, float(self.result["y"][-1]), 1.0)
+    def printresult_graph(self):
+        y = np.arange(0.0, float(self.result["x0"][-1]), 1.0)
         #y = np.arange(0.0, 5.0, 0.1)
         fig = plt.figure(1)
         dm = fig.add_subplot(111)
         dm.hlines(y, self.result["x1"], self.result["x2"], lw=2)
         plt.show()
 
-    def printresult1(self):
+    def printresult(self):
+        for i in range(len(self.result["xk"])):
+            print("i:", i, "x:", self.result["xk"][i], "f(x):", self.result["fxk"])
         pass
