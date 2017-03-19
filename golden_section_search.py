@@ -32,6 +32,7 @@ class GSS:
             "mk2": 13
         }
         self.accuracy = 3
+        self.result = {"x1": [], "x2": [], "f": []}
         self.expression = None
 
 
@@ -163,29 +164,6 @@ class GSS:
     def inputnewdata(self):
         self.expression = str(input("enter expression ->"))
         pass
-
-    def inputmatrix(self, num):
-        print('')
-        i = 0
-        task = 0
-        nm = matrix.Matrix([], "new matrix")
-        while (i < num):
-            print("Enter matrix row (use spaces)")
-            print("Row ", i + 1)
-            while (task != 1):
-                row = list(map(float, input("-> ").split()))
-                print("Input is correct? (enter - yes/n - no)")
-                command = input("-> ")
-                if (command != "n" and len(row) == num):
-                    task = 1
-                    nm.appendnrow(row)
-                elif (len(row) != num):
-                    print('')
-                    print("Incorrect input: count of items.")
-            task = 0
-            i += 1
-        return nm
-
     #@staticmethod
     def execute_expression(self, function, x):
         return eval(function)
@@ -236,31 +214,35 @@ class GSS:
     def resolve(self):
         #self.makedefault()
         i = 0
+        xk = []
+        fxk = []
+        self.result["xk"] = []
+        self.result["fxk"] = []
         self.t = self.get_t()
         self.er = (self.ab[1] - self.ab[0]) / (2 * math.pow(self.t, self.N))
         x1 = self.findx1()
         x2 = self.findx2()
 
-        y1 = self.execute_expression(self.expression, x1)
-        y2 = self.execute_expression(self.expression, x2)
+        f1 = self.execute_expression(self.expression, x1)
+        f2 = self.execute_expression(self.expression, x2)
         m = 1
         while math.fabs(self.ab[1] - self.ab[0]) > self.epsilon:
-            if y1 < y2:
+            if f1 < f2:
                 self.ab[1] = x2
                 x2 = x1
-                y2 = y1
+                f2 = f1
                 x1 = self.findx1()
-                y1 = self.execute_expression(self.expression, x1)
-                print("i=", m, "; x1=", x1, "; x2=", x2, "; y1=", y1, "; y2=", y2, ";")
+                f1 = self.execute_expression(self.expression, x1)
+                print("i=", m, "; x1=", x1, "; x2=", x2, "; f1=", f1, "; f2=", f2, ";")
             else:
                 self.ab[0] = x1
                 x1 = x2
-                y1 = y2
+                f1 = f2
                 x2 = self.findx2()
-                y2 = self.execute_expression(self.expression, x2)
-                print("i=", m, "; x1=", x1, "; x2=", x2, "; y1=", y1, "; y2=", y2, ";")
+                f2 = self.execute_expression(self.expression, x2)
+                print("i=", m, "; x1=", x1, "; x2=", x2, "; f1=", f1, "; f2=", f2, ";")
             i += 1
-        if y1 < y2:
+        if f1 < f2:
             self.ab[1] = x2
         else:
             self.ab[0] = x1
