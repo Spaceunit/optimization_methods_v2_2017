@@ -22,9 +22,8 @@ class DM:
             "acc": 8,
             "mk": 9,
             "start": 10,
-            "image 1": 11,
-            "image 2": 12,
-            "start -g": 13
+            "show result": 11,
+            "image 1": 12
         }
         self.expression = expression.Expression("No name", "x**2")
         self.accuracy = 3
@@ -67,7 +66,7 @@ class DM:
         self.expression.range = [-10.0, 10.0]
         self.expression.parameters["unimodal"] = True
         self.x_start = -9.0
-        self.result = {"x1": [], "x2": [], "y": []}
+        self.result = {"x1": [], "x2": [], "i": []}
         pass
 
     def importparam(self, accuracy):
@@ -145,7 +144,7 @@ class DM:
                 self.printresult()
 
             elif task == 12:
-                self.printresult1()
+                self.printresult_g()
         pass
 
     def print_raw_data(self):
@@ -213,13 +212,13 @@ class DM:
         plt.show()
 
     def printresult(self):
-        def printresult(self):
-            print("Result:")
-            for i in range(len(self.result["i"])):
-                print('')
-                print("i:", i, ":")
-                print("x1:", self.result["x1"][i])
-                print("x2:", self.result["x2"][i])
-            print(self.er, self.ea)
-            pass
+        print("Result:")
+        for i in range(len(self.result["i"])):
+            print('')
+            print("i:", i, ":")
+            print("x1:", self.result["x1"][i])
+            print("x2:", self.result["x2"][i])
+        print(self.er, self.ea)
         pass
+
+    pass
