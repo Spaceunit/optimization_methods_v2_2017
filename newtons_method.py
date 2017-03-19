@@ -5,19 +5,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import mlab
 
+from matplotlib.path import Path
+import matplotlib.patches as patches
+
+from resource import expression
 
 
 class NM:
     def __init__(self):
-        self.epsilon = 0.001
-        self.N = 600
-        self.xmin = None
-        self.ymin = None
-        self.ea = None
-        self.x = 0.1
-        self.ab = [0.1, 3.0]
-        self.raw_data = {}
-        self.result_data = {}
         self.commands = {
             "none": 0,
             "exit": 1,
@@ -30,12 +25,14 @@ class NM:
             "acc": 8,
             "mk": 9,
             "start": 10,
-            "image 1": 11,
-            "image 2": 12,
-            "mk2": 13
+            "show result": 11,
+            "image 1": 12
         }
+        self.expression = expression.Expression("No name", "x**2")
         self.accuracy = 3
-        self.expression = None
+        self.result = {"xk": []}
+        self.makedefault()
+
 
 
     def showCommands(self):
@@ -66,54 +63,18 @@ class NM:
         return y
 
 
-    #remake
-    def inputnewdata0(self):
-        task = 0
-        self.am = matrix.Matrix([], "Initial matrix")
-        while (task != 1):
-            print('')
-            print("Enter matrix dimension:")
-            while (task != 1):
-                num = int(input("-> "))
-                print("Input is correct? (enter - yes/n - no)")
-                command = input("-> ")
-                if (command != "n"):
-                    self.am = self.inputmatrix(num)
-                    # self.dv = self.inputvector()
-                    task = 1
-            task = 0
-            self.am.rename("Initial matrix")
-            self.um = self.am.copy()
-            self.um.rename("U-matrix")
-            self.am.showmatrix()
-            print("Our matrix with accuracy: 3")
-            self.am.showmatrixaccuracy3()
-            # self.dv.showvector()
-            print("Matrix is correct? (enter - yes/n - no)")
-            command = input("-> ")
-            if (command != "n"):
-                task = 1
-
-    def makedefault0(self):
-        print("Setting up data for task#15")
-        self.raw_data = {'a': 1.77, 'b': 2.17, 'c': 1.38, 'd': 0.89, 'x0': 3.39, 'y0': 2.13, 't0': 15, 't1': 45}
-        #self.raw_data = {'a': 1.89, 'b': 2.25, 'c': 1.49, 'd': 1.05, 'x0': 3.55, 'y0': 2.35, 't0': 18, 't1': 48}
-        self.accuracy = 3
-        self.print_raw_data()
-        print("Accuracy of calculations:",(10**(-self.accuracy)))
-        pass
-
     def makedefault(self):
-        self.accuracy = 3
         self.epsilon = 10 ** (-self.accuracy)
-        #self.expression = "10 * x * math.log10(x) / math.log10(2.7) - (x**2) / 2"
-        self.expression = ["x**2 + 6/x", "2*x - 6/(x**2)"]
-        self.ab = [0.1, 3.0]
+        self.expression = expression.Expression("Parabola", "x**2")
+        self.d_expression = expression.Expression("Line", "2*x")
+        self.expression.range = [-10.0, 10.0]
+        self.d_expression.range = self.expression.range
+        self.expression.parameters["unimodal"] = True
+        self.d_expression.parameters["unimodal"] = False
+        self.x_start = -10.0
+        self.result = {"xk": []}
+        self.h = 0.1
         pass
-
-    def makedefault2(self):
-        pass
-
 
     def importparam(self, accuracy):
         self.accuracy = accuracy
@@ -133,7 +94,6 @@ class NM:
                     print("Please enter positive number!")
                     task = 0
         self.epsilon = 10 ** (-self.accuracy)
-        pass
 
     def inputdata(self, data_name, data_type):
         task = 0
@@ -159,39 +119,10 @@ class NM:
         else:
             pass
 
-    #def inputnewdata(self):
-    #    for value in ['a', 'b', 'c', 'd', 'x0', 'y0', 't0', 't1']:
-    #        self.raw_data[value] = self.inputdata(value, 'float')
-
     def inputnewdata(self):
-        self.expression = str(input("enter expression ->"))
+        self.expression.input_expr()
+        self.expression.input_range()
         pass
-
-    def inputmatrix(self, num):
-        print('')
-        i = 0
-        task = 0
-        nm = matrix.Matrix([], "new matrix")
-        while (i < num):
-            print("Enter matrix row (use spaces)")
-            print("Row ", i + 1)
-            while (task != 1):
-                row = list(map(float, input("-> ").split()))
-                print("Input is correct? (enter - yes/n - no)")
-                command = input("-> ")
-                if (command != "n" and len(row) == num):
-                    task = 1
-                    nm.appendnrow(row)
-                elif (len(row) != num):
-                    print('')
-                    print("Incorrect input: count of items.")
-            task = 0
-            i += 1
-        return nm
-
-    #@staticmethod
-    def execute_expression(self, function, x):
-        return eval(function)
 
     def dostaff(self):
         task = 0
@@ -200,67 +131,95 @@ class NM:
             print("Newton's method")
             print('')
             task = self.enterCommand()
-            if (task == 2):
+            if task == 2:
                 pass
-            elif (task == 3):
+            elif task == 3:
                 pass
-            elif (task == 4):
+            elif task == 4:
                 self.showHelp()
-            elif (task == 5):
+            elif task == 5:
                 self.inputnewdata()
-                pass
-            elif (task == 6):
+            elif task == 6:
                 self.print_raw_data()
-                pass
-            elif (task == 8):
+            elif task == 8:
                 self.setaccuracy()
-                pass
-            elif (task == 9):
+            elif task == 9:
                 self.makedefault()
-                pass
-            elif (task == 10):
+            elif task == 10:
                 self.resolve()
-                pass
-            elif (task == 11):
+            elif task == 11:
                 self.printresult()
 
-            elif (task == 12):
-                self.printresult1()
-            elif (task == 13):
-                self.makedefault2()
+            elif task == 12:
+                self.printresult_g()
         pass
 
     def print_raw_data(self):
+        self.expression.show_expr()
         pass
+
 
     def resolve(self):
         i = 0
-        y = self.count_f(self.x)
-        dy = self.count_df(self.x)
-        while y > self.epsilon:
-            if dy != 0:
-                print("i =", i, "x =", self.x, "f(x) =", y, "df(x) =", dy)
-                self.x = self.count_g(self.x, y, dy)
-                y = self.count_f(self.x)
-                dy = self.count_df(self.x)
+        xk = []
+        fxk = []
+        dfxk = []
+        self.result["xk"] = []
+        self.result["fxk"] = []
+        self.result["dfxk"] = []
+        self.x = self.x_start
+        xk.append(self.x)
+        f = self.expression.execute(self.x)
+        fxk.append(f)
+        df = self.expression.diff_derivative(self.x, self.h)
+        dfxk.append(df)
+        while f > self.epsilon:
+            if df != 0:
+                print("i =", i, "x =", self.x, "f(x) =", f, "df(x) =", df)
+                self.x = self.count_g(self.x, df, self.h)
+                xk.append(self.x)
+                f = self.expression.execute(self.x)
+                fxk.append(f)
+                df = self.expression.diff_derivative(self.x, self.h)
+                dfxk.append(df)
             else:
                 print("df(x) = 0: Stop")
                 break
             i += 1
+        self.result["xk"] = xk
+        self.result["fxk"] = fxk
+        self.result["dfxk"] = dfxk
+        self.printresult()
+
+    def count_g(self, x, df, h):
+        ddf = 0.5 * (self.expression.diff_derivative(x + h, h) - self.expression.diff_derivative(x - h, h)) / h
+        return x - df / ddf
+
+    def resolve_with_grp(self):
         pass
 
-    def count_f(self, x):
-        return self.execute_expression(self.expression[0], x)
 
-    def count_df(self, x):
-        return self.execute_expression(self.expression[1], x)
+    def collect_result(self):
+        pass
 
-    def count_g(self, x, f, df):
-        return x - f / df
+    def set_d(self, ab):
+        self.d = math.fabs(ab[1] - ab[0]) / 4
+
+    def printresult_g(self):
+        verts = []
+        for i in range(len(self.result["xk"])):
+            verts.append((self.result["xk"][i], self.result["fxk"][i]))
+        path = Path(verts)
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        patch = patches.PathPatch(path, facecolor='none', lw=2)
+        ax.add_patch(patch)
+
+        xs, ys = zip(*verts)
+        ax.plot(xs, ys, 'x--', lw=2, color='black', ms=10)
+
+        plt.show()
 
     def printresult(self):
-        pass
-
-    def printresult1(self):
-        pass
-    # 13
+        print(self.x)
