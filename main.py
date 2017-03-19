@@ -9,6 +9,7 @@ from resource import excel_transfer
 
 import jap
 import golden_section_search
+import golden_section_search_v2
 import dichotomy_method
 import newtons_method
 import sven_method
@@ -94,7 +95,7 @@ class Work:
                 Task.dostaff()
                 pass
             elif (task == 11):
-                Task = golden_section_search.GSS()
+                Task = golden_section_search_v2.GSS()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass

@@ -212,7 +212,7 @@ class GSS:
         pass
 
     def resolve(self):
-        #self.makedefault()
+        self.makedefault()
         i = 0
         xk = []
         fxk = []
