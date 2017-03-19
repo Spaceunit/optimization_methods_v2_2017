@@ -5,16 +5,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import mlab
 
+from matplotlib.path import Path
+import matplotlib.patches as patches
+
+from resource import expression
+
 
 class GSS:
     def __init__(self):
-        self.N = 600
-        self.xmin = None
-        self.ymin = None
-        self.ea = None
-        self.ab = [0, 100]
-        self.raw_data = {}
-        self.result_data = {}
         self.commands = {
             "none": 0,
             "exit": 1,
@@ -27,13 +25,13 @@ class GSS:
             "acc": 8,
             "mk": 9,
             "start": 10,
-            "image 1": 11,
-            "image 2": 12,
-            "mk2": 13
+            "show result": 11,
+            "image 1": 12
         }
+        self.expression = expression.Expression("No name", "x**2")
         self.accuracy = 3
-        self.result = {"x1": [], "x2": [], "f": []}
-        self.expression = None
+        self.result = {"xk": []}
+        self.makedefault()
 
 
 
@@ -65,54 +63,19 @@ class GSS:
         return y
 
 
-    #remake
-    def inputnewdata0(self):
-        task = 0
-        self.am = matrix.Matrix([], "Initial matrix")
-        while (task != 1):
-            print('')
-            print("Enter matrix dimension:")
-            while (task != 1):
-                num = int(input("-> "))
-                print("Input is correct? (enter - yes/n - no)")
-                command = input("-> ")
-                if (command != "n"):
-                    self.am = self.inputmatrix(num)
-                    # self.dv = self.inputvector()
-                    task = 1
-            task = 0
-            self.am.rename("Initial matrix")
-            self.um = self.am.copy()
-            self.um.rename("U-matrix")
-            self.am.showmatrix()
-            print("Our matrix with accuracy: 3")
-            self.am.showmatrixaccuracy3()
-            # self.dv.showvector()
-            print("Matrix is correct? (enter - yes/n - no)")
-            command = input("-> ")
-            if (command != "n"):
-                task = 1
-
-    def makedefault0(self):
-        print("Setting up data for task#15")
-        self.raw_data = {'a': 1.77, 'b': 2.17, 'c': 1.38, 'd': 0.89, 'x0': 3.39, 'y0': 2.13, 't0': 15, 't1': 45}
-        #self.raw_data = {'a': 1.89, 'b': 2.25, 'c': 1.49, 'd': 1.05, 'x0': 3.55, 'y0': 2.35, 't0': 18, 't1': 48}
-        self.accuracy = 3
-        self.print_raw_data()
-        print("Accuracy of calculations:",(10**(-self.accuracy)))
-        pass
-
     def makedefault(self):
-        self.accuracy = 3
         self.epsilon = 10 ** (-self.accuracy)
-        #self.expression = "10 * x * math.log10(x) / math.log10(2.7) - (x**2) / 2"
-        self.expression = "(x-12)**2"
-        self.ab = [0, 100]
+        self.expression = expression.Expression("Parabola", "x**2")
+        self.d_expression = expression.Expression("Line", "2*x")
+        self.expression.range = [-10.0, 10.0]
+        self.d_expression.range = self.expression.range
+        self.expression.parameters["unimodal"] = True
+        self.d_expression.parameters["unimodal"] = False
+        self.x_start = -10.0
+        self.result = {"a": [], "b": [], "x1": [], "x2": [], "f1": [], "f2": [], "i": []}
+        self.h = 0.1
+        self.N = 10
         pass
-
-    def makedefault2(self):
-        pass
-
 
     def importparam(self, accuracy):
         self.accuracy = accuracy
@@ -131,7 +94,7 @@ class GSS:
                 if self.accuracy < 0:
                     print("Please enter positive number!")
                     task = 0
-        pass
+        self.epsilon = 10 ** (-self.accuracy)
 
     def inputdata(self, data_name, data_type):
         task = 0
@@ -157,19 +120,10 @@ class GSS:
         else:
             pass
 
-    #def inputnewdata(self):
-    #    for value in ['a', 'b', 'c', 'd', 'x0', 'y0', 't0', 't1']:
-    #        self.raw_data[value] = self.inputdata(value, 'float')
-
     def inputnewdata(self):
-        self.expression = str(input("enter expression ->"))
+        self.expression.input_expr()
+        self.expression.input_range()
         pass
-    #@staticmethod
-    def execute_expression(self, function, x):
-        return eval(function)
-
-    def get_t(self):
-        return (1 + math.sqrt(5)) / 2
 
     def dostaff(self):
         task = 0
@@ -178,89 +132,127 @@ class GSS:
             print("Golden section search")
             print('')
             task = self.enterCommand()
-            if (task == 2):
+            if task == 2:
                 pass
-            elif (task == 3):
+            elif task == 3:
                 pass
-            elif (task == 4):
+            elif task == 4:
                 self.showHelp()
-            elif (task == 5):
+            elif task == 5:
                 self.inputnewdata()
-                pass
-            elif (task == 6):
+            elif task == 6:
                 self.print_raw_data()
-                pass
-            elif (task == 8):
+            elif task == 8:
                 self.setaccuracy()
-                pass
-            elif (task == 9):
+            elif task == 9:
                 self.makedefault()
-                pass
-            elif (task == 10):
+            elif task == 10:
                 self.resolve()
-                pass
-            elif (task == 11):
+            elif task == 11:
                 self.printresult()
 
-            elif (task == 12):
-                self.printresult1()
-            elif (task == 13):
-                self.makedefault2()
+            elif task == 12:
+                self.printresult_g()
         pass
 
     def print_raw_data(self):
+        self.expression.show_expr()
         pass
+
 
     def resolve(self):
         self.makedefault()
-        i = 0
+        ab = self.expression.range.copy()
+        i = 1
         xk = []
         fxk = []
+        self.result = {"a": [], "b": [], "x1": [], "x2": [], "f1": [], "f2": [], "i": []}
         self.result["xk"] = []
         self.result["fxk"] = []
         self.t = self.get_t()
-        self.er = (self.ab[1] - self.ab[0]) / (2 * math.pow(self.t, self.N))
-        x1 = self.findx1()
-        x2 = self.findx2()
+        x1 = self.findx1(ab)
+        x2 = self.findx2(ab)
 
-        f1 = self.execute_expression(self.expression, x1)
-        f2 = self.execute_expression(self.expression, x2)
-        m = 1
-        while math.fabs(self.ab[1] - self.ab[0]) > self.epsilon:
+        f1 = self.expression.execute(x1)
+        f2 = self.expression.execute(x2)
+
+        self.collect_result(ab, x1, x2, f1, f2, i)
+        while math.fabs(ab[1] - ab[0]) > self.epsilon:
             if f1 < f2:
-                self.ab[1] = x2
+                ab[1] = x2
                 x2 = x1
                 f2 = f1
-                x1 = self.findx1()
-                f1 = self.execute_expression(self.expression, x1)
-                print("i=", m, "; x1=", x1, "; x2=", x2, "; f1=", f1, "; f2=", f2, ";")
+                x1 = self.findx1(ab)
+                f1 = self.expression.execute(x1)
+
+                self.collect_result(ab, x1, x2, f1, f2, i)
+                print("i=", i, "; x1=", x1, "; x2=", x2, "; f1=", f1, "; f2=", f2, ";")
             else:
-                self.ab[0] = x1
+                ab[0] = x1
                 x1 = x2
                 f1 = f2
-                x2 = self.findx2()
-                f2 = self.execute_expression(self.expression, x2)
-                print("i=", m, "; x1=", x1, "; x2=", x2, "; f1=", f1, "; f2=", f2, ";")
+                x2 = self.findx2(ab)
+                f2 = self.expression.execute(x2)
+
+                self.collect_result(ab, x1, x2, f1, f2, i)
+                print("i=", i, "; x1=", x1, "; x2=", x2, "; f1=", f1, "; f2=", f2, ";")
             i += 1
         if f1 < f2:
-            self.ab[1] = x2
+            ab[1] = x2
+
+            self.collect_result(ab, x1, x2, f1, f2, i)
+            self.ea = (ab[1] - ab[0]) / 2
         else:
-            self.ab[0] = x1
-            self.xmin = (self.ab[1] + self.ab[0]) / 2
-            self.ymin = self.execute_expression(self.expression, self.xmin)
-            self.ea = (self.ab[1] - self.ab[0]) / 2
-        print(self.xmin, self.ymin, self.er, self.ea)
+            ab[0] = x1
+            self.xmin = (ab[1] + ab[0]) / 2
+            self.ymin = self.expression.execute(self.xmin)
+            self.ea = (ab[1] - ab[0]) / 2
+
+            self.collect_result(ab, x1, x2, f1, f2, i)
+            print(self.xmin, self.ymin, self.er, self.ea)
+        self.er = (ab[1] - ab[0]) / (2 * math.pow(self.t, i))
+        print(self.er, self.ea)
         pass
 
-    def findx1(self):
-        return self.ab[1] - (self.ab[1] - self.ab[0]) / self.t
+    def findx1(self, ab):
+        return ab[1] - (ab[1] - ab[0]) / self.t
 
-    def findx2(self):
-        return self.ab[0] + (self.ab[1] - self.ab[0]) / self.t
+    def findx2(self, ab):
+        return ab[0] + (ab[1] - ab[0]) / self.t
+
+    def get_t(self):
+        return (1 + math.sqrt(5)) / 2
+
+
+    def collect_result(self, ab, x1, x2, f1, f2, i):
+        self.result["a"].append(ab[0])
+        self.result["b"].append(ab[1])
+        self.result["x1"].append(x1)
+        self.result["x2"].append(x2)
+        self.result["f1"].append(f1)
+        self.result["f2"].append(f2)
+        self.result["i"].append(i)
+        pass
+
+    def set_d(self, ab):
+        self.d = math.fabs(ab[1] - ab[0]) / 4
+
+    def printresult_g(self):
+        y = np.arange(0.0, float(self.result["i"][-1]), 1.0)
+        #y = np.arange(0.0, 5.0, 0.1)
+        fig = plt.figure(1)
+        dm = fig.add_subplot(111)
+        dm.hlines(y, self.result["a"], self.result["b"], lw=2)
+        plt.show()
 
     def printresult(self):
+        print("Result:")
+        for i in range(len(self.result["i"])):
+            print('')
+            print("i:", i,":")
+            print("a:", self.result["a"][i])
+            print("b:", self.result["b"][i])
+            print("x1:", self.result["x1"][i], "f(x1):", self.result["f1"][i])
+            print("x2:", self.result["x2"][i], "f(x2):", self.result["f2"][i])
+        print(self.er, self.ea)
         pass
-
-    def printresult1(self):
-        pass
-    # 13
