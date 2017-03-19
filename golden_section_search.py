@@ -186,7 +186,7 @@ class GSS:
                 f1 = self.expression.execute(x1)
 
                 self.collect_result(ab, x1, x2, f1, f2, i)
-                print("i=", i, "; x1=", x1, "; x2=", x2, "; f1=", f1, "; f2=", f2, ";")
+                #print("i=", i, "; x1=", x1, "; x2=", x2, "; f1=", f1, "; f2=", f2, ";")
             else:
                 ab[0] = x1
                 x1 = x2
@@ -195,7 +195,7 @@ class GSS:
                 f2 = self.expression.execute(x2)
 
                 self.collect_result(ab, x1, x2, f1, f2, i)
-                print("i=", i, "; x1=", x1, "; x2=", x2, "; f1=", f1, "; f2=", f2, ";")
+                #print("i=", i, "; x1=", x1, "; x2=", x2, "; f1=", f1, "; f2=", f2, ";")
             i += 1
         if f1 < f2:
             ab[1] = x2
