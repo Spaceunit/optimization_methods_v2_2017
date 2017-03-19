@@ -47,6 +47,9 @@ class Expression:
     def execute(self, x):
         return eval(self.expression)
 
+    def diff_derivative(self, x, h):
+        return 0.5 * (self.execute(x + h) - self.execute(x - h)) / h
+
     def rename(self, name):
         self.name = name
         pass

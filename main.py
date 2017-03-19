@@ -10,7 +10,7 @@ from resource import excel_transfer
 import jap
 import golden_section_search
 import dichotomy_method
-import newtons_method
+import newtons_method_v2
 import sven_method
 import bisection_method
 import dsk_paula
@@ -104,7 +104,7 @@ class Work:
                 Task.dostaff()
                 pass
             elif (task == 13):
-                Task = newtons_method.NM()
+                Task = newtons_method_v2.NM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
             elif (task == 14):
