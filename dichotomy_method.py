@@ -218,7 +218,6 @@ class DM:
             print("i:", i, ":")
             print("x1:", self.result["x1"][i])
             print("x2:", self.result["x2"][i])
-        print(self.er, self.ea)
         pass
 
     pass
