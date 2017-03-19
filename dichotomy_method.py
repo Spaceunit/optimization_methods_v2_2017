@@ -146,51 +146,13 @@ class DM:
 
             elif task == 12:
                 self.printresult1()
-
-            elif task == 13:
-                self.resolve_with_grp()
         pass
 
     def print_raw_data(self):
         self.expression.show_expr()
         pass
 
-
     def resolve(self):
-        i = 0
-        ab = self.expression.range.copy()
-        way = True
-        print("Begin...")
-        print("i =", i, "a =", ab[0], "b =", ab[1])
-        while math.fabs(ab[1] - ab[0]) > self.epsilon:
-            self.set_d(ab)
-            x1 = self.findx1(ab)
-            x2 = self.findx2(ab)
-
-            y1 = self.expression.execute(x1)
-            y2 = self.expression.execute(x2)
-
-            if y1 < y2:
-                if way == False:
-                    ab[0] = x2
-                    self.set_d(ab)
-                    print("Overjump - change direction, go to B-point...")
-                    way = True
-                else:
-                    ab[1] = x2
-            else:
-                if way == False:
-                    ab[1] = x1
-                    self.set_d(ab)
-                    print("Overjump - change direction, go to A-point...")
-                    way = True
-                else:
-                    ab[0] = x1
-            i += 1
-            print("i =", i, "a =", ab[0], "b =", ab[1], "d =", self.d)
-        pass
-
-    def resolve_with_grp(self):
         i = 0
         ab = self.expression.range.copy()
         way = True
@@ -228,10 +190,10 @@ class DM:
             print("i =", i, "a =", ab[0], "b =", ab[1], "d =", self.d)
 
 
-    def collect_result(self, y, ab):
+    def collect_result(self, i, ab):
         self.result["x1"].append(ab[0])
         self.result["x2"].append(ab[1])
-        self.result["y"].append(y)
+        self.result["i"].append(i)
 
     def set_d(self, ab):
         self.d = math.fabs(ab[1] - ab[0]) / 4
@@ -242,13 +204,22 @@ class DM:
     def findx2(self, ab):
         return (ab[1] + ab[0]) / 2 + self.d
 
-    def printresult(self):
-        y = np.arange(0.0, float(self.result["y"][-1]), 1.0)
+    def printresult_g(self):
+        y = np.arange(0.0, float(self.result["i"][-1]), 1.0)
         #y = np.arange(0.0, 5.0, 0.1)
         fig = plt.figure(1)
         dm = fig.add_subplot(111)
         dm.hlines(y, self.result["x1"], self.result["x2"], lw=2)
         plt.show()
 
-    def printresult1(self):
+    def printresult(self):
+        def printresult(self):
+            print("Result:")
+            for i in range(len(self.result["i"])):
+                print('')
+                print("i:", i, ":")
+                print("x1:", self.result["x1"][i])
+                print("x2:", self.result["x2"][i])
+            print(self.er, self.ea)
+            pass
         pass
