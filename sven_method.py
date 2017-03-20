@@ -208,7 +208,8 @@ class SM:
                     d *= 2
                 elif fxk[-1] > fxk[-2]:
                     print("fxk[-1] > fxk[-2]")
-                    x_next = xk[-1] - d / 4
+                    d /= 4
+                    x_next = xk[-1] - d
                     xk.append(xk[-1])
                     fxk.append(fxk[-1])
                     xk[-2] = x_next
@@ -224,6 +225,7 @@ class SM:
                     print("WTF")
             self.result["xk"] = xk
             self.result["fxk"] = fxk
+            self.d = d
 
     def collect_final_result(self, x, f):
         self.result["x0"].append(x[1])
@@ -242,6 +244,19 @@ class SM:
 
     def find_f2(self, ab):
         return (ab[1] + ab[0]) / 2 + self.d
+
+    def find_min(self):
+        array = {"xk": [None, None, None], "fxk": [None, None, None]}
+        pos = self.result["fxk"].index(min(self.result["fxk"]))
+
+        array["xk"][1] = self.result["xk"][pos]
+        array["xk"][0] = self.result["xk"][pos - 1]
+        array["xk"][2] = self.result["xk"][pos + 1]
+
+        array["fxk"][1] = self.result["fxk"][pos]
+        array["fxk"][0] = self.result["fxk"][pos - 1]
+        array["fxk"][2] = self.result["fxk"][pos + 1]
+        return array
 
     def printresult_graph(self):
         verts = []

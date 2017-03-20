@@ -13,7 +13,7 @@ import dichotomy_method
 import newtons_method
 import sven_method
 import bisection_method
-import dsk_paula
+import dsk_paula_v2
 
 
 class Work:
@@ -118,7 +118,7 @@ class Work:
                 Task.dostaff()
                 pass
             elif (task == 16):
-                Task = dsk_paula.DSKP()
+                Task = dsk_paula_v2.DSKP()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
