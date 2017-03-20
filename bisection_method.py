@@ -134,9 +134,6 @@ class BSM:
         fm = self.expression.execute(middle)
         while d > self.epsilon and fm != 0:
             d /= 2
-            #print("i =", i, "midle =", midle, "length =", self.d, "Xa =", ab[0], "Xb =", ab[1])
-            #print(math.copysign(1, self.count_f(ab[0])))
-            #print(math.copysign(1, self.count_f(midle)))
             if math.copysign(1.0, self.expression.execute(ab[0])) != math.copysign(1.0, self.expression.execute(middle)):
                 ab[1] = middle
             else:
