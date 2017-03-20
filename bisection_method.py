@@ -5,17 +5,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import mlab
 
+from resource import expression
+
 
 class BSM:
     def __init__(self):
-        self.epsilon = 0.001
-        self.N = 600
-        self.xmin = None
-        self.ymin = None
-        self.ea = None
-        self.ab = [-10.0, 100.0]
-        self.raw_data = {}
-        self.result_data = {}
         self.commands = {
             "none": 0,
             "exit": 1,
@@ -28,12 +22,14 @@ class BSM:
             "acc": 8,
             "mk": 9,
             "start": 10,
-            "image 1": 11,
-            "image 2": 12,
-            "mk2": 13
+            "show result": 11,
+            "image 1": 12
         }
+        self.expression = expression.Expression("No name", "x**2")
         self.accuracy = 3
-        self.expression = None
+        self.result = {"length": [], "middle": [], "x1": [], "x2": [], "i": []}
+        self.makedefault()
+
 
 
     def showCommands(self):
@@ -64,55 +60,13 @@ class BSM:
         return y
 
 
-    #remake
-    def inputnewdata0(self):
-        task = 0
-        self.am = matrix.Matrix([], "Initial matrix")
-        while (task != 1):
-            print('')
-            print("Enter matrix dimension:")
-            while (task != 1):
-                num = int(input("-> "))
-                print("Input is correct? (enter - yes/n - no)")
-                command = input("-> ")
-                if (command != "n"):
-                    self.am = self.inputmatrix(num)
-                    # self.dv = self.inputvector()
-                    task = 1
-            task = 0
-            self.am.rename("Initial matrix")
-            self.um = self.am.copy()
-            self.um.rename("U-matrix")
-            self.am.showmatrix()
-            print("Our matrix with accuracy: 3")
-            self.am.showmatrixaccuracy3()
-            # self.dv.showvector()
-            print("Matrix is correct? (enter - yes/n - no)")
-            command = input("-> ")
-            if (command != "n"):
-                task = 1
-
-    def makedefault0(self):
-        print("Setting up data for task#15")
-        self.raw_data = {'a': 1.77, 'b': 2.17, 'c': 1.38, 'd': 0.89, 'x0': 3.39, 'y0': 2.13, 't0': 15, 't1': 45}
-        #self.raw_data = {'a': 1.89, 'b': 2.25, 'c': 1.49, 'd': 1.05, 'x0': 3.55, 'y0': 2.35, 't0': 18, 't1': 48}
-        self.accuracy = 3
-        self.print_raw_data()
-        print("Accuracy of calculations:",(10**(-self.accuracy)))
-        pass
-
     def makedefault(self):
-        self.accuracy = 3
         self.epsilon = 10 ** (-self.accuracy)
-        #self.expression = "10 * x * math.log10(x) / math.log10(2.7) - (x**2) / 2"
-        self.expression = "(x-3)**3"
-        self.ab = [-10.0, 100.0]
-        pass
-
-
-    def makedefault2(self):
-        pass
-
+        self.expression = expression.Expression("Parabola", "(x-3)**3")
+        self.expression.range = [-10.0, 10.0]
+        self.expression.parameters["unimodal"] = True
+        self.x_start = -9.0
+        self.result = {"length": [], "middle": [], "x1": [], "x2": [], "i": []}
 
     def importparam(self, accuracy):
         self.accuracy = accuracy
@@ -133,63 +87,10 @@ class BSM:
                     task = 0
         self.epsilon = 10 ** (-self.accuracy)
 
-    def inputdata(self, data_name, data_type):
-        task = 0
-        input_type = int
-        if data_type == "float":
-            input_type = float
-        elif data_type == "int":
-            input_type = int
-        else:
-            print("Undefind type", data_type)
-            task = 1
-        if task == 0:
-            print('')
-            print("Enter ", data_name, ":")
-            while (task != 1):
-                value = input_type(input("-> "))
-                print("Value", data_name, "is", value)
-                print("Input is correct? (enter - yes/n - no)")
-                command = input("-> ")
-                if (command != "n"):
-                    task = 1
-            return value
-        else:
-            pass
-
-    #def inputnewdata(self):
-    #    for value in ['a', 'b', 'c', 'd', 'x0', 'y0', 't0', 't1']:
-    #        self.raw_data[value] = self.inputdata(value, 'float')
-
     def inputnewdata(self):
-        self.expression = str(input("enter expression ->"))
+        self.expression.input_expr()
+        self.expression.input_range()
         pass
-
-    def inputmatrix(self, num):
-        print('')
-        i = 0
-        task = 0
-        nm = matrix.Matrix([], "new matrix")
-        while (i < num):
-            print("Enter matrix row (use spaces)")
-            print("Row ", i + 1)
-            while (task != 1):
-                row = list(map(float, input("-> ").split()))
-                print("Input is correct? (enter - yes/n - no)")
-                command = input("-> ")
-                if (command != "n" and len(row) == num):
-                    task = 1
-                    nm.appendnrow(row)
-                elif (len(row) != num):
-                    print('')
-                    print("Incorrect input: count of items.")
-            task = 0
-            i += 1
-        return nm
-
-    #@staticmethod
-    def execute_expression(self, function, x):
-        return eval(function)
 
     def dostaff(self):
         task = 0
@@ -198,102 +99,64 @@ class BSM:
             print("Bisection method")
             print('')
             task = self.enterCommand()
-            if (task == 2):
+            if task == 2:
                 pass
-            elif (task == 3):
+            elif task == 3:
                 pass
-            elif (task == 4):
+            elif task == 4:
                 self.showHelp()
-            elif (task == 5):
+            elif task == 5:
                 self.inputnewdata()
-                pass
-            elif (task == 6):
+            elif task == 6:
                 self.print_raw_data()
-                pass
-            elif (task == 8):
+            elif task == 8:
                 self.setaccuracy()
-                pass
-            elif (task == 9):
+            elif task == 9:
                 self.makedefault()
-                pass
-            elif (task == 10):
+            elif task == 10:
                 self.resolve()
-                pass
-            elif (task == 11):
+            elif task == 11:
                 self.printresult()
 
-            elif (task == 12):
-                self.printresult1()
-            elif (task == 13):
-                self.makedefault2()
+            elif task == 12:
+                self.printresult_g()
         pass
 
     def print_raw_data(self):
-        pass
-
-    def resolve0(self):
-        i = 0
-        c = (self.ab[0] + self.ab[1]) / 2
-        while math.fabs(self.ab[1] - self.ab[0]) > self.epsilon and self.execute_expression(self.expression, c) != 0:
-            if self.execute_expression(self.expression, self.ab[0]) * self.execute_expression(self.expression, self.ab[1]) < 0:
-                self.ab[1] = c
-            else:
-                self.ab[0] = c
-                c = (self.ab[0] + self.ab[1]) / 2
-                i += 1
-                print("c =", c)
-        print("i =", i)
-
-    def resolve1(self):
-        i = 0
-        way = True
-        #print("i =", i, "a =", self.ab[0], "b =", self.ab[1], "d =", self.d)
-        while math.fabs(self.ab[1] - self.ab[0]) > self.epsilon:
-            self.set_d()
-
-            x1 = self.findx1()
-            x2 = self.findx2()
-
-            y1 = self.execute_expression(self.expression, x1)
-            y2 = self.execute_expression(self.expression, x2)
-
-            if y1 < y2:
-                if way == False:
-                    self.ab[0] = x2
-                    self.set_d()
-                    print("Overjump - change direction, go to B-point...")
-                    way = True
-                else:
-                    self.ab[1] = x2
-            else:
-                if way == False:
-                    self.ab[1] = x1
-                    self.set_d()
-                    print("Overjump - change direction, go to A-point...")
-                    way = True
-                else:
-                    self.ab[0] = x1
-            print("i =", i, "a =", self.ab[0], "b =", self.ab[1], "d =", self.d)
-            i += 1
+        self.expression.show_expr()
         pass
 
     def resolve(self):
         i = 0
-        self.midle = (self.ab[0] + self.ab[1]) / 2
-        self.d = math.fabs(self.ab[1] - self.ab[0])
-        self.fm = self.count_f(self.midle)
-        while self.d > self.epsilon and self.fm != 0:
-            self.d /= 2
-            self.midle = self.ab[0] + self.d
-            print("i =", i, "midle =", self.midle, "length =", self.d, "Xa =", self.ab[0], "Xb =", self.ab[1])
-            print(math.copysign(1, self.count_f(self.ab[0])))
-            print(math.copysign(1, self.count_f(self.midle)))
-            if math.copysign(1.0, self.count_f(self.ab[0])) != math.copysign(1.0, self.count_f(self.midle)):
-                self.ab[1] = self.midle
+        ab = self.expression.range.copy()
+        middle = (ab[0] + ab[1]) / 2
+        d = math.fabs(ab[1] - ab[0])
+        fm = self.expression.execute(middle)
+        while d > self.epsilon and fm != 0:
+            d /= 2
+            #print("i =", i, "midle =", midle, "length =", self.d, "Xa =", ab[0], "Xb =", ab[1])
+            #print(math.copysign(1, self.count_f(ab[0])))
+            #print(math.copysign(1, self.count_f(midle)))
+            if math.copysign(1.0, self.expression.execute(ab[0])) != math.copysign(1.0, self.expression.execute(middle)):
+                ab[1] = middle
             else:
-                self.ab[0] = self.midle
+                ab[0] = middle
+            print("i:", i)
+            print("middle =", middle)
+            print("length =", d)
+            print("Xa =", ab[0], "Xb =", ab[1])
+            self.collect_result(d, middle, i, ab)
+            middle = ab[0] + d
             i += 1
         pass
+
+
+    def collect_result(self, d, middle, i, ab):
+        self.result["length"].append(d)
+        self.result["middle"].append(middle)
+        self.result["x1"].append(ab[0])
+        self.result["x2"].append(ab[1])
+        self.result["i"].append(i)
 
     def set_d(self):
         self.d = math.fabs(self.ab[1] - self.ab[0]) / 4
@@ -304,12 +167,23 @@ class BSM:
     def findx2(self):
         return (self.ab[1] + self.ab[0]) / 2 + self.d
 
-    def count_f(self, x):
-        return self.execute_expression(self.expression, x)
+    def printresult_g(self):
+        y = np.arange(0.0, float(self.result["i"][-1]), 1.0)
+        # y = np.arange(0.0, 5.0, 0.1)
+        fig = plt.figure(1)
+        dm = fig.add_subplot(111)
+        dm.hlines(y, self.result["x1"], self.result["x2"], lw=2)
+        plt.show()
+        pass
 
     def printresult(self):
+        print("Result:")
+        for i in range(len(self.result["i"])):
+            print('')
+            print("i:", self.result["i"][i])
+            print("middle =", self.result["middle"])
+            print("length =", self.result["length"])
+            print("Xa =", self.result["x1"][0], "Xb =", self.result["x1"][1])
         pass
 
-    def printresult1(self):
-        pass
-    # 13
+    pass
