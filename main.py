@@ -14,6 +14,7 @@ import newtons_method
 import sven_method
 import bisection_method
 import dsk_paula_v2
+import chords_method
 
 
 class Work:
@@ -36,7 +37,8 @@ class Work:
             "nm": 13,
             "sm": 14,
             "bsm": 15,
-            "dskp": 16
+            "dskp": 16,
+            "cm": 17
 
         }
         pass
@@ -119,6 +121,10 @@ class Work:
                 pass
             elif (task == 16):
                 Task = dsk_paula_v2.DSKP()
+                Task.importparam(self.accuracy)
+                Task.dostaff()
+            elif (task == 17):
+                Task = chords_method.CM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
