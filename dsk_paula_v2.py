@@ -8,6 +8,8 @@ from matplotlib import mlab
 from matplotlib.path import Path
 import matplotlib.patches as patches
 
+import sven_method
+
 from resource import expression
 
 
@@ -28,8 +30,10 @@ class NM:
             "show result": 11,
             "image 1": 12
         }
+        self.sm = sven_method.SM()
         self.expression = expression.Expression("No name", "x**2")
         self.accuracy = 3
+        self.sm.importparam(self.accuracy)
         self.result = {"xk": []}
         self.makedefault()
 
@@ -136,6 +140,7 @@ class NM:
 
 
     def resolve(self):
+        self.sm.makedefault()
         pass
 
     def collect_result(self):

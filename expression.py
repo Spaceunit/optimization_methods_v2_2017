@@ -7,6 +7,13 @@ class Expression:
         self.local_max = None
         self.parameters = {}
 
+    def copy(self):
+        copy_ex = Expression(self.name, self.expression)
+        copy_ex.range = self.range.copy()
+        copy_ex.local_min = self.local_min
+        copy_ex.local_max = self.local_max
+        pass
+
     def input_range(self):
         ans = False
         command = ""
