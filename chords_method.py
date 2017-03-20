@@ -61,13 +61,14 @@ class CM:
 
 
     def makedefault(self):
+        self.accuracy = 3
         self.epsilon = 10 ** (-self.accuracy)
         self.expression = expression.Expression("Parabola", "(x-3)**3")
         self.expression.range = [1.0, 10.0]
         self.expression.parameters["unimodal"] = False
         self.x_start = 9.0
         self.result = {"length": [], "middle": [], "x1": [], "x2": [], "i": []}
-        self.h = self.epsilon * 10
+        self.h = self.epsilon
 
     def importparam(self, accuracy):
         self.accuracy = accuracy
@@ -87,6 +88,7 @@ class CM:
                     print("Please enter positive number!")
                     task = 0
         self.epsilon = 10 ** (-self.accuracy)
+        self.h = self.epsilon
 
     def inputnewdata(self):
         self.expression.input_expr()
@@ -134,21 +136,28 @@ class CM:
         ab = self.expression.range.copy()
         d = self.h
         int_part = None
+        stop_ittr = False
 
         int_part = math.modf(
             self.expression.diff_derivative(ab[1], d) - self.expression.diff_derivative(ab[0], d))
-        middle = ab[1] - (self.expression.diff_derivative(ab[1], d) * (ab[1] - ab[0])) / int_part[1]
-        fm = self.expression.execute(middle)
+        if int_part[1] < self.epsilon:
+            middle = ab[1] - (self.expression.diff_derivative(ab[1], d) * (ab[1] - ab[0]))
+            stop_ittr = True
+        else:
+            middle = ab[1] - (self.expression.diff_derivative(ab[1], d) * (ab[1] - ab[0])) / int_part[1]
+            fm = self.expression.execute(middle)
 
         print("function in middle:", middle)
         print("derivative:", math.fabs(self.expression.diff_derivative(middle, d)))
-        while math.fabs(self.expression.diff_derivative(middle, d)) > self.epsilon and fm != 0:
+        while math.fabs(
+                self.expression.diff_derivative(middle, d)) > self.epsilon and fm != 0 and i <= 600 and not stop_ittr:
             ab[0] = middle
             int_part = math.modf(
                 self.expression.diff_derivative(ab[1], d) - self.expression.diff_derivative(ab[0], d))
             middle = ab[1] - (self.expression.diff_derivative(ab[1], d) * (ab[1] - ab[0])) / int_part[1]
             print("i:", i)
             print("middle =", middle)
+            print("derivative:", math.fabs(self.expression.diff_derivative(middle, d)))
             print("length =", d)
             print("Xa =", ab[0], "Xb =", ab[1])
             self.collect_result(d, middle, i, ab)
