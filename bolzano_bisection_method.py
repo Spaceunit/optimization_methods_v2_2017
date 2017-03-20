@@ -8,7 +8,7 @@ from matplotlib import mlab
 from resource import expression
 
 
-class BSM:
+class BBSM:
     def __init__(self):
         self.commands = {
             "none": 0,
@@ -62,11 +62,12 @@ class BSM:
 
     def makedefault(self):
         self.epsilon = 10 ** (-self.accuracy)
-        self.expression = expression.Expression("Parabola", "(x-3)**3")
+        self.expression = expression.Expression("Parabola", "(x-3)**2")
         self.expression.range = [-10.0, 10.0]
         self.expression.parameters["unimodal"] = True
         self.x_start = -9.0
         self.result = {"length": [], "middle": [], "x1": [], "x2": [], "i": []}
+        self.h = self.epsilon
 
     def importparam(self, accuracy):
         self.accuracy = accuracy
@@ -86,6 +87,7 @@ class BSM:
                     print("Please enter positive number!")
                     task = 0
         self.epsilon = 10 ** (-self.accuracy)
+        self.h = self.epsilon
 
     def inputnewdata(self):
         self.expression.input_expr()
@@ -96,7 +98,7 @@ class BSM:
         task = 0
         while (task != 1):
             print('')
-            print("Bisection method")
+            print("Bolzano-bisection method")
             print('')
             task = self.enterCommand()
             if task == 2:
@@ -132,15 +134,22 @@ class BSM:
         middle = (ab[0] + ab[1]) / 2
         d = math.fabs(ab[1] - ab[0]) / 2
         fm = self.expression.execute(middle)
+
+        print("i:", i)
+        print("middle =", middle)
+        print("half of length =", d)
+        print("Xa =", ab[0], "Xb =", ab[1])
+
         self.collect_result(d, middle, i, ab)
         while d > self.epsilon and fm != 0:
             d /= 2
-            if math.copysign(1.0, self.expression.execute(ab[0])) != math.copysign(1.0, self.expression.execute(middle)):
+            if self.expression.diff_derivative(middle, self.h) >= 0.0:
                 ab[1] = middle
+                middle = ab[1] - d
             else:
                 ab[0] = middle
+                middle = ab[0] + d
             i += 1
-            middle = ab[0] + d
 
             print("i:", i)
             print("middle =", middle)
@@ -182,9 +191,9 @@ class BSM:
         for i in range(len(self.result["i"])):
             print('')
             print("i:", self.result["i"][i])
-            print("middle =", self.result["middle"])
-            print("half of length =", self.result["length"])
-            print("Xa =", self.result["x1"][0], "Xb =", self.result["x1"][1])
+            print("middle =", self.result["middle"][i])
+            print("half of length =", self.result["length"][i])
+            print("Xa =", self.result["x1"][i], "Xb =", self.result["x2"][i])
         pass
 
     pass

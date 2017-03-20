@@ -15,6 +15,7 @@ import sven_method
 import bisection_method
 import dsk_paula_v2
 import chords_method
+import bolzano_bisection_method
 
 
 class Work:
@@ -38,7 +39,8 @@ class Work:
             "sm": 14,
             "bsm": 15,
             "dskp": 16,
-            "cm": 17
+            "cm": 17,
+            "bbsm": 18
 
         }
         pass
@@ -125,6 +127,11 @@ class Work:
                 Task.dostaff()
             elif (task == 17):
                 Task = chords_method.CM()
+                Task.importparam(self.accuracy)
+                Task.dostaff()
+                pass
+            elif (task == 18):
+                Task = bolzano_bisection_method.BBSM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
