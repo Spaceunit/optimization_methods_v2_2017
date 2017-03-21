@@ -72,7 +72,7 @@ class HJPS:
 
     def showHelp(self):
         print('')
-        print("Help v0.001")
+        print("Help v0.002")
         self.showCommands()
 
     def makedefault(self):

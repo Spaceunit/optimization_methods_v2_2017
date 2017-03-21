@@ -93,7 +93,7 @@ class Work:
 
     def showHelp(self):
         print('')
-        print("Help v0.001")
+        print("Help v0.002")
         print("Author of this program: Oleksiy Polshchak")
         self.showCommands()
 
