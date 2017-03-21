@@ -44,7 +44,9 @@ class HJPS:
         }
         self.expression = expression.Expression("No name", "x**2")
         self.accuracy = 3
-        self.result = {"length": [], "middle": [], "x1": [], "x2": [], "i": []}
+        self.x_start = {"x1": 0, "x2": 0}
+        self.x_delta = {"x1": 0, "x2": 0}
+        self.result = {"i": [], "xk": [], "x_delta": []}
         self.makedefault()
 
 
@@ -78,10 +80,10 @@ class HJPS:
     def makedefault(self):
         self.epsilon = 10 ** (-self.accuracy)
         self.expression = expression.Expression("Parabola", "(x-3)**2")
-        self.expression.range = [-10.0, 10.0]
         self.expression.parameters["unimodal"] = True
-        self.x_start = -9.0
-        self.result = {"length": [], "middle": [], "x1": [], "x2": [], "i": []}
+        self.x_start = {"x1": 4.0, "x2": 6.0}
+        self.x_delta = {"x1": 0.6, "x2": 0.8}
+        self.result = {"i": [], "xk": [], "x_delta": []}
         self.h = self.epsilon
 
     def importparam(self, accuracy):
@@ -144,6 +146,7 @@ class HJPS:
         pass
 
     def resolve(self):
+
         pass
 
 
