@@ -11,19 +11,36 @@ from resource import expression
 class HJPS:
     def __init__(self):
         self.commands = {
-            "none": 0,
-            "exit": 1,
-            "test": 2,
-            "clear": 3,
-            "help": 4,
-            "new": 5,
-            "show slist": 6,
-            "show scount": 7,
-            "acc": 8,
-            "mk": 9,
-            "start": 10,
-            "show result": 11,
-            "image 1": 12
+            "commands": {
+                "none": 0,
+                "exit": 1,
+                "test": 2,
+                "clear": 3,
+                "help": 4,
+                "new": 5,
+                "show slist": 6,
+                "show scount": 7,
+                "acc": 8,
+                "mk": 9,
+                "start": 10,
+                "show result": 11,
+                "image 1": 12
+            },
+            "description": {
+                "none": "do nothing",
+                "exit": "exit from module",
+                "test": "do test stuff",
+                "clear": "clear something",
+                "help": "display helpfull information",
+                "new": "enter new raw data",
+                "show slist": "show raw data",
+                "show scount": "show something",
+                "acc": "set accuracy",
+                "mk": "set default raw data",
+                "start": "start calculation process",
+                "show result": "show result",
+                "image 1": "show visualization"
+            }
         }
         self.expression = expression.Expression("No name", "x**2")
         self.accuracy = 3
@@ -35,8 +52,12 @@ class HJPS:
     def showCommands(self):
         print('')
         print("Commands...")
-        for item in self.commands:
-            print(str(item) + ": " + str(self.commands[item]))
+        print("---")
+        for item in self.commands["commands"]:
+            print(str(item) + ":")
+            print("Number: " + str(self.commands["commands"][item]))
+            print("Description: " + str(self.commands["description"][item]))
+            print("---")
 
     def enterCommand(self):
         command = "0"
@@ -44,10 +65,10 @@ class HJPS:
         print("Enter command (help for Q&A)")
         while (command not in self.commands):
             command = input("->")
-            if (command not in self.commands):
+            if (command not in self.commands["commands"]):
                 print("There is no such command")
             else:
-                return self.commands[command]
+                return self.commands["commands"][command]
 
     def showHelp(self):
         print('')

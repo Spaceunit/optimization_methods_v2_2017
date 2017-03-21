@@ -16,32 +16,57 @@ import bisection_method
 import dsk_paula_v2
 import chords_method
 import bolzano_bisection_method
+import hooke_jeeves_pattern_search
 
 
 class Work:
     def __init__(self):
         self.accuracy = 3
         self.commands = {
-            "none": 0,
-            "exit": 1,
-            "test": 2,
-            "clear": 3,
-            "help": 4,
-            "new": 5,
-            "show slist": 6,
-            "show scount": 7,
-            "acc": 8,
-            "mk": 9,
-            "jap": 10,
-            "gss": 11,
-            "dm": 12,
-            "nm": 13,
-            "sm": 14,
-            "bsm": 15,
-            "dskp": 16,
-            "cm": 17,
-            "bbsm": 18
-
+            "commands": {
+                "none": 0,
+                "exit": 1,
+                "test": 2,
+                "clear": 3,
+                "help": 4,
+                "new": 5,
+                "show slist": 6,
+                "show scount": 7,
+                "acc": 8,
+                "mk": 9,
+                "jap": 10,
+                "gss": 11,
+                "dm": 12,
+                "nm": 13,
+                "sm": 14,
+                "bsm": 15,
+                "dskp": 16,
+                "cm": 17,
+                "bbsm": 18,
+                "hjps": 19
+            },
+            "description": {
+                "none": "do nothing",
+                "exit": "exit from module",
+                "test": "do test stuff",
+                "clear": "clear something",
+                "help": "display helpfull information",
+                "new": "enter new raw data",
+                "show slist": "show raw data",
+                "show scount": "show something",
+                "acc": "set accuracy",
+                "mk": "set default raw data",
+                "jap": "Job Assignment Problem",
+                "gss": "Hooke-Jeeves pattern search method",
+                "dm": "Dichotomy method",
+                "nm": "Newton's method",
+                "sm": "Sven's method",
+                "bsm": "Bisection method",
+                "dskp": "DSK Paul`s method",
+                "cm": "Chords method",
+                "bbsm": "Bolzano-bisection method",
+                "hjps": "Hooke-Jeeves pattern search method"
+            }
         }
         pass
 
@@ -51,21 +76,25 @@ class Work:
         print("Enter command (help for Q&A)")
         while (command not in self.commands):
             command = input("->")
-            if (command not in self.commands):
+            if (command not in self.commands["commands"]):
                 print("There is no such command")
             else:
-                return self.commands[command]
+                return self.commands["commands"][command]
 
     def showCommands(self):
         print('')
         print("Commands...")
-        for item in self.commands:
-            print(str(item) + ": " + str(self.commands[item]))
+        print("---")
+        for item in self.commands["commands"]:
+            print(str(item) + ":")
+            print("Number: " + str(self.commands["commands"][item]))
+            print("Description: " + str(self.commands["description"][item]))
+            print("---")
 
     def showHelp(self):
         print('')
         print("Help v0.001")
-        print("Author of this program: Sir Oleksiy Polshchak")
+        print("Author of this program: Oleksiy Polshchak")
         self.showCommands()
 
     def dostaff(self):
@@ -132,6 +161,11 @@ class Work:
                 pass
             elif (task == 18):
                 Task = bolzano_bisection_method.BBSM()
+                Task.importparam(self.accuracy)
+                Task.dostaff()
+                pass
+            elif (task == 19):
+                Task = hooke_jeeves_pattern_search.HJPS()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
