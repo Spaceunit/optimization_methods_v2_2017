@@ -54,12 +54,6 @@ class HJPS:
         print("Help v0.001")
         self.showCommands()
 
-
-    def testfunc(self, x):
-        y = 10 * x * math.log10(x) / math.log10(2.7) - (x**2) / 2
-        return y
-
-
     def makedefault(self):
         self.epsilon = 10 ** (-self.accuracy)
         self.expression = expression.Expression("Parabola", "(x-3)**2")
@@ -129,71 +123,14 @@ class HJPS:
         pass
 
     def resolve(self):
-        i = 0
-        ab = self.expression.range.copy()
-        middle = (ab[0] + ab[1]) / 2
-        d = math.fabs(ab[1] - ab[0]) / 2
-        fm = self.expression.execute(middle)
-
-        print("i:", i)
-        print("middle =", middle)
-        print("half of length =", d)
-        print("Xa =", ab[0], "Xb =", ab[1])
-
-        self.collect_result(d, middle, i, ab)
-        while d > self.epsilon and fm != 0:
-            d /= 2
-            if self.expression.diff_derivative(middle, self.h) >= 0.0:
-                ab[1] = middle
-                middle = ab[1] - d
-            else:
-                ab[0] = middle
-                middle = ab[0] + d
-            i += 1
-
-            print("i:", i)
-            print("middle =", middle)
-            print("half of length =", d)
-            print("Xa =", ab[0], "Xb =", ab[1])
-
-            self.collect_result(d, middle, i, ab)
         pass
 
 
-    def collect_result(self, d, middle, i, ab):
-        self.result["length"].append(d)
-        self.result["middle"].append(middle)
-        self.result["x1"].append(ab[0])
-        self.result["x2"].append(ab[1])
-        self.result["i"].append(i)
-
-    def set_d(self):
-        self.d = math.fabs(self.ab[1] - self.ab[0]) / 4
-
-    def findx1(self):
-        return (self.ab[1] + self.ab[0]) / 2 - self.d
-
-    def findx2(self):
-        return (self.ab[1] + self.ab[0]) / 2 + self.d
+    def collect_result(self):
+        pass
 
     def printresult_g(self):
-        y = np.arange(0.0, float(len(self.result["i"])), 1.0)
-        # y = np.arange(0.0, 5.0, 0.1)
-        fig = plt.figure(1)
-        dm = fig.add_subplot(111)
-        dm.hlines(y, self.result["x1"], self.result["x2"], lw=2)
-        plt.plot(self.result["middle"], y, marker='o', color='r', ls='')
-        plt.show()
         pass
 
     def printresult(self):
         print("Result:")
-        for i in range(len(self.result["i"])):
-            print('')
-            print("i:", self.result["i"][i])
-            print("middle =", self.result["middle"][i])
-            print("half of length =", self.result["length"][i])
-            print("Xa =", self.result["x1"][i], "Xb =", self.result["x2"][i])
-        pass
-
-    pass
