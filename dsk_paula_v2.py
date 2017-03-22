@@ -77,7 +77,7 @@ class DSKP:
         self.d_expression.range = self.expression.range
         self.expression.parameters["unimodal"] = True
         self.d_expression.parameters["unimodal"] = False
-        self.x_start = -10.0
+        self.x_start = -9.0
         self.result = {"xst": None, "fsxt" : None}
         self.h = 0.00001
         pass
@@ -144,6 +144,7 @@ class DSKP:
     def resolve(self):
         self.makedefault()
         self.sm.makedefault()
+        self.sm.x_start = self.x_start
         self.sm.expression = self.expression.copy()
         self.sm.resolve()
         self.raw_group = self.sm.result

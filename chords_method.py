@@ -188,6 +188,7 @@ class CM:
         fig = plt.figure(1)
         dm = fig.add_subplot(111)
         dm.hlines(y, self.result["x1"], self.result["x2"], lw=2)
+        plt.plot(self.result["middle"], y, marker='o', color='r', ls='')
         plt.show()
         pass
 

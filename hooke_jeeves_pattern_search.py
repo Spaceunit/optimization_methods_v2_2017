@@ -105,8 +105,8 @@ class HJPS:
                 if self.accuracy < 0:
                     print("Please enter positive number!")
                     task = 0
-        self.epsilon = 10 ** (-self.accuracy)
-        self.h = self.epsilon
+        self.epsilon[0] = 10 ** (-self.accuracy)
+        self.epsilon[1] = self.epsilon[0]
 
     def inputnewdata(self):
         self.expression.input_expr()
@@ -187,7 +187,8 @@ class HJPS:
         if not chalt:
             i += 1
             self.collect_result(i, xn, dx, fn)
-            while not self.halting_check() and not chalt:
+            #while not self.halting_check() and not chalt:
+            while not chalt:
                 print("i", i)
                 #fp = fw
                 xp.pop("__builtins__", None)
@@ -214,24 +215,6 @@ class HJPS:
 
                 print("dx", dx)
 
-                print("Before second while fw >fp?", fw > fp)
-                if fw > fp and not chalt:
-                    wx = xp.copy()
-                    dx = self.mul(dx, self.get_alpha())
-                    print("dx", dx)
-
-                    if self.norm(dx) > self.epsilon[0]:
-                        print("xp: ", xp)
-                        xw.pop("__builtins__", None)
-                        print("Before choose, xw:", xw)
-                        xw = self.choose_point(xp, dx, True)
-                        xw.pop("__builtins__", None)
-                        print("After choose, xw:", xw)
-                        fw = self.expression.execute_d(xw)
-                    else:
-                        chalt = True
-                    xw.pop("__builtins__", None)
-
                 fn = fw
                 print("Are chalt false?", chalt)
                 print("After second while fn < fp?", fn < fp)
@@ -242,17 +225,30 @@ class HJPS:
                     xn = xw.copy()
                     xn.pop("__builtins__", None)
                 elif fn >= fp and not chalt:
+                    xp.pop("__builtins__", None)
+                    print(xp)
                     dx = self.mul(dx, self.get_alpha())
                     xw = self.choose_point(xp, dx, True)
                     xw.pop("__builtins__", None)
                     fw = self.expression.execute_d(xw)
 
                     while fw > fp and not chalt:
-                        dx = self.mul(dx, self.get_alpha())
+                        dx = self.mul(dx, 0.5)
                         if self.norm(dx) > self.epsilon[0]:
-                            xw = self.choose_point(xp, dx, True)
+                            print("LOL")
+                            xw.pop("__builtins__", None)
+                            print(xw)
+                            xw = self.choose_point(xw.copy(), dx.copy(), True)
+                            print(xw)
                             xw.pop("__builtins__", None)
                             fw = self.expression.execute_d(xw)
+
+                            fp = fn
+                            xp = xn.copy()
+                            xp.pop("__builtins__", None)
+                            xn = xw.copy()
+                            xn.pop("__builtins__", None)
+
                         else:
                             chalt = True
 
@@ -264,7 +260,8 @@ class HJPS:
                         fp = fn
 
                 i += 1
-                self.collect_result(i, xn, dx, fn)
+                if not chalt:
+                    self.collect_result(i, xn, dx, fn)
                 pass
         else:
             pass
@@ -273,6 +270,9 @@ class HJPS:
 
     def halting_check(self):
         ansver = False
+        print(self.norm(self.dif(self.result["xk"][-2], self.result["xk"][-1])) / self.norm(self.result["xk"][-2]), " and", math.fabs((self.expression.execute_d(
+                self.result["xk"][-2]) - self.expression.execute_d(self.result["xk"][-1])) / self.expression.execute_d(
+                self.result["xk"][-2])))
         if self.norm(self.dif(self.result["xk"][-2], self.result["xk"][-1])) / self.norm(self.result["xk"][-2]) <= \
                 self.epsilon[0] and math.fabs((self.expression.execute_d(
                 self.result["xk"][-2]) - self.expression.execute_d(self.result["xk"][-1])) / self.expression.execute_d(
