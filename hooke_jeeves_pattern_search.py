@@ -47,6 +47,7 @@ class HJPS:
         self.x_start = {"x1": 0, "x2": 0}
         self.x_delta = {"x1": 0, "x2": 0}
         self.result = {"i": [], "xk": [], "x_delta": []}
+        self.epsilon = [1, 1]
         self.makedefault()
 
 
@@ -78,8 +79,9 @@ class HJPS:
         self.showCommands()
 
     def makedefault(self):
-        self.epsilon = 10 ** (-self.accuracy)
-        self.expression = expression.Expression("Parabola", "(x-3)**2")
+        self.epsilon[0] = 10 ** (-self.accuracy)
+        self.epsilon[1] = self.epsilon[0]
+        self.expression = expression.Expression("Function", "(x1-2)**2+x2**2")
         self.expression.parameters["unimodal"] = True
         self.x_start = {"x1": 4.0, "x2": 6.0}
         self.x_delta = {"x1": 0.6, "x2": 0.8}
@@ -146,15 +148,192 @@ class HJPS:
         pass
 
     def resolve(self):
+        xw = {"x1": 1, "x2": 1}
+        xp = {"x1": 1, "x2": 1}
+        xn = {"x1": 1, "x2": 1}
+        i = 0
+        chalt = False
+        x = self.x_start
+        dx = self.x_delta
+        print('-')
+        print(dx)
+        self.collect_result(i, x, dx)
+        print(self.result["x_delta"][-1])
 
+        xw = x.copy()
+        fp = self.expression.execute_d(x)
+        print("Before choose point")
+        xw = self.choose_point(x, dx, True)
+        xw.pop("__builtins__", None)
+        print(xw)
+        fw = self.expression.execute_d(xw)
+        print("After choose point")
+
+        xn = x.copy()
+        xp = x.copy()
+
+        while fw > fp and not chalt:
+            dx = self.mul(dx, self.get_alpha())
+            if self.norm(dx) > self.epsilon[0]:
+                xw = self.choose_point(x, dx, True)
+                fw = self.expression.execute_d(xw)
+            else:
+                chalt = True
+
+        xn = xw.copy()
+        xp = x.copy()
+        fn = fw
+
+        if not chalt:
+            i += 1
+            self.collect_result(i, xn, dx)
+            while not self.halting_check() and not chalt:
+                print("i", i)
+                print()
+                #fp = fw
+                xw = self.choose_point(self.dif(self.mul(xn, self.get_betta()), xp), dx, True)
+                fw = self.expression.execute_d(xw)
+
+                while fw > fp and not chalt:
+                    print("while fw > fp and not chalt")
+                    print(fw)
+                    print(fp)
+                    print("--")
+                    dx = self.mul(dx, self.get_alpha())
+                    if self.norm(dx) > self.epsilon[0]:
+                        xw = self.choose_point(xp, dx, True)
+                        fw = self.expression.execute_d(xw)
+                    else:
+                        chalt = True
+                    xw.pop("__builtins__", None)
+                    print(xw)
+                    print(fw)
+
+                fn = fw
+
+                if fn < fp and not chalt:
+                    fp = fn
+                    xp = xn.copy()
+                    xn = xw.copy()
+                elif fn >= fp and not chalt:
+                    dx = self.mul(dx, self.get_alpha())
+                    xw = self.choose_point(xp, dx, True)
+                    fw = self.expression.execute_d(xw)
+
+                    while fw > fp and not chalt:
+                        dx = self.mul(dx, self.get_alpha())
+                        if self.norm(dx) > self.epsilon[0]:
+                            xw = self.choose_point(xp, dx, True)
+                            fw = self.expression.execute_d(xw)
+                        else:
+                            chalt = True
+
+                    if fn < fp and not chalt:
+                        xp = xn.copy()
+                        xn = xw.copy()
+                        fp = fn
+
+                i += 1
+                self.collect_result(i, xn, dx)
+                pass
+        else:
+            pass
         pass
 
+    def halting_check(self):
+        ansver = False
+        if self.norm(self.dif(self.result["xk"][-2], self.result["xk"][-1])) / self.norm(self.result["xk"][-2]) <= \
+                self.epsilon[0] and math.fabs((self.expression.execute_d(
+                self.result["xk"][-2]) - self.expression.execute_d(self.result["xk"][-1])) / self.expression.execute_d(
+                self.result["xk"][-2])) <= self.epsilon[1]:
+            ansver = True
+        else:
+            ansver = False
+        return ansver
 
-    def collect_result(self):
-        pass
+    def get_alpha(self):
+        return 0.5
+
+    def get_betta(self):
+        return 2
+
+    def choose_point(self, x, dx, m):
+        print("Choose point---")
+        argument_x = [
+            self.sum(x, dx),
+            self.dif_part(self.sum_part(x, dx, "x1"), dx, "x2"),
+            self.sum_part(self.dif_part(x, dx, "x1"), dx, "x2"),
+            self.dif(x, dx)
+        ]
+        print(argument_x)
+        f = [self.expression.execute_d(xw) for xw in argument_x]
+        print(f)
+        if m:
+            r = argument_x[f.index(min(f))]
+        else:
+            r = argument_x[f.index(min(f))]
+        print("--end--")
+        return r
+
+    def norm(self, v):
+        s = 0.0
+        v.pop("__builtins__", None)
+        for item in v:
+            s += math.pow(v[item], 2)
+        return math.sqrt(s)
+
+    def dif(self, v1, v2):
+        d = v1.copy()
+        d.pop("__builtins__", None)
+        for item in d:
+            d[item] = v1[item] - v2[item]
+        return d
+
+    def dif_part(self, v1, v2, part):
+        d = v1.copy()
+        d.pop("__builtins__", None)
+        d[part] = v1[part] - v2[part]
+        return d
+
+    def sum(self, v1, v2):
+        s = v1.copy()
+        s.pop("__builtins__", None)
+        for item in s:
+            s[item] = v1[item] + v2[item]
+        return s
+
+    def sum_part(self, v1, v2, part):
+        d = v1.copy()
+        d.pop("__builtins__", None)
+        d[part] = v1[part] + v2[part]
+        return d
+
+    def mul(self, v1, betta):
+        v1.pop("__builtins__", None)
+        for item in v1:
+            v1[item] *= betta
+        return v1
+
+    def collect_result(self, i, x, dx):
+        x = x.copy()
+        x.pop("__builtins__", None)
+        dx = dx.copy()
+        dx.pop("__builtins__", None)
+        self.result["i"].append(i)
+        self.result["xk"].append(x)
+        self.result["x_delta"].append(dx)
 
     def printresult_g(self):
         pass
 
     def printresult(self):
+        print("Result:")
+        for i in range(len(self.result["i"])):
+            print('')
+            print("i:", self.result["i"][i])
+            self.result["xk"][i].pop("__builtins__", None)
+            print("x:", self.result["xk"][i])
+            self.result["x_delta"][i].pop("__builtins__", None)
+            print("dx:", self.result["x_delta"][i])
+        pass
         print("Result:")
