@@ -187,8 +187,8 @@ class HJPS:
         if not chalt:
             i += 1
             self.collect_result(i, xn, dx, fn)
-            #while not self.halting_check() and not chalt:
-            while not chalt:
+            while not self.halting_check() and not chalt:
+            #while not chalt:
                 print("i", i)
                 #fp = fw
                 xp.pop("__builtins__", None)
@@ -201,12 +201,12 @@ class HJPS:
                 print("xn: ", xn)
                 print("fn: ", fn)
 
-                print("Before 2TB - BT, xw:", xw)
-                xw = self.mul(xn, 2.0)
-                xw = self.dif(xw, xp)
-                print("After 2TB - BT, xw:", xw)
+                #print("Before 2TB - BT, xw:", xw)
+                #xw = self.mul(xn, 2.0)
+                #xw = self.dif(xw, xp)
+                #print("After 2TB - BT, xw:", xw)
                 #xw = self.choose_point(self.dif(self.mul(xn, self.get_betta()), xn), dx, True)
-                xw = self.choose_point(xw, dx, True)
+                #xw = self.choose_point(xw, dx, True)
                 xw.pop("__builtins__", None)
                 print("xw: ", xw)
 
@@ -219,6 +219,14 @@ class HJPS:
                 print("Are chalt false?", chalt)
                 print("After second while fn < fp?", fn < fp)
                 if fn < fp and not chalt:
+
+                    print("Before 2TB - BT, xw:", xw)
+                    xw = self.mul(xn, 2.0)
+                    xw = self.dif(xw, xp)
+                    print("After 2TB - BT, xw:", xw)
+                    # xw = self.choose_point(self.dif(self.mul(xn, self.get_betta()), xn), dx, True)
+                    xw = self.choose_point(xw, dx, True)
+
                     fp = fn
                     xp = xn.copy()
                     xp.pop("__builtins__", None)
@@ -227,13 +235,13 @@ class HJPS:
                 elif fn >= fp and not chalt:
                     xp.pop("__builtins__", None)
                     print(xp)
-                    dx = self.mul(dx, self.get_alpha())
+                    dx = self.mul(dx.copy(), self.get_alpha())
                     xw = self.choose_point(xp, dx, True)
                     xw.pop("__builtins__", None)
                     fw = self.expression.execute_d(xw)
 
                     while fw > fp and not chalt:
-                        dx = self.mul(dx, 0.5)
+                        dx = self.mul(dx.copy(), 0.5)
                         if self.norm(dx) > self.epsilon[0]:
                             print("LOL")
                             xw.pop("__builtins__", None)
@@ -242,12 +250,6 @@ class HJPS:
                             print(xw)
                             xw.pop("__builtins__", None)
                             fw = self.expression.execute_d(xw)
-
-                            fp = fn
-                            xp = xn.copy()
-                            xp.pop("__builtins__", None)
-                            xn = xw.copy()
-                            xn.pop("__builtins__", None)
 
                         else:
                             chalt = True
@@ -260,7 +262,7 @@ class HJPS:
                         fp = fn
 
                 i += 1
-                if not chalt:
+                if not chalt and fn < fp:
                     self.collect_result(i, xn, dx, fn)
                 pass
         else:
