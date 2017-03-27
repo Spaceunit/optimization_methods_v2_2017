@@ -74,7 +74,7 @@ class Work:
         command = "0"
         print('')
         print("Enter command (help for Q&A)")
-        while (command not in self.commands):
+        while (command not in self.commands["commands"]):
             command = input("->")
             if (command not in self.commands["commands"]):
                 print("There is no such command")
