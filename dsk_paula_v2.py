@@ -36,7 +36,7 @@ class DSKP:
         self.sm.importparam(self.accuracy)
         self.result = {"xst": None, "fsxt" : None}
         self.raw_group = {}
-        self.h = 0.00001
+        self.h = 0.1
         self.makedefault()
 
 
@@ -70,7 +70,8 @@ class DSKP:
 
 
     def makedefault(self):
-        self.epsilon = 10 ** (-self.accuracy)
+        #self.epsilon = 10 ** (-self.accuracy)
+        self.epsilon = [0.2, 0.01]
         self.expression = expression.Expression("Parabola", "x**2")
         self.d_expression = expression.Expression("Line", "2*x")
         self.expression.range = [-10.0, 10.0]
@@ -101,10 +102,52 @@ class DSKP:
                     task = 0
         self.epsilon = 10 ** (-self.accuracy)
 
+    def inputdata(self, data_name, data_type):
+        task = 0
+        value = None
+        input_type = int
+        if data_type == "float":
+            input_type = float
+        elif data_type == "int":
+            input_type = int
+        else:
+            print("Undefind type", data_type)
+            task = 1
+        if task == 0:
+            print('')
+            print("Enter ", data_name, ":")
+            while (task != 1):
+                value = input_type(input("-> "))
+                print("Value", data_name, "is", value)
+                print("Input is correct? (enter - yes/n - no)")
+                command = input("-> ")
+                if (command != "n"):
+                    task = 1
+            return value
+        else:
+            return None
+
     def inputnewdata(self):
         self.expression.input_expr()
-        self.expression.input_range()
+        # self.expression.input_range()
+        self.input_epsilon()
+        self.x_start = self.inputdata("Start position", "float")
+        self.h = self.inputdata("Step", "float")
         pass
+
+    def input_epsilon(self):
+        ans = False
+        command = ""
+        print('')
+        while not ans:
+            self.epsilon = list(map(float, input("Input epsilon1 and epsilon2 -> ").split()))
+            print("Input is correct?[Y]-> ")
+            command = input("-> ")
+            if (command.lower() != "y" or command.lower() != "yes") and len(self.epsilon) != 2:
+                print("Try again and input \"yes\" or \"y\"")
+                ans = True
+            else:
+                ans = True
 
     def dostaff(self):
         task = 0
@@ -142,9 +185,15 @@ class DSKP:
 
 
     def resolve(self):
-        self.makedefault()
+        #self.expression.input_expr()
+        #self.epsilon = self.inputdata("Epsilon", "float")
+        #self.x_start = self.inputdata("Start position", "float")
+        #self.d = self.inputdata("Step", "float")
+
         self.sm.makedefault()
         self.sm.x_start = self.x_start
+        self.sm.d = self.h
+        self.sm.epsilon = self.epsilon[0]
         self.sm.expression = self.expression.copy()
         self.sm.resolve()
         self.raw_group = self.sm.result
@@ -169,7 +218,7 @@ class DSKP:
         # 0.2
         # 0.01
         self.dx = self.h
-        self.epsilon = 0.00000000000001
+        #self.epsilon = 0.00000000000001
         x1 = x_new
         x2 = x_new + self.dx
         f1 = self.expression.execute(x_new)
@@ -190,7 +239,7 @@ class DSKP:
 
         i = 0
         print("start sycle")
-        while math.fabs(x2 - xst) < self.epsilon and math.fabs(f2 - fs) < self.epsilon and i < 100:
+        while math.fabs(x2 - xst) < self.epsilon[1] and math.fabs(f2 - fs) < self.epsilon[0] and i < 100:
             x1 = xst
             f1 = self.expression.execute(x1)
             x2 = x1 + self.dx

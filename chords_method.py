@@ -90,9 +90,35 @@ class CM:
         self.epsilon = 10 ** (-self.accuracy)
         self.h = self.epsilon
 
+    def inputdata(self, data_name, data_type):
+        task = 0
+        input_type = int
+        if data_type == "float":
+            input_type = float
+        elif data_type == "int":
+            input_type = int
+        else:
+            print("Undefind type", data_type)
+            task = 1
+        if task == 0:
+            print('')
+            print("Enter ", data_name, ":")
+            while (task != 1):
+                value = input_type(input("-> "))
+                print("Value", data_name, "is", value)
+                print("Input is correct? (enter - yes/n - no)")
+                command = input("-> ")
+                if (command != "n"):
+                    task = 1
+            return value
+        else:
+            pass
+
     def inputnewdata(self):
         self.expression.input_expr()
         self.expression.input_range()
+        self.epsilon = self.inputdata("Epsilon", "float")
+        self.h = self.inputdata("Step", "float")
         pass
 
     def dostaff(self):
@@ -142,6 +168,7 @@ class CM:
             self.expression.diff_derivative(ab[1], d) - self.expression.diff_derivative(ab[0], d))
         if int_part[1] < self.epsilon:
             middle = ab[1] - (self.expression.diff_derivative(ab[1], d) * (ab[1] - ab[0]))
+            fm = self.expression.execute(middle)
             stop_ittr = True
         else:
             middle = ab[1] - (self.expression.diff_derivative(ab[1], d) * (ab[1] - ab[0])) / int_part[1]
@@ -154,6 +181,8 @@ class CM:
             ab[0] = middle
             int_part = math.modf(
                 self.expression.diff_derivative(ab[1], d) - self.expression.diff_derivative(ab[0], d))
+            if int_part[1] == 0.0:
+                int_part = [0, self.epsilon]
             middle = ab[1] - (self.expression.diff_derivative(ab[1], d) * (ab[1] - ab[0])) / int_part[1]
             print("i:", i)
             print("middle =", middle)

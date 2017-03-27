@@ -89,9 +89,35 @@ class BBSM:
         self.epsilon = 10 ** (-self.accuracy)
         self.h = self.epsilon
 
+    def inputdata(self, data_name, data_type):
+        task = 0
+        input_type = int
+        if data_type == "float":
+            input_type = float
+        elif data_type == "int":
+            input_type = int
+        else:
+            print("Undefind type", data_type)
+            task = 1
+        if task == 0:
+            print('')
+            print("Enter ", data_name, ":")
+            while (task != 1):
+                value = input_type(input("-> "))
+                print("Value", data_name, "is", value)
+                print("Input is correct? (enter - yes/n - no)")
+                command = input("-> ")
+                if (command != "n"):
+                    task = 1
+            return value
+        else:
+            pass
+
     def inputnewdata(self):
         self.expression.input_expr()
         self.expression.input_range()
+        self.epsilon = self.inputdata("Epsilon", "float")
+        self.h = self.inputdata("Step", "float")
         pass
 
     def dostaff(self):

@@ -119,7 +119,10 @@ class SM:
 
     def inputnewdata(self):
         self.expression.input_expr()
-        self.expression.input_range()
+        #self.expression.input_range()
+        self.epsilon = self.inputdata("Epsilon", "float")
+        self.x_start = self.inputdata("Start position", "float")
+        self.d = self.inputdata("Step", "float")
         pass
 
     def dostaff(self):

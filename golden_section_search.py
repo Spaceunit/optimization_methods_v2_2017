@@ -123,6 +123,7 @@ class GSS:
     def inputnewdata(self):
         self.expression.input_expr()
         self.expression.input_range()
+        self.epsilon = self.inputdata("Epsilon", "float")
         pass
 
     def dostaff(self):
@@ -161,7 +162,7 @@ class GSS:
 
 
     def resolve(self):
-        self.makedefault()
+        #self.makedefault()
         ab = self.expression.range.copy()
         i = 1
         xk = []
