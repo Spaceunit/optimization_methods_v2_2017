@@ -274,7 +274,9 @@ class HJPS:
     def printresult_g(self):
         verts = []
         for i in range(len(self.result["xk"])):
-            verts.append((self.result["xk"][i][0], self.result["xk"][i][1]))
+            if not ("decrease x-delta" in self.result["action"][i]):
+                verts.append((self.result["xk"][i][0], self.result["xk"][i][1]))
+        print("Points count:", len(verts))
         path = Path(verts)
 
         fig = plt.figure()
