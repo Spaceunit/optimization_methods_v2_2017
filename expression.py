@@ -57,6 +57,12 @@ class Expression:
     def execute_d(self, x):
         return eval(self.expression, x)
 
+    def execute_l(self, x):
+        x_dict = {}
+        for i in range(len(x)):
+            x_dict["x" + str(i + 1)] = x[i]
+        return self.execute_d(x_dict)
+
     def diff_derivative(self, x, h):
         return 0.5 * (self.execute(x + h) - self.execute(x - h)) / h
 

@@ -16,7 +16,7 @@ import bisection_method
 import dsk_paula_v2
 import chords_method
 import bolzano_bisection_method
-import hooke_jeeves_pattern_search_old
+import hooke_jeeves_pattern_search
 
 
 class Work:
@@ -165,7 +165,7 @@ class Work:
                 Task.dostaff()
                 pass
             elif (task == 19):
-                Task = hooke_jeeves_pattern_search_old.HJPS()
+                Task = hooke_jeeves_pattern_search.HJPS()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
