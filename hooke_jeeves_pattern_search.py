@@ -2,11 +2,16 @@ import math
 import matrix
 import excel_transfer
 import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
+from matplotlib import cm
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
 from matplotlib import mlab
 
 from matplotlib.path import Path
 import matplotlib.patches as patches
+
+
 
 from resource import expression
 
@@ -27,7 +32,8 @@ class HJPS:
                 "mk": 9,
                 "start": 10,
                 "show result": 11,
-                "image 1": 12
+                "image 1": 12,
+                "image 2": 13
             },
             "description": {
                 "none": "do nothing",
@@ -42,7 +48,8 @@ class HJPS:
                 "mk": "set default raw data",
                 "start": "start calculation process",
                 "show result": "show result",
-                "image 1": "show visualization"
+                "image 1": "show 2D visualization",
+                "image 2": "show 3D visualization"
             }
         }
         self.expression = expression.Expression("No name", "x**2")
@@ -144,6 +151,8 @@ class HJPS:
 
             elif task == 12:
                 self.printresult_g()
+            elif task == 13:
+                self.printresult_3d()
         pass
 
     def print_raw_data(self):
@@ -286,6 +295,49 @@ class HJPS:
 
         xs, ys = zip(*verts)
         ax.plot(xs, ys, 'x--', lw=2, color='black', ms=10)
+
+        plt.show()
+
+    def printresult_3d(self):
+        verts = [[], [], []]
+        for i in range(len(self.result["xk"])):
+            if not ("decrease x-delta" in self.result["action"][i]):
+                verts[0].append(self.result["xk"][i][0])
+                verts[1].append(self.result["xk"][i][1])
+                verts[2].append(self.result["fx"][i])
+        print("Points count:", len(verts[0]))
+
+
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+
+        # Make data.
+        X = np.arange(-5, 5, 0.25)
+
+        Y = np.arange(-5, 5, 0.25)
+
+        X, Y = np.meshgrid(X, Y)
+        #R = np.sqrt(X ** 2 + Y ** 2)
+        Z = np.array([self.expression.execute_l([X[i], Y[i]]) for i in range(len(X))])
+
+        # Plot the surface.
+        surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm,
+                               linewidth=0, antialiased=False)
+
+        #X = np.array(verts[0])
+        #Y = np.array(verts[1])
+        #Z = np.array([self.expression.execute_l([verts[0][i], verts[1][i]]) for i in range(len(verts[2]))])
+
+        #surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm,
+        #                       linewidth=0, antialiased=False)
+
+        # Customize the z axis.
+        ax.set_zlim(-1.01, 1.01)
+        ax.zaxis.set_major_locator(LinearLocator(10))
+        ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+
+        # Add a color bar which maps values to colors.
+        fig.colorbar(surf, shrink=0.5, aspect=5)
 
         plt.show()
 
