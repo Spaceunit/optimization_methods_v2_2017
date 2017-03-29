@@ -16,7 +16,7 @@ import matplotlib.patches as patches
 from resource import expression
 
 
-class HJPS:
+class NMM:
     def __init__(self):
         self.commands = {
             "commands": {
@@ -56,6 +56,7 @@ class HJPS:
         self.accuracy = 3
         self.epsilon = [1, 1]
         self.mm = True
+        self.msycle = 3
         self.makedefault()
 
 
@@ -89,13 +90,14 @@ class HJPS:
     def makedefault(self):
         self.epsilon[0] = 10 ** (-self.accuracy)
         self.epsilon[1] = self.epsilon[0]
-        self.expression = expression.Expression("Function", "(x1-2)**2+1*x2**2")
+        self.expression = expression.Expression("Function", "4*(x1-2)**2+(x2-1)**2")
         self.expression.parameters["unimodal"] = True
-        self.x_start = [4.0, 6.0]
-        self.x_delta = [0.6, 0.8]
-        self.result = {"i": [], "xk": [], "x_delta": [], "fx": [], "action": []}
+        self.x_start = [[5.0, 4.0], [7.0, 6.0], [5.0, 6.0]]
+        self.x_delta = [[5.0, 4.0], [7.0, 6.0], [5.0, 6.0]]
+        self.result = {"i": [], "xk": [], "fx": [], "action": []}
         self.cross = []
         self.h = self.epsilon
+        self.msycle = 3
         self.mm = True
 
     def importparam(self, accuracy):
@@ -127,7 +129,7 @@ class HJPS:
         task = 0
         while (task != 1):
             print('')
-            print("Hooke-Jeeves pattern search method")
+            print("Nelder–Mead method")
             print('')
             task = self.enterCommand()
             if task == 2:
@@ -162,78 +164,111 @@ class HJPS:
     def resolve(self):
         self.makedefault()
         i = 0
-        self.result["i"].append(i)
-        self.result["xk"].append(self.x_start)
-        self.result["x_delta"].append(self.x_delta)
-        xk = self.result["xk"]
-        fxk = self.result["fx"]
-        dx = self.result["x_delta"]
-        action = self.result["action"]
-        action.append("Initial point")
-        fxk.append(self.expression.execute_l(self.x_start))
+        sycle = [0,0,0]
+        while i != 3:
+            f = []
+            x = NMM.deepcopy(self.x_start)
+            for i in range(len(x)):
+                f.append(self.expression.execute_l(x[i]))
 
-        finest_point = self.find_finest_point(self.expression, xk[0], self.x_delta, self.mm)
-        xw = [None, None]
-        f_xw = None
-        if finest_point != False:
-            i += 1
-            #xw = xk[-1].copy()
-            self.collect_data(i, finest_point, self.x_delta, self.expression.execute_l(finest_point), "make next point")
-            while self.halting_check(xk, self.expression, self.epsilon) and self.norm(self.x_delta) > self.epsilon[0]:
-            #while self.norm(self.x_delta) > self.epsilon[0]:
-                xw = self.dif(self.mul(xk[-1], self.get_betta()), xk[-2])
-                temp = self.find_finest_point(self.expression, xw, self.x_delta, self.mm)
-                if temp != False:
-                    xw = temp
-                    f_xw = self.expression.execute_l(xw)
-                    if f_xw < self.expression.execute_l(xk[-2]):
-                        self.collect_data(i, xw, self.x_delta, f_xw, "make next point (NBP)")
+            self.collect_data(i, x, f, "initial simplex")
+
+            xmax = x[f.index(max(f))].copy()
+            xmin = x[f.index(min(f))].copy()
+            xmed= [0.0, 0.0]
+            for item in x:
+                index = x.index(item)
+                if index != x.index(xmax) and index != x.index(xmin):
+                    xmed = item.copy()
+            xhalf = self.mul(self.sum(xmin, xmed), 0.5)
+
+            xtest = self.sum(self.mul(self.dif(xhalf, xmax), 2.0), xmax)
+            f_xtest = self.expression.execute_l(xtest)
+            if f_xtest < f[x.index(xmed)] and f_xtest > f[x.index(xmin)]:
+                xnew = self.sum(self.mul(self.dif(xhalf, xmax), 2.0), xmax)
+            elif (f_xtest < max(f) and f_xtest > f[x.index(xmed)]):
+                xnew = self.sum(self.mul(self.dif(xhalf, xmax), 0.5), xmax)
+            else:
+                xnew = self.sum(self.mul(self.dif(xhalf, xmax), 0.5), xmax)
+
+            x_mod = [xnew.copy(), xmed.copy(), xmin.copy()]
+
+            if self.compare(x, x_mod):
+                for item in x_mod:
+                    if item in x:
+                        sycle[x_mod.index(item)] += 1
+
+                for item in sycle:
+                    if item >= self.msycle:
+                        center = item.copy()
+                        x_ch = []
+                        for item1 in x_mod:
+                            index = x.index(item1)
+                            if index != x_mod.index(center):
+                                x_ch.append(item1.copy())
+
+                        arr = self.reduction(center, x_ch[0], x_ch[1])
+                        x_mod = [center, x_ch[0], x_ch[1]]
+                        f = []
+                        for i in range(len(x_mod)):
+                            f.append(self.expression.execute_l(x_mod[i]))
+                        self.collect_data(i, x_mod, f, "do reduction")
+                        sycle = [0, 0, 0]
+                        break
                     else:
-                        self.x_delta = self.mul(self.x_delta, self.get_alpha())
-                        self.collect_data(i, xw, self.x_delta, f_xw, "decrease x-delta, go to PBP")
-                else:
-                    self.x_delta = self.mul(self.x_delta, self.get_alpha())
-                    self.collect_data(i, xw, self.x_delta, f_xw, "decrease x-delta for x-work")
-                i += 1
+                        self.collect_data(i, x_mod, f, "make new simplex")
+            else:
+                self.collect_data(i, x_mod, f, "make new simplex")
+            x = self.deepcopy(x_mod)
+            i += 1
+            print(i)
         self.printresult()
+
+    @staticmethod
+    def reduction(center, x1, x2):
+        half_x1 = NMM.mul(NMM.sum(x1, center), 0.5)
+        half_x2 = NMM.mul(NMM.sum(x2, center), 0.5)
+        return [half_x1, half_x2]
+
+    @staticmethod
+    def compare(x1, x2):
+        ansver = False
+        for i in range(len(x1)):
+            for j in range(len(x1[0])):
+                if x1[i][j] in x2:
+                    ansver = True
+        return ansver
 
     @staticmethod
     def halting_check(harr, ex, eps):
         r = True
-        if HJPS.norm(HJPS.dif(harr[-2], harr[-1])) / HJPS.norm(harr[-2]) <= eps[0] and math.fabs((ex.execute_l(harr[-2]) - ex.execute_l(harr[-1])) / ex.execute_l(harr[-2])) <= eps[1]:
+        if True:
             r = False
             print("Halting check! - True")
         return r
 
     @staticmethod
-    def find_finest_point(ex, x, dx, mm):
+    def find_finest_simplex(ex, x, dx, mm):
         result = False
-        cross = [
-            HJPS.sum_part(x, dx, 0),
-            HJPS.sum_part(x, dx, 1),
-            HJPS.dif_part(x, dx, 0),
-            HJPS.dif_part(x, dx, 1),
-            HJPS.sum(x, dx),
-            HJPS.dif(x, dx),
-            [x[0] + dx[0], x[1] - dx[1]],
-            [x[0] - dx[0], x[1] + dx[1]]
+        simplex = [
+
         ]
 
         f = []
-        for i in range(len(cross)):
-            f.append(ex.execute_l(cross[i]))
+        for i in range(len(simplex)):
+            f.append(ex.execute_l(simplex[i]))
         if mm:
             result = min(f)
             if not result < ex.execute_l(x):
                 result = False
             else:
-                result = cross[f.index(result)]
+                result = simplex[f.index(result)]
         else:
             result = max(f)
             if not result > ex.execute_l(x):
                 result = False
             else:
-                result = cross[f.index(result)]
+                result = simplex[f.index(result)]
 
         return result
 
@@ -274,11 +309,18 @@ class HJPS:
             r[i] *= c
         return r
 
-    def collect_data(self, i, x, dx, fx, action):
+    @staticmethod
+    def deepcopy(x):
+        xn = [[], [], []]
+        for i in range(len(x)):
+            for j in range(len(x[i])):
+                xn[i].append(x[i][j])
+        return xn
+
+    def collect_data(self, i, x, fx, action):
         self.result["i"].append(i)
         self.result["xk"].append(x)
         self.result["fx"].append(fx)
-        self.result["x_delta"].append(dx)
         self.result["action"].append(action)
 
     def printresult_g0(self):
@@ -368,7 +410,6 @@ class HJPS:
             print("itteration:", self.result["i"][i])
             print("x:", self.result["xk"][i])
             print("f(x):", self.result["fx"][i])
-            print("x-delta:", self.result["x_delta"][i])
             print("action:", self.result["action"][i])
             print("----------------------------------------")
         pass

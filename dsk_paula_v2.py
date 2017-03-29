@@ -72,9 +72,9 @@ class DSKP:
     def makedefault(self):
         #self.epsilon = 10 ** (-self.accuracy)
         self.epsilon = [0.2, 0.01]
-        self.expression = expression.Expression("Parabola", "x**2")
+        self.expression = expression.Expression("Parabola", "x**2 - 5*x")
         self.d_expression = expression.Expression("Line", "2*x")
-        self.expression.range = [-10.0, 10.0]
+        self.expression.range = [2.0, 3.0]
         self.d_expression.range = self.expression.range
         self.expression.parameters["unimodal"] = True
         self.d_expression.parameters["unimodal"] = False
@@ -200,6 +200,7 @@ class DSKP:
         self.dx = self.sm.d
 
         x_new = self.dsk(self.sm.find_min())
+        #x_new = []
 
         self.paul(x_new)
         pass

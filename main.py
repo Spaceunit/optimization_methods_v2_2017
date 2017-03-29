@@ -17,6 +17,7 @@ import dsk_paula_v2
 import chords_method
 import bolzano_bisection_method
 import hooke_jeeves_pattern_search
+import nelder_mead_method
 
 
 class Work:
@@ -43,7 +44,8 @@ class Work:
                 "dskp": 16,
                 "cm": 17,
                 "bbsm": 18,
-                "hjps": 19
+                "hjps": 19,
+                "nmm": 20
             },
             "description": {
                 "none": "do nothing",
@@ -65,7 +67,8 @@ class Work:
                 "dskp": "DSK Paul`s method",
                 "cm": "Chords method",
                 "bbsm": "Bolzano-bisection method",
-                "hjps": "Hooke-Jeeves pattern search method"
+                "hjps": "Hooke-Jeeves pattern search method",
+                "nmm": "Nelder–Mead method"
             }
         }
         pass
@@ -166,6 +169,11 @@ class Work:
                 pass
             elif (task == 19):
                 Task = hooke_jeeves_pattern_search.HJPS()
+                Task.importparam(self.accuracy)
+                Task.dostaff()
+                pass
+            elif (task == 20):
+                Task = nelder_mead_method.NMM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
