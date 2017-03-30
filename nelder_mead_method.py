@@ -163,11 +163,12 @@ class NMM:
 
     def resolve(self):
         self.makedefault()
-        i = 0
+        k = 0
         sycle = [0,0,0]
-        while i != 3:
+        x_mod = self.deepcopy(self.x_start)
+        while k <= 30:
             f = []
-            x = NMM.deepcopy(self.x_start)
+            x = NMM.deepcopy(x_mod)
             for i in range(len(x)):
                 f.append(self.expression.execute_l(x[i]))
 
@@ -212,16 +213,16 @@ class NMM:
                         f = []
                         for i in range(len(x_mod)):
                             f.append(self.expression.execute_l(x_mod[i]))
-                        self.collect_data(i, x_mod, f, "do reduction")
+                        self.collect_data(k, x_mod, f, "do reduction")
                         sycle = [0, 0, 0]
                         break
                     else:
-                        self.collect_data(i, x_mod, f, "make new simplex")
+                        self.collect_data(k, x_mod, f, "make new simplex")
             else:
-                self.collect_data(i, x_mod, f, "make new simplex")
-            x = self.deepcopy(x_mod)
-            i += 1
-            print(i)
+                self.collect_data(k, x_mod, f, "make new simplex")
+            #x = self.deepcopy(x_mod)
+            k += 1
+            print(k)
         self.printresult()
 
     @staticmethod
