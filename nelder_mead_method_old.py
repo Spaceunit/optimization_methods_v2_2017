@@ -172,7 +172,7 @@ class NMM:
             for i in range(len(x)):
                 f.append(self.expression.execute_l(x[i]))
 
-            self.collect_data(k, x, f, "initial simplex")
+            self.collect_data(i, x, f, "initial simplex")
 
             xmax = x[f.index(max(f))].copy()
             xmin = x[f.index(min(f))].copy()
