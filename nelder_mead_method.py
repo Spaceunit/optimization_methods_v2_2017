@@ -95,6 +95,7 @@ class NMM:
         self.expression.parameters["unimodal"] = True
         self.expression.parameters["global_min"] = [5.0, 6.0]
         self.x_start = [[8.0, 9.0], [10.0, 11.0], [8.0, 11.0]]
+        self.cof = {"a": 1.0, "g": 2.0, "b": 0.5}
 
 
     def importparam(self, accuracy):
@@ -160,8 +161,65 @@ class NMM:
 
     def resolve(self):
         self.makedefault()
+        exp_r = self.expression
+        f_arr = [exp_r.execute_l(x) for x in self.x_start]
+        x_w = self.deepcopy(self.x_start)
+        center = [0 for _ in range(len(x_w[0]))]
+        h_temp = [0 for _ in range(len(x_w[0]))]
 
+        self.par_sort(x_w, f_arr)
+        while self.halting_check():
+            for i in range(len(x_w) - 1):
+                center = self.sum(center, x_w[i])
+            center = self.mul(center, 1.0 / float(len(x_w) - 1))
+            h_temp = self.reflection(center, x_w)
+            f_h_temp = exp_r.execute_l(h_temp)
+            if f_h_temp <= f_arr[0]:
+                h_temp_new = self.stretching(center, h_temp, x_w)
+                f_h_temp_new = exp_r.execute_l(h_temp_new)
+                if f_h_temp_new < f_arr[0]:
+                    x_w[-1] = h_temp_new.copy()
+                else:
+                    x_w[-1] = h_temp.copy()
+            elif f_h_temp > f_arr[-2] and f_h_temp < f_arr[-1]:
+                h_temp_new = self.compression(center, h_temp, x_w)
+                x_w[-1] = h_temp_new
+            else:
+                i = 1
+                while i < len(x_w)
+                    x_w[i] = self.mul(x_w[i], 0.5)
+                    i += 1
         pass
+
+    def stretching(self, center, h_temp, x_w):
+        h_temp = self.dif(h_temp, center)
+        h_temp = self.mul(h_temp, self.cof["g"])
+        h_temp = self.sum(h_temp, center)
+        return h_temp
+
+    def compression(self, center, h_temp, x_w):
+        h_temp = self.dif(h_temp, center)
+        h_temp = self.mul(h_temp, self.cof["b"])
+        h_temp = self.sum(h_temp, center)
+        return h_temp
+
+    def reflection(self, center, x_w):
+        h_temp = self.dif(center, x_w[-1])
+        h_temp = self.mul(h_temp, self.cof["a"])
+        h_temp = self.sum(h_temp, center)
+        return h_temp
+
+    @staticmethod
+    def par_sort(x, f):
+        f_temp = f.copy()
+        x_temp = x.copy()
+        index = [i for i in range(len(x))]
+        f.sort()
+        for i in range(len(x)):
+            x[i] = x_temp[f_temp.index(f[i])]
+
+
+
 
     @staticmethod
     def reduction(center, x1, x2):
@@ -176,19 +234,12 @@ class NMM:
                     ansver = True
         return ansver
 
-    @staticmethod
-    def halting_check(harr, ex, eps):
+    def halting_check(self):
         r = True
-        if True:
+        if 1 / float(len(self.x_start)):
             r = False
             print("Halting check! - True")
         return r
-
-    def get_alpha(self):
-        return 0.5
-
-    def get_betta(self):
-        return 2.0
 
     @staticmethod
     def norm(v):
