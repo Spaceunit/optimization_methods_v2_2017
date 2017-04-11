@@ -176,9 +176,14 @@ class NMM:
         self.collect_data(k, x_w, f_arr, "initial simplex")
         while self.halting_check(f_arr, center) and k <= 600:
             k += 1
+            i = 1
             #for i in range(len(x_w) - 1):
             #    center = self.sum(center, x_w[i])
-            center = self.sum(x_w[0], x_w[1])
+            center = x_w[0].copy()
+            while i < (len(x_w) - 1):
+                center = self.sum(center, x_w[i])
+                i += 1
+            #center = self.sum(x_w[0], x_w[1])
             center = self.mul(center, 1.0 / float(len(x_w) - 1))
             h_temp = self.reflection(center, x_w)
             print("center is", center)
