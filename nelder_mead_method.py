@@ -161,37 +161,44 @@ class NMM:
 
     def resolve(self):
         self.makedefault()
+        k = 0
         exp_r = self.expression
         f_arr = [exp_r.execute_l(x) for x in self.x_start]
         x_w = self.deepcopy(self.x_start)
         center = [0 for _ in range(len(x_w[0]))]
         h_temp = [0 for _ in range(len(x_w[0]))]
-
-        self.par_sort(x_w, f_arr)
-        while self.halting_check():
+        cycling = [0 for _ in range(len(x_w))]
+        self.par_sort(x_w, f_arr, cycling)
+        while self.halting_check(f_arr, center) and k <= 5:
             for i in range(len(x_w) - 1):
                 center = self.sum(center, x_w[i])
             center = self.mul(center, 1.0 / float(len(x_w) - 1))
             h_temp = self.reflection(center, x_w)
             f_h_temp = exp_r.execute_l(h_temp)
             if f_h_temp <= f_arr[0]:
-                h_temp_new = self.stretching(center, h_temp, x_w)
+                h_temp_new = self.expansion(center, h_temp, x_w)
                 f_h_temp_new = exp_r.execute_l(h_temp_new)
                 if f_h_temp_new < f_arr[0]:
                     x_w[-1] = h_temp_new.copy()
+                    self.collect_data(k, x_w, f_arr, "expansion")
                 else:
                     x_w[-1] = h_temp.copy()
+                    self.collect_data(k, x_w, f_arr, "reflection")
             elif f_h_temp > f_arr[-2] and f_h_temp < f_arr[-1]:
                 h_temp_new = self.compression(center, h_temp, x_w)
                 x_w[-1] = h_temp_new
+                self.collect_data(k, x_w, f_arr, "compression")
             else:
                 i = 1
-                while i < len(x_w)
+                while i < len(x_w):
                     x_w[i] = self.mul(x_w[i], 0.5)
                     i += 1
-        pass
+                self.collect_data(k, x_w, f_arr, "reduction")
+            #self.collect_data(k, x_w, f_arr, "default iterration")
+            k += 1
+        self.printresult()
 
-    def stretching(self, center, h_temp, x_w):
+    def expansion(self, center, h_temp, x_w):
         h_temp = self.dif(h_temp, center)
         h_temp = self.mul(h_temp, self.cof["g"])
         h_temp = self.sum(h_temp, center)
@@ -210,13 +217,15 @@ class NMM:
         return h_temp
 
     @staticmethod
-    def par_sort(x, f):
+    def par_sort(x, f, cycling):
         f_temp = f.copy()
         x_temp = x.copy()
+        cycling_temp = cycling.copy()
         index = [i for i in range(len(x))]
         f.sort()
         for i in range(len(x)):
             x[i] = x_temp[f_temp.index(f[i])]
+            cycling[i] = cycling_temp[f_temp.index(f[i])]
 
 
 
@@ -234,9 +243,10 @@ class NMM:
                     ansver = True
         return ansver
 
-    def halting_check(self):
+    def halting_check(self, f_arr, center):
         r = True
-        if 1 / float(len(self.x_start)):
+        f_center = self.expression.execute_l(center)
+        if math.sqrt(math.pow(sum([item - f_center for item in f_arr]), 2.0) / float(len(f_arr))) <= self.epsilon[0]:
             r = False
             print("Halting check! - True")
         return r
