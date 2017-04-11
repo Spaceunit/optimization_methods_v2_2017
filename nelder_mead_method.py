@@ -57,6 +57,7 @@ class NMM:
         self.epsilon = [1, 1]
         self.mm = True
         self.msycle = 3
+        self.result = {"i": [], "xk": [], "fx": [], "action": []}
         self.makedefault()
 
 
@@ -96,6 +97,7 @@ class NMM:
         self.expression.parameters["global_min"] = [5.0, 6.0]
         self.x_start = [[8.0, 9.0], [10.0, 11.0], [8.0, 11.0]]
         self.cof = {"a": 1.0, "g": 2.0, "b": 0.5}
+        self.result = {"i": [], "xk": [], "fx": [], "action": []}
 
 
     def importparam(self, accuracy):
@@ -163,40 +165,57 @@ class NMM:
         self.makedefault()
         k = 0
         exp_r = self.expression
-        f_arr = [exp_r.execute_l(x) for x in self.x_start]
         x_w = self.deepcopy(self.x_start)
         center = [0 for _ in range(len(x_w[0]))]
+        f_arr = [exp_r.execute_l(x) for x in x_w]
         h_temp = [0 for _ in range(len(x_w[0]))]
         cycling = [0 for _ in range(len(x_w))]
+        print(x_w)
         self.par_sort(x_w, f_arr, cycling)
-        while self.halting_check(f_arr, center) and k <= 5:
-            for i in range(len(x_w) - 1):
-                center = self.sum(center, x_w[i])
+        print(x_w)
+        self.collect_data(k, x_w, f_arr, "initial simplex")
+        while self.halting_check(f_arr, center) and k <= 600:
+            k += 1
+            #for i in range(len(x_w) - 1):
+            #    center = self.sum(center, x_w[i])
+            center = self.sum(x_w[0], x_w[1])
             center = self.mul(center, 1.0 / float(len(x_w) - 1))
             h_temp = self.reflection(center, x_w)
+            print("center is", center)
+            print("h_temp is", h_temp)
             f_h_temp = exp_r.execute_l(h_temp)
+            print("fcenter is", f_h_temp)
             if f_h_temp <= f_arr[0]:
                 h_temp_new = self.expansion(center, h_temp, x_w)
                 f_h_temp_new = exp_r.execute_l(h_temp_new)
                 if f_h_temp_new < f_arr[0]:
                     x_w[-1] = h_temp_new.copy()
+                    f_arr[-1] = f_h_temp_new
                     self.collect_data(k, x_w, f_arr, "expansion")
                 else:
                     x_w[-1] = h_temp.copy()
+                    f_arr[-1] = f_h_temp
                     self.collect_data(k, x_w, f_arr, "reflection")
-            elif f_h_temp > f_arr[-2] and f_h_temp < f_arr[-1]:
+            elif f_h_temp >= f_arr[-2] and f_h_temp < f_arr[-1]:
                 h_temp_new = self.compression(center, h_temp, x_w)
                 x_w[-1] = h_temp_new
+                f_arr[-1] = exp_r.execute_l(h_temp_new)
                 self.collect_data(k, x_w, f_arr, "compression")
             else:
-                i = 1
-                while i < len(x_w):
-                    x_w[i] = self.mul(x_w[i], 0.5)
-                    i += 1
+                self.reduction(x_w)
                 self.collect_data(k, x_w, f_arr, "reduction")
+            self.par_sort(x_w, f_arr, cycling)
             #self.collect_data(k, x_w, f_arr, "default iterration")
-            k += 1
+            #k += 1
         self.printresult()
+
+    def reduction(self, x_w):
+        i = 1
+        while i < len(x_w):
+            x_w[i] = self.dif(x_w[i], x_w[0])
+            x_w[i] = self.mul(x_w[i], 0.5)
+            x_w[i] = self.sum(x_w[i], x_w[0])
+            i += 1
 
     def expansion(self, center, h_temp, x_w):
         h_temp = self.dif(h_temp, center)
@@ -216,23 +235,15 @@ class NMM:
         h_temp = self.sum(h_temp, center)
         return h_temp
 
-    @staticmethod
-    def par_sort(x, f, cycling):
+    def par_sort(self, x, f, cycling):
         f_temp = f.copy()
-        x_temp = x.copy()
+        x_temp = self.deepcopy(x)
         cycling_temp = cycling.copy()
         index = [i for i in range(len(x))]
         f.sort()
         for i in range(len(x)):
             x[i] = x_temp[f_temp.index(f[i])]
             cycling[i] = cycling_temp[f_temp.index(f[i])]
-
-
-
-
-    @staticmethod
-    def reduction(center, x1, x2):
-        pass
 
     @staticmethod
     def compare(x1, x2):
@@ -292,8 +303,8 @@ class NMM:
 
     def collect_data(self, i, x, fx, action):
         self.result["i"].append(i)
-        self.result["xk"].append(x)
-        self.result["fx"].append(fx)
+        self.result["xk"].append(self.deepcopy(x))
+        self.result["fx"].append(fx.copy())
         self.result["action"].append(action)
 
     def printresult_g(self):
