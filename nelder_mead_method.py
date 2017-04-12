@@ -10,6 +10,9 @@ from matplotlib import mlab
 
 from matplotlib.path import Path
 import matplotlib.patches as patches
+import matplotlib
+from matplotlib.patches import Polygon
+from matplotlib.collections import PatchCollection
 
 
 
@@ -313,6 +316,26 @@ class NMM:
         self.result["action"].append(action)
 
     def printresult_g(self):
+        fig, ax = plt.subplots()
+        patches = []
+        N = 3
+        for i in range(len(self.result["i"])):
+            for j in range(N):
+                polygon = Polygon(np.array(self.result["xk"][i]), True)
+            patches.append(polygon)
+
+        p = PatchCollection(patches, cmap=matplotlib.cm.jet, alpha=0.4)
+
+        colors = 100 * np.random.rand(len(patches))
+        p.set_array(np.array(colors))
+
+        ax.add_collection(p)
+        # Set x ticks
+        #plt.xticks(np.linspace(-10, 10, 10, endpoint=True))
+
+        # Set y ticks
+        #plt.yticks(np.linspace(-10, 10, 10, endpoint=True))
+        plt.show()
         pass
 
     def printresult_3d(self):
