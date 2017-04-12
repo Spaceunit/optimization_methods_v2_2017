@@ -94,11 +94,12 @@ class NMM:
     def makedefault(self):
         self.epsilon[0] = 10 ** (-self.accuracy)
         self.epsilon[1] = self.epsilon[0]
-        #self.expression = expression.Expression("Function", "4*(x1-2)**2+(x2-1)**2")
-        self.expression = expression.Expression("Function", "4*(x1-5)**2+(x2-6)**2")
+        self.expression = expression.Expression("Function", "4*(x1-2)**2+(x2-1)**2")
+        #self.expression = expression.Expression("Function", "4*(x1-5)**2+(x2-6)**2")
         self.expression.parameters["unimodal"] = True
         self.expression.parameters["global_min"] = [5.0, 6.0]
-        self.x_start = [[8.0, 9.0], [10.0, 11.0], [8.0, 11.0]]
+        #self.x_start = [[8.0, 9.0], [10.0, 11.0], [8.0, 11.0]]
+        self.x_start = [[5.0, 4.0], [7.0, 6.0], [5.0, 6.0]]
         self.cof = {"a": 1.0, "g": 2.0, "b": 0.5}
         self.result = {"i": [], "xk": [], "fx": [], "action": []}
 
