@@ -53,11 +53,13 @@ class GDM:
                 "image 2": "show 3D visualization"
             }
         }
+        self.hg = matrix.Matrix([[0]], "Hessian matrix")
         self.expression = expression.Expression("No name", "x**2")
         self.accuracy = 3
         self.epsilon = [1, 1]
         self.mm = True
         self.msycle = 3
+        self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "h": 0.001}
         self.result = {"i": [], "xk": [], "fx": [], "action": []}
         self.makedefault()
 
@@ -95,10 +97,10 @@ class GDM:
         self.expression = expression.Expression("Function", "4*(x1-2)**2+(x2-1)**2")
         #self.expression = expression.Expression("Function", "4*(x1-5)**2+(x2-6)**2")
         self.expression.parameters["unimodal"] = True
-        self.expression.parameters["global_min"] = [5.0, 6.0]
+        self.expression.parameters["global_min"] = [2.0, 1.0]
         #self.x_start = [[8.0, 9.0], [10.0, 11.0], [8.0, 11.0]]
-        self.x_start = [[5.0, 4.0], [7.0, 6.0], [5.0, 6.0]]
-        self.cof = {"a": 1.0, "g": 2.0, "b": 0.5}
+        self.x_start = [7.0, 6.0]
+        self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "h": 0.001}
         self.result = {"i": [], "xk": [], "fx": [], "action": []}
 
 
@@ -166,10 +168,23 @@ class GDM:
     def resolve(self):
         self.makedefault()
         k = 0
+        x_w = self.x_start.copy()
+        dfd = (self.get_gradient(x_w))
+
         while self.halting_check() and k <= 600:
+            k += 1
             pass
 
         self.printresult()
+
+    def get_gradient(self, x):
+        result = []
+        df = self.expression.diff_derivative(x, self.cof["h"])
+        i = 0
+        while i < len(x):
+            result.append(df / x[i])
+            i += 1
+        return result
 
     def par_sort(self):
         pass
