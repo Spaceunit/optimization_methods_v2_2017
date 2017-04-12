@@ -54,6 +54,7 @@ class GDM:
             }
         }
         self.hg = matrix.Matrix([[0]], "Hessian matrix")
+        self.hg.makedimatrix(2)
         self.expression = expression.Expression("No name", "x**2")
         self.accuracy = 3
         self.epsilon = [1, 1]
@@ -102,6 +103,8 @@ class GDM:
         self.x_start = [7.0, 6.0]
         self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "h": 0.001}
         self.result = {"i": [], "xk": [], "fx": [], "action": []}
+        self.hg = matrix.Matrix([[0]], "Hessian matrix")
+        self.hg.makedimatrix(2)
 
 
     def importparam(self, accuracy):
@@ -169,7 +172,12 @@ class GDM:
         self.makedefault()
         k = 0
         x_w = self.x_start.copy()
-        dfd = (self.get_gradient(x_w))
+        hg = self.hg
+        gradient = self.get_gradient(x_w)
+        dfd = self.get_dfd(x_w)
+
+
+
 
         while self.halting_check() and k <= 600:
             k += 1
@@ -177,12 +185,33 @@ class GDM:
 
         self.printresult()
 
+    def get_hessian_matrix(self, x_w):
+        hg = matrix.Matrix([[0]], "Hessian matrix")
+        hg.makedimatrix(2)
+        #hg = matrix.copy()
+        i = 0
+        j = 0
+        item = 0.0
+        while i < hg.len[0]:
+            j = 0
+            while j < hg.len[1]:
+                # warning!!! only for x1, x2!!!!
+                item = self.expression.diff2_derivative_pi2_l(x_w, self.cof["h"], i, j)
+                hg.chel(i, j, item)
+
+
+
+    #direction of fatest descent
+    def get_dfd(self, x_w):
+        dfd = self.get_gradient(x_w)
+        dfd = self.mul(dfd, -self.norm(dfd))
+        return dfd
+
     def get_gradient(self, x):
         result = []
-        df = self.expression.diff_derivative(x, self.cof["h"])
         i = 0
         while i < len(x):
-            result.append(df / x[i])
+            result.append(self.expression.diff_derivative_pi2_l(x, self.cof["h"], i))
             i += 1
         return result
 
