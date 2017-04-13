@@ -175,13 +175,16 @@ class GDM:
         hg = self.get_hessian_matrix(x_w)
         gradient = self.get_gradient(x_w)
         dfd = self.get_dfd(x_w)
+        print("Get lambda...")
         clambda = self.get_lambda(x_w)
+        print("Get lambda ok")
         f_x_w = self.expression.execute_l(x_w)
 
         self.collect_data(k,x_w,f_x_w, "Initial point")
 
         while self.halting_check() and k <= 60:
             k += 1
+            print(k)
             dfd = self.mul(dfd, clambda)
             x_w = self.dif(x_w, dfd)
 
@@ -206,11 +209,13 @@ class GDM:
                 # warning!!! only for x1, x2!!!!
                 item = self.expression.diff2_derivative_pi2_l(x_w, self.cof["h"], i, j)
                 hg.chel(i, j, item)
+                j += 1
+            i += 1
 
         return hg
 
     def get_lambda(self, x_w):
-        hg = self.hg
+        hg = self.get_hessian_matrix(x_w)
         #gradient = self.get_gradient(x_w)
         #dfd = self.get_dfd(x_w)
 
@@ -251,7 +256,7 @@ class GDM:
 
     def halting_check(self):
         r = True
-        if True:
+        if not r:
             r = False
             print("Halting check! - True")
         return r

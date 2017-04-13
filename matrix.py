@@ -526,6 +526,7 @@ class Vector:
         summ = 0
         while i < self.len:
             summ += round(self.vector[i] * v.vector[i], accuracy)
+            i += 1
         return summ
 
     def dnumber(self, num, accuracy):
