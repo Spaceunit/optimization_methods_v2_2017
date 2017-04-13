@@ -112,82 +112,82 @@ class Work:
             print("Optimization methods v2 2017")
             print('')
             task = self.enterCommand()
-            if (task == 2):
+            if task == 2:
                 self.dostaff()
-            elif (task == 3):
+            elif task == 3:
                 pass
-            elif (task == 4):
+            elif task == 4:
                 self.showHelp()
             elif (task == 5):
                 self.inputnewdata()
                 pass
-            elif (task == 6):
+            elif task == 6:
                 self.a.showmatrix()
                 pass
-            elif (task == 8):
+            elif task == 8:
                 self.setaccuracy()
                 pass
-            elif (task == 9):
+            elif task == 9:
                 self.makedafault()
-            elif (task == 10):
+            elif task == 10:
                 Task = jap.JAP()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
-            elif (task == 11):
+            elif task == 11:
                 Task = golden_section_search.GSS()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
-            elif (task == 12):
+            elif task == 12:
                 Task = dichotomy_method.DM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
-            elif (task == 13):
+            elif task == 13:
                 Task = newtons_method.NM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
-            elif (task == 14):
+            elif task == 14:
                 Task = sven_method.SM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
-            elif (task == 15):
+            elif task == 15:
                 Task = bisection_method.BSM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
-            elif (task == 16):
+            elif task == 16:
                 Task = dsk_paula_v2.DSKP()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
-            elif (task == 17):
+            elif task == 17:
                 Task = chords_method.CM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
-            elif (task == 18):
+            elif task == 18:
                 Task = bolzano_bisection_method.BBSM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
-            elif (task == 19):
+            elif task == 19:
                 Task = hooke_jeeves_pattern_search.HJPS()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
-            elif (task == 20):
+            elif task == 20:
                 Task = nelder_mead_method.NMM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
-            elif (task == 21):
+            elif task == 21:
                 Task = gradient_descent.GDM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
-            elif (task == 22):
+            elif task == 22:
                 Task = partan_gradient_descent.PGDM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
