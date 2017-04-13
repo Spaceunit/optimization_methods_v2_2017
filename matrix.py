@@ -520,6 +520,14 @@ class Vector:
         for i in range(0, self.len):
             self.vector[i] = round(self.vector[i] * num, accuracy)
 
+    # horizontal vector by vertical vector
+    def hvm(self, v, accuracy):
+        i = 0
+        summ = 0
+        while i < self.len:
+            summ += round(self.vector[i] * v.vector[i], accuracy)
+        return summ
+
     def dnumber(self, num, accuracy):
         for i in range(0, self.len):
             self.vector[i] = round(self.vector[i] / num, accuracy)

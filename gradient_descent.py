@@ -176,9 +176,6 @@ class GDM:
         gradient = self.get_gradient(x_w)
         dfd = self.get_dfd(x_w)
 
-
-
-
         while self.halting_check() and k <= 600:
             k += 1
             pass
@@ -199,12 +196,29 @@ class GDM:
                 item = self.expression.diff2_derivative_pi2_l(x_w, self.cof["h"], i, j)
                 hg.chel(i, j, item)
 
+    def get_lambda(self, x_w):
+        hg = self.hg
+        #gradient = self.get_gradient(x_w)
+        #dfd = self.get_dfd(x_w)
 
+        gradient = matrix.Vector(self.get_gradient(x_w), "Gradient")
+        dfd = matrix.Vector(self.get_dfd(x_w), "DFD")
+
+
+
+        part_up = gradient.hvm(dfd, 20)
+
+        part_down_temp = hg.matrixmv(dfd, 20)
+
+        part_down = part_down_temp
+
+
+        pass
 
     #direction of fatest descent
     def get_dfd(self, x_w):
         dfd = self.get_gradient(x_w)
-        dfd = self.mul(dfd, -self.norm(dfd))
+        dfd = self.mul(dfd, -1.0 / self.norm(dfd))
         return dfd
 
     def get_gradient(self, x):
