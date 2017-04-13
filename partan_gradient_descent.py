@@ -175,6 +175,7 @@ class PGDM:
     def resolve(self):
         self.makedefault()
         k = 0
+        turn = True
         x_w = self.x_start.copy()
         hg = self.get_hessian_matrix(x_w)
         gradient = self.get_gradient(x_w)
@@ -186,24 +187,43 @@ class PGDM:
 
         self.collect_data(k,x_w,f_x_w, "Initial point")
 
-        while self.halting_check() and k < 2 and self.norm(dfd) > 0.1:
+        # find first point after start
+        k += 1
+        print(k)
+        dfd = self.mul(dfd, clambda)
+        x_w = self.dif(x_w, dfd)
+
+        dfd = self.get_dfd(x_w)
+        clambda = self.get_lambda(x_w)
+        f_x_w = self.expression.execute_l(x_w)
+
+        self.collect_data(k, x_w, f_x_w, "GDM: next point")
+
+        while self.halting_check() and k < 60 and self.norm(dfd) > 0.1:
             k += 1
-            print(k)
-            dfd = self.mul(dfd, clambda)
-            x_w = self.dif(x_w, dfd)
+            if turn:
+                print(k)
+                dfd = self.mul(dfd, clambda)
+                x_w = self.dif(x_w, dfd)
 
-            dfd = self.get_dfd(x_w)
-            clambda = self.get_lambda(x_w)
-            f_x_w = self.expression.execute_l(x_w)
+                dfd = self.get_dfd(x_w)
+                clambda = self.get_lambda(x_w)
+                f_x_w = self.expression.execute_l(x_w)
 
-            self.collect_data(k, x_w, f_x_w, "GDM: next point")
-            pass
+                self.collect_data(k, x_w, f_x_w, "GDM: next point")
+                turn = False
+            else:
+                print(k)
+                dfd = self.dif(x_w, self.result["xk"][-2])
 
-        while self.halting_check() and k < 2 and self.norm(dfd) > 0.1:
-            k += 1
-            dfd = self.dif(x_w, self.result["xk"][0])
-            self.collect_data(k, x_w, f_x_w, "PGDM: next point")
-            pass
+                dfd = self.mul(dfd, clambda)
+                x_w = self.sum(x_w, dfd)
+                clambda = self.get_lambda(x_w)
+                f_x_w = self.expression.execute_l(x_w)
+
+                self.collect_data(k, x_w, f_x_w, "PGDM: next point")
+                dfd = self.get_dfd(x_w)
+                turn = True
 
         self.printresult()
 
