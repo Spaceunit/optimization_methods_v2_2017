@@ -52,10 +52,18 @@ class Expression:
         pass
 
     def execute(self, x):
-        return eval(self.expression)
+        try:
+            result = eval(self.expression)
+        except ZeroDivisionError:
+            result = eval(self.parameters["ZDE_expression"])
+        return result
 
     def execute_d(self, x):
-        return eval(self.expression, x)
+        try:
+            result = eval(self.expression, x)
+        except ZeroDivisionError:
+            result = eval(self.parameters["ZDE_expression"], x)
+        return result
 
     def execute_l(self, x):
         x_dict = {}
