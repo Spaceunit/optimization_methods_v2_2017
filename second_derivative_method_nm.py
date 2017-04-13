@@ -1,4 +1,4 @@
-# Gradient descent
+# Second derivative method: Newton`s method
 import math
 import matrix
 import excel_transfer
@@ -17,7 +17,7 @@ import matplotlib.patches as patches
 from resource import expression
 
 
-class PGDM:
+class SDMNM:
     def __init__(self):
         self.commands = {
             "commands": {

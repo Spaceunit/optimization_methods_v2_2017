@@ -20,6 +20,7 @@ import hooke_jeeves_pattern_search
 import nelder_mead_method
 import gradient_descent
 import partan_gradient_descent
+import second_derivative_method_nm
 
 
 class Work:
@@ -189,6 +190,11 @@ class Work:
                 Task.dostaff()
                 pass
             elif task == 22:
+                Task = partan_gradient_descent.PGDM()
+                Task.importparam(self.accuracy)
+                Task.dostaff()
+                pass
+            elif task == 23:
                 Task = partan_gradient_descent.PGDM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
