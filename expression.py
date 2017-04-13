@@ -64,21 +64,33 @@ class Expression:
         return self.execute_d(x_dict)
 
     def diff_derivative(self, x, h):
-        return 0.5 * (self.execute(x + h) - self.execute(x - h)) / h
+        try:
+            result = 0.5 * (self.execute(x + h) - self.execute(x - h)) / h
+        except ZeroDivisionError:
+            result = 0.5 * (self.execute(x + h) - self.execute(x - h)) / float('Inf')
+        return result
 
     def diff_derivative_pi2_l(self, x, h, j):
         x_p = [x[0], x[1]]
         x_m = [x[0], x[1]]
         x_p[j] += h
         x_m[j] -= h
-        return 0.5 * (self.execute_l(x_p) - self.execute_l(x_m)) / h
+        try:
+            result = 0.5 * (self.execute_l(x_p) - self.execute_l(x_m)) / h
+        except ZeroDivisionError:
+            result = 0.5 * (self.execute_l(x_p) - self.execute_l(x_m)) / float('Inf')
+        return result
 
     def diff2_derivative_pi2_l(self, x, h, i, j):
         x_p = [x[0], x[1]]
         x_m = [x[0], x[1]]
         x_p[i] += h
         x_m[i] -= h
-        return 0.5 * (self.diff_derivative_pi2_l(x_p, h, j) - self.diff_derivative_pi2_l(x_m, h, j)) / h
+        try:
+            result = 0.5 * (self.diff_derivative_pi2_l(x_p, h, j) - self.diff_derivative_pi2_l(x_m, h, j)) / h
+        except ZeroDivisionError:
+            result = 0.5 * (self.diff_derivative_pi2_l(x_p, h, j) - self.diff_derivative_pi2_l(x_m, h, j)) / float('Inf')
+        return result
 
     def rename(self, name):
         self.name = name
