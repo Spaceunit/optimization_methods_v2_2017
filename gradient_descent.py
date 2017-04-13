@@ -136,7 +136,7 @@ class GDM:
         task = 0
         while (task != 1):
             print('')
-            print("Gradient descent")
+            print("Gradient descent method")
             print('')
             task = self.enterCommand()
             if task == 2:

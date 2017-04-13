@@ -18,7 +18,7 @@ import chords_method
 import bolzano_bisection_method
 import hooke_jeeves_pattern_search
 import nelder_mead_method
-
+import gradient_descent
 
 class Work:
     def __init__(self):
@@ -45,7 +45,8 @@ class Work:
                 "cm": 17,
                 "bbsm": 18,
                 "hjps": 19,
-                "nmm": 20
+                "nmm": 20,
+                "gdm": 21
             },
             "description": {
                 "none": "do nothing",
@@ -68,7 +69,8 @@ class Work:
                 "cm": "Chords method",
                 "bbsm": "Bolzano-bisection method",
                 "hjps": "Hooke-Jeeves pattern search method",
-                "nmm": "Nelder–Mead method"
+                "nmm": "Nelder–Mead method",
+                "gdm": "Gradient descent method"
             }
         }
         pass
