@@ -21,6 +21,7 @@ import nelder_mead_method
 import gradient_descent
 import partan_gradient_descent
 
+
 class Work:
     def __init__(self):
         self.accuracy = 3
@@ -82,9 +83,9 @@ class Work:
         command = "0"
         print('')
         print("Enter command (help for Q&A)")
-        while (command not in self.commands["commands"]):
+        while command not in self.commands["commands"]:
             command = input("->")
-            if (command not in self.commands["commands"]):
+            if command not in self.commands["commands"]:
                 print("There is no such command")
             else:
                 return self.commands["commands"][command]
@@ -118,7 +119,7 @@ class Work:
                 pass
             elif task == 4:
                 self.showHelp()
-            elif (task == 5):
+            elif task == 5:
                 self.inputnewdata()
                 pass
             elif task == 6:
@@ -198,14 +199,14 @@ class Work:
     def inputnewdata(self):
         task = 0
         self.a = matrix.Matrix([], "Initial matrix")
-        while (task != 1):
+        while task != 1:
             print('')
             print("Enter matrix dimension:")
-            while (task != 1):
+            while task != 1:
                 num = int(input("-> "))
                 print("Input is correct? (enter - yes/n - no)")
                 command = input("-> ")
-                if (command != "n"):
+                if command != "n":
                     self.a = self.inputmatrix(num)
                     task = 1
             task = 0
@@ -213,7 +214,7 @@ class Work:
             self.a.showmatrix()
             print("Matrix is correct? (enter - yes/n - no)")
             command = input("-> ")
-            if (command != "n"):
+            if command != "n":
                 task = 1
 
     def inputmatrix(self, num):
@@ -221,17 +222,17 @@ class Work:
         i = 0
         task = 0
         nm = matrix.Matrix([], "new matrix")
-        while (i < num):
+        while i < num:
             print("Enter matrix row (use spaces)")
             print("Row ", i + 1)
-            while (task != 1):
+            while task != 1:
                 row = list(map(float, input("-> ").split()))
                 print("Input is correct? (enter - yes/n - no)")
                 command = input("-> ")
-                if (command != "n" and len(row) == num):
+                if command != "n" and len(row) == num:
                     task = 1
                     nm.appendnrow(row)
-                elif (len(row) != num):
+                elif len(row) != num:
                     print('')
                     print("Incorrect input: count of items.")
             task = 0
@@ -242,11 +243,11 @@ class Work:
         task = 0
         print('')
         print("Enter accuracy:")
-        while (task != 1):
+        while task != 1:
             self.accuracy = int(input("-> "))
             print("Input is correct? (enter - yes/n - no)")
             command = input("-> ")
-            if (command != "n"):
+            if command != "n":
                 task = 1
         pass
 
