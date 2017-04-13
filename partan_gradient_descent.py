@@ -1,3 +1,4 @@
+# Gradient descent
 import math
 import matrix
 import excel_transfer
@@ -16,7 +17,7 @@ import matplotlib.patches as patches
 from resource import expression
 
 
-class HJPS:
+class PGDM:
     def __init__(self):
         self.commands = {
             "commands": {
@@ -52,10 +53,15 @@ class HJPS:
                 "image 2": "show 3D visualization"
             }
         }
+        self.hg = matrix.Matrix([[0]], "Hessian matrix")
+        self.hg.makedimatrix(2)
         self.expression = expression.Expression("No name", "x**2")
         self.accuracy = 3
         self.epsilon = [1, 1]
         self.mm = True
+        self.msycle = 3
+        self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "h": 0.001}
+        self.result = {"i": [], "xk": [], "fx": [], "action": []}
         self.makedefault()
 
 
@@ -87,19 +93,23 @@ class HJPS:
         self.showCommands()
 
     def makedefault(self):
-        #a = 3 b = 1
         self.epsilon[0] = 10 ** (-self.accuracy)
         self.epsilon[1] = self.epsilon[0]
-        #self.expression = expression.Expression("Function", "(x1-2)**2+1*x2**2")
-        self.expression = expression.Expression("Function", "(x1-3)**2+1*x2**2")
+        #self.expression = expression.Expression("Function", "4*(x1-2)**2+(x2-1)**2")
+        #self.expression = expression.Expression("Function", "4*(x1-5)**2+(x2-6)**2")
+
+        self.expression = expression.Expression("Function", "3*x1**2+2*x1*x2+2*x2**2")
+
         self.expression.parameters["unimodal"] = True
-        #self.x_start = [4.0, 6.0]
-        self.x_start = [6.0, 9.0]
-        self.x_delta = [0.6, 0.8]
-        self.result = {"i": [], "xk": [], "x_delta": [], "fx": [], "action": []}
-        self.cross = []
-        self.h = self.epsilon
-        self.mm = True
+        self.expression.parameters["global_min"] = [2.0, 1.0]
+        #self.x_start = [[8.0, 9.0], [10.0, 11.0], [8.0, 11.0]]
+        #self.x_start = [7.0, 6.0]
+        self.x_start = [6.0, 4.0]
+        self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "h": 0.001}
+        self.result = {"i": [], "xk": [], "fx": [], "action": []}
+        self.hg = matrix.Matrix([[0]], "Hessian matrix")
+        self.hg.makedimatrix(2)
+
 
     def importparam(self, accuracy):
         self.accuracy = accuracy
@@ -130,7 +140,7 @@ class HJPS:
         task = 0
         while (task != 1):
             print('')
-            print("Hooke-Jeeves pattern search method")
+            print("Partan gradient descent method")
             print('')
             task = self.enterCommand()
             if task == 2:
@@ -164,87 +174,110 @@ class HJPS:
 
     def resolve(self):
         self.makedefault()
-        i = 0
-        self.result["i"].append(i)
-        self.result["xk"].append(self.x_start)
-        self.result["x_delta"].append(self.x_delta)
-        xk = self.result["xk"]
-        fxk = self.result["fx"]
-        dx = self.result["x_delta"]
-        action = self.result["action"]
-        action.append("Initial point")
-        fxk.append(self.expression.execute_l(self.x_start))
+        k = 0
+        x_w = self.x_start.copy()
+        hg = self.get_hessian_matrix(x_w)
+        gradient = self.get_gradient(x_w)
+        dfd = self.get_dfd(x_w)
+        print("Get lambda...")
+        clambda = self.get_lambda(x_w)
+        print("Get lambda ok")
+        f_x_w = self.expression.execute_l(x_w)
 
-        finest_point = self.find_finest_point(self.expression, xk[0], self.x_delta, self.mm)
-        xw = [None, None]
-        f_xw = None
-        if finest_point != False:
-            i += 1
-            #xw = xk[-1].copy()
-            self.collect_data(i, finest_point, self.x_delta, self.expression.execute_l(finest_point), "make next point")
-            while self.halting_check(xk, self.expression, self.epsilon) and self.norm(self.x_delta) > self.epsilon[0]:
-            #while self.norm(self.x_delta) > self.epsilon[0]:
-                xw = self.dif(self.mul(xk[-1], self.get_betta()), xk[-2])
-                temp = self.find_finest_point(self.expression, xw, self.x_delta, self.mm)
-                if temp != False:
-                    xw = temp
-                    f_xw = self.expression.execute_l(xw)
-                    if f_xw < self.expression.execute_l(xk[-2]):
-                        self.collect_data(i, xw, self.x_delta, f_xw, "make next point (NBP)")
-                    else:
-                        self.x_delta = self.mul(self.x_delta, self.get_alpha())
-                        self.collect_data(i, xw, self.x_delta, f_xw, "decrease x-delta, go to PBP")
-                else:
-                    self.x_delta = self.mul(self.x_delta, self.get_alpha())
-                    self.collect_data(i, xw, self.x_delta, f_xw, "decrease x-delta for x-work")
-                i += 1
+        self.collect_data(k,x_w,f_x_w, "Initial point")
+
+        while self.halting_check() and k < 2 and self.norm(dfd) > 0.1:
+            k += 1
+            print(k)
+            dfd = self.mul(dfd, clambda)
+            x_w = self.dif(x_w, dfd)
+
+            dfd = self.get_dfd(x_w)
+            clambda = self.get_lambda(x_w)
+            f_x_w = self.expression.execute_l(x_w)
+
+            self.collect_data(k, x_w, f_x_w, "GDM: next point")
+            pass
+
+        while self.halting_check() and k < 2 and self.norm(dfd) > 0.1:
+            k += 1
+            dfd = self.dif(x_w, self.result["xk"][0])
+            self.collect_data(k, x_w, f_x_w, "PGDM: next point")
+            pass
+
         self.printresult()
 
-    @staticmethod
-    def halting_check(harr, ex, eps):
-        r = True
-        if HJPS.norm(HJPS.dif(harr[-2], harr[-1])) / HJPS.norm(harr[-2]) <= eps[0] and math.fabs((ex.execute_l(harr[-2]) - ex.execute_l(harr[-1])) / ex.execute_l(harr[-2])) <= eps[1]:
-            r = False
-            print("Halting check! - True")
-        return r
+    def get_hessian_matrix(self, x_w):
+        hg = matrix.Matrix([[0]], "Hessian matrix")
+        hg.makedimatrix(2)
+        #hg = matrix.copy()
+        i = 0
+        item = 0.0
+        while i < hg.len[0]:
+            j = 0
+            while j < hg.len[1]:
+                # warning!!! only for x1, x2!!!!
+                item = self.expression.diff2_derivative_pi2_l(x_w, self.cof["h"], i, j)
+                hg.chel(i, j, item)
+                j += 1
+            i += 1
 
-    @staticmethod
-    def find_finest_point(ex, x, dx, mm):
-        result = False
-        cross = [
-            HJPS.sum_part(x, dx, 0),
-            HJPS.sum_part(x, dx, 1),
-            HJPS.dif_part(x, dx, 0),
-            HJPS.dif_part(x, dx, 1),
-            HJPS.sum(x, dx),
-            HJPS.dif(x, dx),
-            [x[0] + dx[0], x[1] - dx[1]],
-            [x[0] - dx[0], x[1] + dx[1]]
-        ]
+        return hg
 
-        f = []
-        for i in range(len(cross)):
-            f.append(ex.execute_l(cross[i]))
-        if mm:
-            result = min(f)
-            if not result < ex.execute_l(x):
-                result = False
-            else:
-                result = cross[f.index(result)]
-        else:
-            result = max(f)
-            if not result > ex.execute_l(x):
-                result = False
-            else:
-                result = cross[f.index(result)]
+    def get_lambda(self, x_w):
+        hg = self.get_hessian_matrix(x_w)
+        #gradient = self.get_gradient(x_w)
+        #dfd = self.get_dfd(x_w)
+
+        gradient = matrix.Vector(self.get_gradient(x_w), "Gradient")
+        dfd = matrix.Vector(self.get_dfd(x_w), "DFD")
+
+        part_up = gradient.hvm(dfd, 20)
+        part_down_temp = hg.matrixmv(dfd, 20)
+        part_down = dfd.hvm(part_down_temp, 20)
+
+        try:
+            result = part_up / part_down
+        except ZeroDivisionError:
+            result = float('Inf')
 
         return result
 
-    def get_alpha(self):
-        return 0.5
+    #direction of fatest descent
+    def get_dfd(self, x_w):
+        dfd = self.get_gradient(x_w)
+        try:
+            dfd = self.mul(dfd, -1.0 / self.norm(dfd))
+        except ZeroDivisionError:
+            dfd = self.mul(dfd, -1.0 / float('Inf'))
+        return dfd
 
-    def get_betta(self):
-        return 2.0
+    def get_gradient(self, x):
+        result = []
+        i = 0
+        while i < len(x):
+            result.append(self.expression.diff_derivative_pi2_l(x, self.cof["h"], i))
+            i += 1
+        return result
+
+    def par_sort(self):
+        pass
+
+    @staticmethod
+    def compare(x1, x2):
+        ansver = False
+        for i in range(len(x1)):
+            for j in range(len(x1[0])):
+                if x1[i][j] in x2:
+                    ansver = True
+        return ansver
+
+    def halting_check(self):
+        r = True
+        if not r:
+            r = False
+            print("Halting check! - True")
+        return r
 
     @staticmethod
     def norm(v):
@@ -277,37 +310,16 @@ class HJPS:
             r[i] *= c
         return r
 
-    def collect_data(self, i, x, dx, fx, action):
+    def collect_data(self, i, x, fx, action):
         self.result["i"].append(i)
-        self.result["xk"].append(x)
+        self.result["xk"].append(x.copy())
         self.result["fx"].append(fx)
-        self.result["x_delta"].append(dx)
         self.result["action"].append(action)
-
-    def printresult_g0(self):
-        verts = []
-        for i in range(len(self.result["xk"])):
-            if not ("decrease x-delta" in self.result["action"][i]):
-                verts.append((self.result["xk"][i][0], self.result["xk"][i][1]))
-        print("Points count:", len(verts))
-        path = Path(verts)
-
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        patch = patches.PathPatch(path, facecolor='none', lw=2)
-        ax.add_patch(patch)
-
-        xs, ys = zip(*verts)
-        ax.plot(xs, ys, 'x--', lw=2, color='black', ms=10)
-
-        plt.show()
 
     def printresult_g(self):
         verts = []
         for i in range(len(self.result["xk"])):
-        #    if not ("decrease x-delta" in self.result["action"][i]):
             verts.append((self.result["xk"][i][0], self.result["xk"][i][1]))
-        print("Points count:", len(verts))
         path = Path(verts)
 
         fig = plt.figure()
@@ -321,47 +333,7 @@ class HJPS:
         plt.show()
 
     def printresult_3d(self):
-        verts = [[], [], []]
-        for i in range(len(self.result["xk"])):
-            if not ("decrease x-delta" in self.result["action"][i]):
-                verts[0].append(self.result["xk"][i][0])
-                verts[1].append(self.result["xk"][i][1])
-                verts[2].append(self.result["fx"][i])
-        print("Points count:", len(verts[0]))
-
-
-        fig = plt.figure()
-        ax = fig.gca(projection='3d')
-
-        # Make data.
-        X = np.arange(-5, 5, 0.25)
-
-        Y = np.arange(-5, 5, 0.25)
-
-        X, Y = np.meshgrid(X, Y)
-        #R = np.sqrt(X ** 2 + Y ** 2)
-        Z = np.array([self.expression.execute_l([X[i], Y[i]]) for i in range(len(X))])
-
-        # Plot the surface.
-        surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm,
-                               linewidth=0, antialiased=False)
-
-        #X = np.array(verts[0])
-        #Y = np.array(verts[1])
-        #Z = np.array([self.expression.execute_l([verts[0][i], verts[1][i]]) for i in range(len(verts[2]))])
-
-        #surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm,
-        #                       linewidth=0, antialiased=False)
-
-        # Customize the z axis.
-        ax.set_zlim(-1.01, 1.01)
-        ax.zaxis.set_major_locator(LinearLocator(10))
-        ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
-
-        # Add a color bar which maps values to colors.
-        fig.colorbar(surf, shrink=0.5, aspect=5)
-
-        plt.show()
+        pass
 
     def printresult(self):
         print('')
@@ -371,7 +343,6 @@ class HJPS:
             print("itteration:", self.result["i"][i])
             print("x:", self.result["xk"][i])
             print("f(x):", self.result["fx"][i])
-            print("x-delta:", self.result["x_delta"][i])
             print("action:", self.result["action"][i])
             print("----------------------------------------")
         pass

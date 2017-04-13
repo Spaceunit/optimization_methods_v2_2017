@@ -19,6 +19,7 @@ import bolzano_bisection_method
 import hooke_jeeves_pattern_search
 import nelder_mead_method
 import gradient_descent
+import partan_gradient_descent
 
 class Work:
     def __init__(self):
@@ -46,7 +47,8 @@ class Work:
                 "bbsm": 18,
                 "hjps": 19,
                 "nmm": 20,
-                "gdm": 21
+                "gdm": 21,
+                "pgdm": 22
             },
             "description": {
                 "none": "do nothing",
@@ -70,7 +72,8 @@ class Work:
                 "bbsm": "Bolzano-bisection method",
                 "hjps": "Hooke-Jeeves pattern search method",
                 "nmm": "Nelder–Mead method",
-                "gdm": "Gradient descent method"
+                "gdm": "Gradient descent method",
+                "pgdm": "Partan gradient descent method"
             }
         }
         pass
@@ -181,6 +184,11 @@ class Work:
                 pass
             elif (task == 21):
                 Task = gradient_descent.GDM()
+                Task.importparam(self.accuracy)
+                Task.dostaff()
+                pass
+            elif (task == 22):
+                Task = partan_gradient_descent.PGDM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
