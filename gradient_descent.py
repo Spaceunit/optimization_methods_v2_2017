@@ -1,4 +1,4 @@
-#Gradient descent
+# Gradient descent
 import math
 import matrix
 import excel_transfer
