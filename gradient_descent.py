@@ -172,12 +172,24 @@ class GDM:
         self.makedefault()
         k = 0
         x_w = self.x_start.copy()
-        hg = self.hg
+        hg = self.get_hessian_matrix(x_w)
         gradient = self.get_gradient(x_w)
         dfd = self.get_dfd(x_w)
+        clambda = self.get_lambda(x_w)
+        f_x_w = self.expression.execute_l(x_w)
 
-        while self.halting_check() and k <= 600:
+        self.collect_data(k,x_w,f_x_w, "Initial point")
+
+        while self.halting_check() and k <= 60:
             k += 1
+            dfd = self.mul(dfd, clambda)
+            x_w = self.dif(x_w, dfd)
+
+            dfd = self.get_dfd(x_w)
+            clambda = self.get_lambda(x_w)
+            f_x_w = self.expression.execute_l(x_w)
+
+            self.collect_data(k, x_w, f_x_w, "Next point")
             pass
 
         self.printresult()
@@ -187,7 +199,6 @@ class GDM:
         hg.makedimatrix(2)
         #hg = matrix.copy()
         i = 0
-        j = 0
         item = 0.0
         while i < hg.len[0]:
             j = 0
@@ -195,6 +206,8 @@ class GDM:
                 # warning!!! only for x1, x2!!!!
                 item = self.expression.diff2_derivative_pi2_l(x_w, self.cof["h"], i, j)
                 hg.chel(i, j, item)
+
+        return hg
 
     def get_lambda(self, x_w):
         hg = self.hg
@@ -204,16 +217,11 @@ class GDM:
         gradient = matrix.Vector(self.get_gradient(x_w), "Gradient")
         dfd = matrix.Vector(self.get_dfd(x_w), "DFD")
 
-
-
         part_up = gradient.hvm(dfd, 20)
-
         part_down_temp = hg.matrixmv(dfd, 20)
+        part_down = dfd.hvm(part_down_temp, 20)
 
-        part_down = part_down_temp
-
-
-        pass
+        return part_up / part_down
 
     #direction of fatest descent
     def get_dfd(self, x_w):
