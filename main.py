@@ -179,6 +179,11 @@ class Work:
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
+            elif (task == 21):
+                Task = gradient_descent.GDM()
+                Task.importparam(self.accuracy)
+                Task.dostaff()
+                pass
         pass
 
 
