@@ -401,6 +401,28 @@ class Matrix:
         minor = self.getel(c[0], c[0]) * self.getel(c[1], c[1]) - (self.getel(c[0], c[1]) * self.getel(c[1], c[0]))
         return minor
 
+    def inverse_dim_2(self):
+        inverse_matrix = self.copy()
+        inverse_matrix.rename(self.name + " inverted")
+
+        minor_matrix = [[self.matrix[1][1], self.matrix[1][0]], [self.matrix[0][1], self.matrix[0][0]]]
+
+        al_matrix = [[minor_matrix[0][0], -minor_matrix[0][1]],[-minor_matrix[1][0], minor_matrix[1][1]]]
+
+        inverse_matrix.matrix = al_matrix
+        inverse_matrix.transpose()
+
+        det_a = al_matrix[0][0] * al_matrix[1][1] - al_matrix[0][1] * al_matrix[1][0]
+
+        for item in al_matrix:
+            for el in item:
+                try:
+                    el /= det_a
+                except ZeroDivisionError:
+                    el /= float('Inf')
+        return inverse_matrix
+
+
 class Vector:
     def __init__(self, vector, name):
         self.name = name
