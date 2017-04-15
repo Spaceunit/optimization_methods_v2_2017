@@ -179,7 +179,6 @@ class SDMNM:
         x_w = self.x_start.copy()
         hg = self.get_hessian_matrix(x_w)
         gradient = self.get_gradient(x_w)
-        dfd = self.get_dfd(x_w)
         print("Get lambda...")
         clambda = self.get_lambda(x_w)
         print("Get lambda ok")
@@ -187,43 +186,9 @@ class SDMNM:
 
         self.collect_data(k,x_w,f_x_w, "Initial point")
 
-        # find first point after start
-        k += 1
-        print(k)
-        dfd = self.mul(dfd, clambda)
-        x_w = self.dif(x_w, dfd)
-
-        dfd = self.get_dfd(x_w)
-        clambda = self.get_lambda(x_w)
-        f_x_w = self.expression.execute_l(x_w)
-
-        self.collect_data(k, x_w, f_x_w, "GDM: next point")
-
         while self.halting_check() and k < 60 and self.norm(dfd) > 0.1:
             k += 1
-            if turn:
-                print(k)
-                dfd = self.mul(dfd, clambda)
-                x_w = self.dif(x_w, dfd)
 
-                dfd = self.get_dfd(x_w)
-                clambda = self.get_lambda(x_w)
-                f_x_w = self.expression.execute_l(x_w)
-
-                self.collect_data(k, x_w, f_x_w, "GDM: next point")
-                turn = False
-            else:
-                print(k)
-                dfd = self.dif(x_w, self.result["xk"][-2])
-
-                dfd = self.mul(dfd, clambda)
-                x_w = self.sum(x_w, dfd)
-                clambda = self.get_lambda(x_w)
-                f_x_w = self.expression.execute_l(x_w)
-
-                self.collect_data(k, x_w, f_x_w, "PGDM: next point")
-                dfd = self.get_dfd(x_w)
-                turn = True
 
         self.printresult()
 

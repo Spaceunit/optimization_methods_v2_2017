@@ -422,6 +422,16 @@ class Matrix:
                     el /= float('Inf')
         return inverse_matrix
 
+    def get_characteristic_polynomial_dim_2(self):
+        #x**2 - TR(A)*t + DET(A) = 0
+        result = [0.0, 0.0]
+        trace = self.matrix[0][0] + self.matrix[1][1]
+        det_a = self.matrix[0][0] * self.matrix[1][1] - self.matrix[0][1] * self.matrix[1][0]
+        d = math.sqrt(math.pow(trace, 2.0) - 4.0 * float(det_a))
+        result[0] = 0.5 * (trace + d)
+        result[1] = 0.5 * (trace - d)
+        return result
+
 
 class Vector:
     def __init__(self, vector, name):
