@@ -184,11 +184,22 @@ class SDMNM:
         print("Get lambda ok")
         f_x_w = self.expression.execute_l(x_w)
 
-        self.collect_data(k,x_w,f_x_w, "Initial point")
+        self.collect_data(k, x_w, f_x_w, "Initial point")
 
-        while self.halting_check() and k < 60 and self.norm(dfd) > 0.1:
+        while self.halting_check() and k < 60 and self.norm(gradient) > 0.1:
             k += 1
+            hg_i = hg.inverse_dim_2()
+            v = hg_i.matrixmv(gradient, 20)
+            x = v.vector
+            x = self.mul(x, clambda)
 
+            x_w = self.dif(x_w, x)
+            hg = self.get_hessian_matrix(x_w)
+            gradient = self.get_gradient(x_w)
+            clambda = self.get_lambda(x_w)
+            f_x_w = self.expression.execute_l(x_w)
+
+            self.collect_data(k, x_w, f_x_w, "Next point")
 
         self.printresult()
 
