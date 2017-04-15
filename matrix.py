@@ -412,14 +412,34 @@ class Matrix:
         inverse_matrix.matrix = al_matrix
         inverse_matrix.transpose()
 
-        det_a = al_matrix[0][0] * al_matrix[1][1] - al_matrix[0][1] * al_matrix[1][0]
+        det_a = self.matrix[0][0] * self.matrix[1][1] - self.matrix[0][1] * self.matrix[1][0]
 
-        for item in al_matrix:
-            for el in item:
+        print(det_a)
+
+        #for item in al_matrix:
+        #    for el in item:
+        #        try:
+        #            print("Before ", el)
+        #            el /= det_a
+        #            print("After ", el)
+        #        except ZeroDivisionError:
+        #            el /= float('Inf')
+
+        i = 0
+        j = 0
+        while i < len(al_matrix):
+            j = 0
+            while j < len(al_matrix):
                 try:
-                    el /= det_a
+                    #print("Before ", al_matrix[i][j])
+                    al_matrix[i][j] /= det_a
+                    #print("After ", al_matrix[i][j])
                 except ZeroDivisionError:
-                    el /= float('Inf')
+                    al_matrix[i][j] /= float('Inf')
+                j += 1
+            i += 1
+        #print("Result ", al_matrix)
+        inverse_matrix.matrix = al_matrix
         return inverse_matrix
 
     def get_characteristic_polynomial_dim_2(self):

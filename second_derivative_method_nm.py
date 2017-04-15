@@ -98,7 +98,9 @@ class SDMNM:
         #self.expression = expression.Expression("Function", "4*(x1-2)**2+(x2-1)**2")
         #self.expression = expression.Expression("Function", "4*(x1-5)**2+(x2-6)**2")
 
-        self.expression = expression.Expression("Function", "3*x1**2+2*x1*x2+2*x2**2")
+        #self.expression = expression.Expression("Function", "3*x1**2+2*x1*x2+2*x2**2")
+
+        self.expression = expression.Expression("Function", "2*x1**2+2*x1*x2+3*x2**2")
 
         self.expression.parameters["unimodal"] = True
         self.expression.parameters["global_min"] = [2.0, 1.0]
@@ -175,10 +177,14 @@ class SDMNM:
     def resolve(self):
         self.makedefault()
         k = 0
+        gradient_v = matrix.Vector([], "Gradient")
         turn = True
         x_w = self.x_start.copy()
         hg = self.get_hessian_matrix(x_w)
         gradient = self.get_gradient(x_w)
+        print(gradient)
+        gradient_v = matrix.Vector(gradient, "Gradient")
+        gradient_v.showvector()
         print("Get lambda...")
         clambda = self.get_lambda(x_w)
         print("Get lambda ok")
@@ -186,16 +192,24 @@ class SDMNM:
 
         self.collect_data(k, x_w, f_x_w, "Initial point")
 
-        while self.halting_check() and k < 60 and self.norm(gradient) > 0.1:
+        while self.halting_check() and k < 60 and self.norm(gradient_v.vector) > 0.01:
             k += 1
             hg_i = hg.inverse_dim_2()
-            v = hg_i.matrixmv(gradient, 20)
+            hg.showmatrix()
+            hg_i.showmatrix()
+            v = hg_i.matrixmv(gradient_v, 20)
             x = v.vector
-            x = self.mul(x, clambda)
+            try:
+                x = self.mul(x, clambda / self.norm(x))
+            except ZeroDivisionError:
+                x = self.mul(x, clambda / float('Inf'))
 
-            x_w = self.dif(x_w, x)
+            print("-lambda*H^(-1)*gradient=", x)
+            print("prew x", x_w)
+
+            x_w = self.sum(x_w, x)
             hg = self.get_hessian_matrix(x_w)
-            gradient = self.get_gradient(x_w)
+            gradient_v.vector = self.get_gradient(x_w)
             clambda = self.get_lambda(x_w)
             f_x_w = self.expression.execute_l(x_w)
 
@@ -235,7 +249,7 @@ class SDMNM:
         try:
             result = part_up / part_down
         except ZeroDivisionError:
-            result = float('Inf')
+            result = part_up / float('Inf')
 
         return result
 

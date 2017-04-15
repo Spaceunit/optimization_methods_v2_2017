@@ -50,7 +50,8 @@ class Work:
                 "hjps": 19,
                 "nmm": 20,
                 "gdm": 21,
-                "pgdm": 22
+                "pgdm": 22,
+                "sdmnm": 23
             },
             "description": {
                 "none": "do nothing",
@@ -75,7 +76,8 @@ class Work:
                 "hjps": "Hooke-Jeeves pattern search method",
                 "nmm": "Nelder–Mead method",
                 "gdm": "Gradient descent method",
-                "pgdm": "Partan gradient descent method"
+                "pgdm": "Partan gradient descent method",
+                "sdmnm": "Second derivative method: Newton`s method"
             }
         }
         pass
@@ -195,7 +197,7 @@ class Work:
                 Task.dostaff()
                 pass
             elif task == 23:
-                Task = partan_gradient_descent.PGDM()
+                Task = second_derivative_method_nm.SDMNM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
