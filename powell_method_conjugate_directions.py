@@ -177,10 +177,12 @@ class PMCD:
         k = 0
         x_w = [0.0, 0.0]
         f_x_w = 0.0
-        self.collect_data(k, x_w, f_x_w, "GDM: next point")
+        self.collect_data(k, x_w, f_x_w, "Initial point")
+
 
         while self.halting_check() and k < 60 and self.norm(x_w) > 0.1:
             k += 1
+
 
         self.printresult()
 
