@@ -184,6 +184,59 @@ class PMCD:
 
         self.printresult()
 
+    def get_hessian_matrix(self, x_w):
+        hg = matrix.Matrix([[0]], "Hessian matrix")
+        hg.makedimatrix(2)
+        #hg = matrix.copy()
+        i = 0
+        item = 0.0
+        while i < hg.len[0]:
+            j = 0
+            while j < hg.len[1]:
+                # warning!!! only for x1, x2!!!!
+                item = self.expression.diff2_derivative_pi2_l(x_w, self.cof["h"], i, j)
+                hg.chel(i, j, item)
+                j += 1
+            i += 1
+
+        return hg
+
+    def get_lambda(self, x_w):
+        hg = self.get_hessian_matrix(x_w)
+        #gradient = self.get_gradient(x_w)
+        #dfd = self.get_dfd(x_w)
+
+        gradient = matrix.Vector(self.get_gradient(x_w), "Gradient")
+        dfd = matrix.Vector(self.get_dfd(x_w), "DFD")
+
+        part_up = gradient.hvm(dfd, 20)
+        part_down_temp = hg.matrixmv(dfd, 20)
+        part_down = dfd.hvm(part_down_temp, 20)
+
+        try:
+            result = part_up / part_down
+        except ZeroDivisionError:
+            result = float('Inf')
+
+        return result
+
+    #direction of fatest descent
+    def get_dfd(self, x_w):
+        dfd = self.get_gradient(x_w)
+        try:
+            dfd = self.mul(dfd, -1.0 / self.norm(dfd))
+        except ZeroDivisionError:
+            dfd = self.mul(dfd, -1.0 / float('Inf'))
+        return dfd
+
+    def get_gradient(self, x):
+        result = []
+        i = 0
+        while i < len(x):
+            result.append(self.expression.diff_derivative_pi2_l(x, self.cof["h"], i))
+            i += 1
+        return result
+
     def par_sort(self):
         pass
 
