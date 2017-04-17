@@ -177,10 +177,11 @@ class PMCD:
         k = 0
         x_w = [0.0, 0.0]
         f_x_w = 0.0
+        gradient = matrix.Vector(self.get_gradient(x_w), "Gradient")
         self.collect_data(k, x_w, f_x_w, "Initial point")
 
 
-        while self.halting_check() and k < 60 and self.norm(x_w) > 0.1:
+        while self.halting_check() and k < 60 and self.norm(gradient.vector) > 0.1:
             k += 1
 
 
