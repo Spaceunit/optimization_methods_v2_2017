@@ -210,7 +210,7 @@ class GSS:
             self.ea = (ab[1] - ab[0]) / 2
 
             self.collect_result(ab, x1, x2, f1, f2, i)
-            print(self.xmin, self.ymin, self.er, self.ea)
+            #print(self.xmin, self.ymin, self.er, self.ea)
         self.er = (ab[1] - ab[0]) / (2 * math.pow(self.t, i))
         print(self.er, self.ea)
         pass

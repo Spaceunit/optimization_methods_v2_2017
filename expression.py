@@ -9,7 +9,10 @@ class Expression:
 
     def copy(self):
         copy_ex = Expression(self.name, self.expression)
-        copy_ex.range = self.range.copy()
+        if self.range != None:
+            copy_ex.range = self.range.copy()
+        else:
+            copy_ex.range = self.range
         copy_ex.local_min = self.local_min
         copy_ex.local_max = self.local_max
         return copy_ex
@@ -49,6 +52,25 @@ class Expression:
         print("Local minimum:", self.local_min)
         print("Local maximum:", self.local_max)
         print("Parameters:", self.parameters)
+        pass
+
+    def replace_arg(self, r_array):
+        # change x1 x2 x3 ...
+        i = 0
+        while i < len(r_array):
+            if r_array[i] != None:
+                #self.expression.replace('x'+str(i+1), '{'+ str(i)+'}')
+                self.expression = self.expression.replace("x" + str(i + 1), str(r_array[i]))
+                #print('x' + str(i + 1), r_array[i])
+            i += 1
+        #print(len(r_array))
+        i = 0
+        if len(r_array) == 2:
+            while i < len(r_array):
+                if r_array[i] == None:
+                    self.expression = self.expression.replace("x" + str(i + 1), "x")
+                i += 1
+        #print(self.expression)
         pass
 
     def execute(self, x):

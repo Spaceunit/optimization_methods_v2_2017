@@ -21,6 +21,7 @@ import nelder_mead_method
 import gradient_descent
 import partan_gradient_descent
 import second_derivative_method_nm
+import powell_method_conjugate_directions
 
 
 class Work:
@@ -51,7 +52,8 @@ class Work:
                 "nmm": 20,
                 "gdm": 21,
                 "pgdm": 22,
-                "sdmnm": 23
+                "sdmnm": 23,
+                "pmcd": 24
             },
             "description": {
                 "none": "do nothing",
@@ -77,7 +79,8 @@ class Work:
                 "nmm": "Nelder–Mead method",
                 "gdm": "Gradient descent method",
                 "pgdm": "Partan gradient descent method",
-                "sdmnm": "Second derivative method: Newton`s method"
+                "sdmnm": "Second derivative method: Newton`s method",
+                "pmcd": "The Powell method of conjugate directions"
             }
         }
         pass
@@ -198,6 +201,11 @@ class Work:
                 pass
             elif task == 23:
                 Task = second_derivative_method_nm.SDMNM()
+                Task.importparam(self.accuracy)
+                Task.dostaff()
+                pass
+            elif task == 24:
+                Task = powell_method_conjugate_directions.PMCD()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
