@@ -159,8 +159,8 @@ class DM:
 
         self.collect_result(i, ab)
 
-        print("Begin...")
-        print("i =", i, "a =", ab[0], "b =", ab[1])
+        print("Begin Dichotomy method")
+        # print("i =", i, "a =", ab[0], "b =", ab[1])
         while math.fabs(ab[1] - ab[0]) > self.epsilon:
             self.set_d(ab)
             x1 = self.findx1(ab)
@@ -173,7 +173,7 @@ class DM:
                 if way == False:
                     ab[0] = x2
                     self.set_d(ab)
-                    print("Overjump - change direction, go to B-point...")
+                    #print("Overjump - change direction, go to B-point...")
                     way = True
                 else:
                     ab[1] = x2
@@ -181,13 +181,13 @@ class DM:
                 if way == False:
                     ab[1] = x1
                     self.set_d(ab)
-                    print("Overjump - change direction, go to A-point...")
+                    #print("Overjump - change direction, go to A-point...")
                     way = True
                 else:
                     ab[0] = x1
             i += 1
             self.collect_result(i, ab)
-            print("i =", i, "a =", ab[0], "b =", ab[1], "d =", self.d)
+            #print("i =", i, "a =", ab[0], "b =", ab[1], "d =", self.d)
 
 
     def collect_result(self, i, ab):

@@ -64,7 +64,7 @@ class PMCD:
         self.hg.makedimatrix(2)
         self.expression = expression.Expression("No name", "x**2")
         self.r_expression = expression.Expression("No name", "x**2")
-        self.accuracy = 3
+        self.accuracy = 20
         self.epsilon = [1, 1]
         self.mm = True
         self.msycle = 3
@@ -198,6 +198,8 @@ class PMCD:
         self.makedefault()
         k = 0
         flag = 1
+        part = 0
+        c_lambda = 0.0
         x_w = [self.x_start[0], self.x_start[1]]
         f_x_w = self.expression.execute_l(x_w)
         gradient = matrix.Vector(self.get_gradient(x_w), "Gradient")
@@ -207,82 +209,82 @@ class PMCD:
         # It will be soon...
         s3 = matrix.Vector([1.0, 1.0], "Vector S(3)")
         self.collect_data(k, x_w, f_x_w, "Initial point")
-        k += 1
-
-        interval = self.sven_method(x_w, s2)
-
-        print(interval)
-
-        c_lambda = self.dichotomy_method(interval)
-        #c_lambda = -c_lambda
-        s2_temp = s2.copy()
-        s2_temp.rename(s2.name)
-        s2_temp.vector = self.mul(s2_temp.vector, c_lambda)
-        x_w = self.sum(x_w, s2_temp.vector)
-        f_x_w = self.expression.execute_l(x_w)
-        self.collect_data(k, x_w, f_x_w, "Next point by Dichotomy method")
-        k += 1
-        print(c_lambda)
-
-        interval = self.sven_method(x_w, s1)
-        c_lambda = self.golden_section_search_method(interval)
-        #c_lambda = -c_lambda
-        s1_temp = s1.copy()
-        s1_temp.rename(s1.name)
-        s1_temp.vector = self.mul(s1_temp.vector, c_lambda)
-        x_w = self.sum(x_w, s1_temp.vector)
-        f_x_w = self.expression.execute_l(x_w)
-        self.collect_data(k, x_w, f_x_w, "Next point by Golden selection method")
-        k += 1
-        print(c_lambda)
-
-        c_lambda = self.dsk_paula()
-        #c_lambda = -c_lambda
-        s2_temp = s2.copy()
-        s2_temp.rename(s2.name)
-        s2_temp.vector = self.mul(s2_temp.vector, c_lambda)
-        x_w = self.sum(x_w, s2_temp.vector)
-        f_x_w = self.expression.execute_l(x_w)
-        self.collect_data(k, x_w, f_x_w, "Next point by DSK Paula method")
-        k += 1
-        print(c_lambda)
-
-        x_w = self.quad_step(x_w, s3)
-        f_x_w = self.expression.execute_l(x_w)
-        self.collect_data(k, x_w, f_x_w, "Next point by Quad step")
-        k += 1
+        #k += 1
         s_flag = matrix.Vector([0.0 for _ in x_w], "Vector S("+str(flag + 1)+")")
-        while self.halting_check() and k < 60 and self.norm(gradient.vector) > 0.1:
+        #s_flag.chel(flag, 1.0)
+        s_flag.vector[flag] = 1.0
+        d_lambda = self.norm(x_w) / self.norm(s_flag.vector)
+        while self.halting_check() and k <= 4 and d_lambda > 0.001:
             k += 1
-            if flag < len(x_w):
+
+            if part < 3:
+                #x_w[flag] = c_lambda
+                s_flag.makezero_f(len(x_w))
+                print(part)
+                print(len(s_flag.vector))
+                #s_flag.chel(flag, 1.0)
+                s_flag.vector[flag] = 1.0
+                interval = self.sven_method(x_w, s_flag, flag, part)
+                if part == 0:
+                    c_lambda = self.dichotomy_method(interval)
+                elif part == 1:
+                    c_lambda = self.golden_section_search_method(interval)
+                elif part == 2:
+                    c_lambda = self.dsk_paula(x_w[flag], d_lambda)
+                else:
+                    print("Error: part is wrong")
+
                 x_w[flag] = c_lambda
-                interval = self.sven_method(x_w, s_flag, flag)
-            elif flag == len(x_w):
+                d_lambda = self.get_d_lambda(x_w, s_flag)
+                f_x_w = self.expression.execute_l(x_w)
+                self.collect_data(k, x_w, f_x_w, "Next point")
+            elif part == 3:
 
-                self.quad_step(x_w, s3, flag)
-
+                x_w = self.quad_step(x_w, s_flag, d_lambda, flag, part)
+                d_lambda = self.get_d_lambda(x_w, s_flag)
                 #s3.vector = self.dif(self.result["xk"][-1], self.result["xk"][-3])
                 #s3.vector = self.mul(s3.vector, c_lambda)
                 #x_w = self.sum(x_w, s3.vector)
+                f_x_w = self.expression.execute_l(x_w)
+                self.collect_data(k, x_w, f_x_w, "*Next point")
             else:
-                print("Error")
+                print("Error: for flag")
+
+            if flag >= len(x_w) - 1:
+                flag = 0
+            else:
+                flag += 1
+
+            if part > 3:
+                part = 0
+            else:
+                part += 1
         self.printresult()
 
-    def quad_step(self, x_w, s, flag):
+    def get_d_lambda(self, x_w, s):
+        try:
+            d_lambda = self.norm(x_w) / self.norm(s.vector)
+        except ZeroDivisionError:
+            d_lambda = self.norm(x_w) / float('Inf')
+        return d_lambda
+
+    def quad_step(self, x_w, s, d_lambda, flag, part):
         stat = True
         start = 0.0
         c_lambda = []
         # S = matrix.Vector([0.0, 1.0], "Vector S(1)")
-        s.vector = self.dif(x_w, self.result["xk"][-2])
+        s.vector = self.dif(self.result["xk"][-1], self.result["xk"][-3])
         #d_lambda = 0.1 * self.norm(x_w) / self.norm(s.vector)
 
-        interval = self.sven_method(x_w, s, flag)
+        interval = self.sven_method(x_w, s, flag, part)
 
-        c_lambda = self.dichotomy_method(interval)
-        c_lambda = -c_lambda
+        c_lambda = self.dsk_paula(x_w[flag], d_lambda)
+        #c_lambda = self.dichotomy_method(interval)
+        #c_lambda = -c_lambda
         print(c_lambda)
         s_temp = s.copy()
         s_temp.rename(s.name)
+        print("Quad step:", c_lambda)
         s_temp.vector = self.mul(s_temp.vector, c_lambda)
         x_w = self.sum(x_w, s_temp.vector)
 
@@ -297,6 +299,7 @@ class PMCD:
                 replace_array.append(x_w[i])
             else:
                 replace_array.append(None)
+            i += 1
         return replace_array
 
     @staticmethod
@@ -305,22 +308,22 @@ class PMCD:
         replace_array = []
         while i < len(x_w):
             replace_array.append("(" + str(x_w[i]) + "+" + str(s.vector[i]) + "*x" + ")")
+            i += 1
         return replace_array
 
-    def sven_method(self, x_w, S, flag):
+    def sven_method(self, x_w, S, flag, part):
         stat = True
         start = 0.0
         interval = []
-        S.makezero_f(len(x_w))
         self.r_expression = self.expression.copy()
         self.r_expression.rename(self.expression.name)
         #S = matrix.Vector([0.0, 1.0], "Vector S(1)")
-        d_lambda = 0.1 * self.norm(x_w) / self.norm(S.vector)
-        if flag < len(x_w):
+        d_lambda = self.get_d_lambda(x_w, S)
+        if part < 3:
             # S(flag)
             self.r_expression.replace_arg(self.arguments_list(x_w, flag))
             start = x_w[flag]
-        elif flag == len(x_w):
+        elif part == 3:
             self.r_expression.replace_arg(self.lambda_arguments_list(x_w, S, flag))
             start = x_w[0]
         else:
@@ -331,6 +334,7 @@ class PMCD:
             self.r_expression.show_expr()
             self.sm.expression = self.r_expression.copy()
             self.sm.x_start = start
+            self.sm.d = d_lambda
             self.sm.expression.show_expr()
             self.sm.resolve()
             raw_group = self.sm.find_min()
@@ -383,10 +387,12 @@ class PMCD:
             c_lambda = None
         return c_lambda
 
-    def dsk_paula(self):
+    def dsk_paula(self, x_start, d_lambda):
         c_lambda = None
         if True:
             self.dsk.makedefault()
+            self.dsk.x_start = x_start
+            #self.dsk.h = d_lambda
             self.dsk.expression = self.r_expression.copy()
             self.dsk.epsilon = self.epsilon.copy()
             self.dsk.resolve()

@@ -64,7 +64,7 @@ class PMCD:
         self.hg.makedimatrix(2)
         self.expression = expression.Expression("No name", "x**2")
         self.r_expression = expression.Expression("No name", "x**2")
-        self.accuracy = 3
+        self.accuracy = 20
         self.epsilon = [1, 1]
         self.mm = True
         self.msycle = 3
@@ -214,7 +214,7 @@ class PMCD:
         print(interval)
 
         c_lambda = self.dichotomy_method(interval)
-        #c_lambda = -c_lambda
+        c_lambda = -c_lambda
         s2_temp = s2.copy()
         s2_temp.rename(s2.name)
         s2_temp.vector = self.mul(s2_temp.vector, c_lambda)
@@ -261,7 +261,7 @@ class PMCD:
         start = 0.0
         c_lambda = []
         # S = matrix.Vector([0.0, 1.0], "Vector S(1)")
-        s.vector = self.dif(x_w, self.result["xk"][-3])
+        s.vector = self.dif(x_w, self.result["xk"][-2])
         #d_lambda = 0.1 * self.norm(x_w) / self.norm(s.vector)
 
         print("Lol Arbidol:", self.r_expression.expression)
@@ -314,6 +314,7 @@ class PMCD:
             self.r_expression.show_expr()
             self.sm.expression = self.r_expression.copy()
             self.sm.x_start = start
+            #self.sm.d = d_lambda
             self.sm.expression.show_expr()
             self.sm.resolve()
             raw_group = self.sm.find_min()

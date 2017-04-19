@@ -71,7 +71,7 @@ class DSKP:
 
     def makedefault(self):
         #self.epsilon = 10 ** (-self.accuracy)
-        self.epsilon = [0.2, 0.01]
+        self.epsilon = [0.0001, 0.0001]
         self.expression = expression.Expression("Parabola", "x**2 - 2*x")
         self.d_expression = expression.Expression("Line", "2*x")
         self.expression.range = [2.0, 3.0]
@@ -185,6 +185,7 @@ class DSKP:
 
 
     def resolve(self):
+        print("Begin DSK Paula method...")
         #self.expression.input_expr()
         #self.epsilon = self.inputdata("Epsilon", "float")
         #self.x_start = self.inputdata("Start position", "float")
@@ -206,12 +207,12 @@ class DSKP:
         pass
 
     def dsk(self, raw):
-        print(raw["xk"])
-        print(raw["fxk"])
-        print(self.dx)
+        #print(raw["xk"])
+        #print(raw["fxk"])
+        #print(self.dx)
         x_new = raw["xk"][1] + self.dx * (raw["fxk"][0] - raw["fxk"][2]) / (
         2 * (raw["fxk"][0] - 2 * raw["fxk"][1] + raw["fxk"][2]))
-        print("x* = ", x_new)
+        #print("x* = ", x_new)
         return x_new
 
     def paul(self, x_new):
@@ -239,7 +240,7 @@ class DSKP:
         fs = self.expression.execute(xst)
 
         i = 0
-        print("start sycle")
+        #print("start sycle")
         while math.fabs(x2 - xst) < self.epsilon[1] and math.fabs(f2 - fs) < self.epsilon[0] and i < 100:
             x1 = xst
             f1 = self.expression.execute(x1)
@@ -255,14 +256,14 @@ class DSKP:
             a2 = ((f3 - f1) / (x3 - x1) - (f2 - f1) / (x2 - x1)) / (x3 - x2)
             xst = 0.5 * (x1 + x2) - a1 / (a2)
             fs = self.expression.execute(xst)
-            print("i:", i)
-            print("xst =", xst, "f(xst) =", fs)
-            print("x2 =", x2, "f(x2) =", f2)
-            print(math.fabs(x2 - xst), math.fabs(f2 - fs))
+            #print("i:", i)
+            #print("xst =", xst, "f(xst) =", fs)
+            #print("x2 =", x2, "f(x2) =", f2)
+            #print(math.fabs(x2 - xst), math.fabs(f2 - fs))
             i += 1
         self.result["xst"] = xst
         self.result["fsxt"] = fs
-        print("xst =", xst, "f(xst) =", fs)
+        #print("xst =", xst, "f(xst) =", fs)
         pass
 
     def collect_result(self):
@@ -272,4 +273,5 @@ class DSKP:
         pass
 
     def printresult(self):
+        print("DSK Paula method")
         print("xst =", self.result["xst"], "f(xst) =", self.result["fsxt"])

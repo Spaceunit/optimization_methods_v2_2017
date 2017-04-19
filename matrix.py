@@ -464,32 +464,42 @@ class Vector:
 
     def setvector(self, vector):
         self.vector = []
-        for item in range(0, len(vector)):
-            self.vector.append(vector[item])
+        i = 0
+        while i < len(vector):
+            self.vector.append(vector[i])
+            i += 1
         self.len = len(self.vector)
 
     def makezero(self,size):
         self.vector = []
-        for i in range(0, size):
+        i = 0
+        while i < size:
             self.vector.append(0)
+            i += 1
         self.len = len(self.vector)
 
     def makezero_f(self, size):
         self.vector = []
-        for i in range(0, size):
+        i = 0
+        while i < size:
             self.vector.append(0.0)
+            i += 1
         self.len = len(self.vector)
 
     def makeivector(self, size):
         self.vector = []
-        for i in range(0, size):
+        i = 0
+        while i < size:
             self.vector.append(1)
+            i += 1
         self.len = len(self.vector)
 
     def makeivector_f(self, size):
         self.vector = []
-        for i in range(0, size):
+        i = 0
+        while i < size:
             self.vector.append(1.0)
+            i += 1
         self.len = len(self.vector)
 
     def copy(self):

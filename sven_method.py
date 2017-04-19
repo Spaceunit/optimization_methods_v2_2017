@@ -164,7 +164,7 @@ class SM:
 
 
     def resolve(self):
-        print("Begin...")
+        print("Sven Begin...")
         i = 0
         status = False
         f = {}
@@ -178,17 +178,17 @@ class SM:
         f["x0pd"] = self.expression.execute(self.x_start + self.d)
 
         if f["x0"] < f["x0md"]:
-            print("<m")
+            #print("<m")
             self.d = np.copysign(self.d, 1.0)
             fxk.append(f["x0pd"])
             xk.append(self.x_start + self.d)
         elif f["x0"] < f["x0pd"]:
-            print("<p")
+            #print("<p")
             self.d = np.copysign(self.d, -1.0)
             fxk.append(f["x0md"])
             xk.append(self.x_start + self.d)
         elif f["x0"] >= f["x0md"] and f["x0"] <= f["x0pd"]:
-            print(">=<")
+            #print(">=<")
             self.result["xk"] = [self.x_start - self.d, self.x_start, self.x_start + self.d]
             self.result["fxk"] = [f["x0md"], fxk[0], f["x0pd"]]
             status = True
@@ -197,8 +197,8 @@ class SM:
             self.result = None
             status = True
 
-        print("x:", xk[-2], "f(x):", fxk[-2])
-        print("x:", xk[-1], "f(x):", fxk[-1])
+        #print("x:", xk[-2], "f(x):", fxk[-2])
+        #print("x:", xk[-1], "f(x):", fxk[-1])
 
         if not status:
             x_next = None
@@ -210,19 +210,19 @@ class SM:
                     xk.append(x_next)
                     d *= 2
                 elif fxk[-1] > fxk[-2]:
-                    print("fxk[-1] > fxk[-2]")
+                    #print("fxk[-1] > fxk[-2]")
                     d /= 4
                     x_next = xk[-1] - d
                     xk.append(xk[-1])
                     fxk.append(fxk[-1])
                     xk[-2] = x_next
                     fxk[-2] = self.expression.execute(x_next)
-                    print("x:", xk[-3], "f(x):", fxk[-3])
-                    print("x:", xk[-2], "f(x):", fxk[-2])
-                    print("x:", xk[-1], "f(x):", fxk[-1])
+                    #print("x:", xk[-3], "f(x):", fxk[-3])
+                    #print("x:", xk[-2], "f(x):", fxk[-2])
+                    #print("x:", xk[-1], "f(x):", fxk[-1])
                     status = True
                 elif fxk[-1] >= fxk[-2] and fxk[-2] <= fxk[-3]:
-                    print("fxk[-1] >= fxk[-2] and fxk[-2] <= fxk[-3]")
+                    #print("fxk[-1] >= fxk[-2] and fxk[-2] <= fxk[-3]")
                     status = True
                 else:
                     print("WTF")
@@ -278,6 +278,7 @@ class SM:
         plt.show()
 
     def printresult(self):
+        print("Sven method")
         for i in range(len(self.result["xk"])):
             print("i:", i, "x:", self.result["xk"][i], "f(x):", self.result["fxk"][i])
         pass
