@@ -197,7 +197,7 @@ class PMCD:
     def resolve(self):
         self.makedefault()
         k = 0
-        flag = 1
+
         x_w = [self.x_start[0], self.x_start[1]]
         f_x_w = self.expression.execute_l(x_w)
         gradient = matrix.Vector(self.get_gradient(x_w), "Gradient")
@@ -251,35 +251,29 @@ class PMCD:
         f_x_w = self.expression.execute_l(x_w)
         self.collect_data(k, x_w, f_x_w, "Next point by Quad step")
         k += 1
-        s_flag = matrix.Vector([0.0 for _ in x_w], "Vector S("+str(flag + 1)+")")
+
         while self.halting_check() and k < 60 and self.norm(gradient.vector) > 0.1:
             k += 1
-            if flag < len(x_w):
-                x_w[flag] = c_lambda
-                interval = self.sven_method(x_w, s_flag, flag)
-            elif flag == len(x_w):
-
-                self.quad_step(x_w, s3, flag)
-
-                #s3.vector = self.dif(self.result["xk"][-1], self.result["xk"][-3])
-                #s3.vector = self.mul(s3.vector, c_lambda)
-                #x_w = self.sum(x_w, s3.vector)
-            else:
-                print("Error")
         self.printresult()
 
-    def quad_step(self, x_w, s, flag):
+    def quad_step(self, x_w, s):
         stat = True
         start = 0.0
         c_lambda = []
         # S = matrix.Vector([0.0, 1.0], "Vector S(1)")
-        s.vector = self.dif(x_w, self.result["xk"][-2])
+        s.vector = self.dif(x_w, self.result["xk"][-3])
         #d_lambda = 0.1 * self.norm(x_w) / self.norm(s.vector)
 
-        interval = self.sven_method(x_w, s, flag)
+        print("Lol Arbidol:", self.r_expression.expression)
+
+
+
+        print("Lol Kek:", self.r_expression.expression)
+
+        interval = self.sven_method(x_w, s)
 
         c_lambda = self.dichotomy_method(interval)
-        c_lambda = -c_lambda
+        #c_lambda = -c_lambda
         print(c_lambda)
         s_temp = s.copy()
         s_temp.rename(s.name)
@@ -288,60 +282,7 @@ class PMCD:
 
         return x_w
 
-    @staticmethod
-    def arguments_list(x_w, flag):
-        i = 0
-        replace_array = []
-        while i < len(x_w):
-            if i != flag:
-                replace_array.append(x_w[i])
-            else:
-                replace_array.append(None)
-        return replace_array
-
-    @staticmethod
-    def lambda_arguments_list(x_w, s, flag):
-        i = 0
-        replace_array = []
-        while i < len(x_w):
-            replace_array.append("(" + str(x_w[i]) + "+" + str(s.vector[i]) + "*x" + ")")
-        return replace_array
-
-    def sven_method(self, x_w, S, flag):
-        stat = True
-        start = 0.0
-        interval = []
-        S.makezero_f(len(x_w))
-        self.r_expression = self.expression.copy()
-        self.r_expression.rename(self.expression.name)
-        #S = matrix.Vector([0.0, 1.0], "Vector S(1)")
-        d_lambda = 0.1 * self.norm(x_w) / self.norm(S.vector)
-        if flag < len(x_w):
-            # S(flag)
-            self.r_expression.replace_arg(self.arguments_list(x_w, flag))
-            start = x_w[flag]
-        elif flag == len(x_w):
-            self.r_expression.replace_arg(self.lambda_arguments_list(x_w, S, flag))
-            start = x_w[0]
-        else:
-            print("Wrong Vector S([1, 2])")
-            stat = False
-        if stat:
-            self.sm.makedefault()
-            self.r_expression.show_expr()
-            self.sm.expression = self.r_expression.copy()
-            self.sm.x_start = start
-            self.sm.expression.show_expr()
-            self.sm.resolve()
-            raw_group = self.sm.find_min()
-            interval.append(raw_group["xk"][0])
-            interval.append(raw_group["xk"][1])
-            pass
-        else:
-            interval = None
-        return interval
-
-    def sven_method0(self, x_w, S):
+    def sven_method(self, x_w, S):
         stat = True
         start = 0.0
         c_lambda = []

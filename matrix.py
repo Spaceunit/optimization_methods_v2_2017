@@ -470,14 +470,26 @@ class Vector:
 
     def makezero(self,size):
         self.vector = []
-        for i in range(0,size):
+        for i in range(0, size):
             self.vector.append(0)
         self.len = len(self.vector)
 
-    def makeivector(self,size):
+    def makezero_f(self, size):
+        self.vector = []
+        for i in range(0, size):
+            self.vector.append(0.0)
+        self.len = len(self.vector)
+
+    def makeivector(self, size):
         self.vector = []
         for i in range(0, size):
             self.vector.append(1)
+        self.len = len(self.vector)
+
+    def makeivector_f(self, size):
+        self.vector = []
+        for i in range(0, size):
+            self.vector.append(1.0)
         self.len = len(self.vector)
 
     def copy(self):
