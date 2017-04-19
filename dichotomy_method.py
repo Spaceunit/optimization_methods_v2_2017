@@ -28,6 +28,7 @@ class DM:
         self.expression = expression.Expression("No name", "x**2")
         self.accuracy = 3
         self.result = {"x1": [], "x2": [], "y": []}
+        self.way = True
         self.makedefault()
 
 
@@ -155,7 +156,7 @@ class DM:
     def resolve(self):
         i = 0
         ab = self.expression.range.copy()
-        way = True
+        way = self.way
 
         self.collect_result(i, ab)
 
@@ -168,6 +169,10 @@ class DM:
 
             y1 = self.expression.execute(x1)
             y2 = self.expression.execute(x2)
+
+            print(i)
+            print(x1, x2)
+            print(y1, y2)
 
             if y1 < y2:
                 if way == False:

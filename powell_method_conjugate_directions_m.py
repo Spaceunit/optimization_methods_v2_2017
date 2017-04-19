@@ -426,6 +426,7 @@ class PMCD:
             self.dichom.expression.range = interval.copy()
             self.dichom.epsilon = self.epsilon[0]
             self.dichom.resolve()
+            self.dichom.way = True
             c_lambda = (self.dichom.result["x1"][-1] + self.dichom.result["x2"][-1]) / 2.0
         else:
             print("Error in dichotomy method: Interval = None (must be list)")

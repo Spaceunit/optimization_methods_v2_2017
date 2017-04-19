@@ -81,6 +81,7 @@ class DSKP:
         self.x_start = 2.2
         self.result = {"xst": None, "fsxt" : None}
         self.h = 0.00001
+        self.d_lambda = None
         pass
 
     def importparam(self, accuracy):
@@ -193,7 +194,10 @@ class DSKP:
 
         self.sm.makedefault()
         self.sm.x_start = self.x_start
-        self.sm.d = self.h
+        if self.d_lambda == None:
+            self.sm.d = self.h
+        else:
+            self.sm.d = self.d_lambda
         self.sm.epsilon = self.epsilon[0]
         self.sm.expression = self.expression.copy()
         self.sm.resolve()
@@ -219,7 +223,10 @@ class DSKP:
         print("Begin Paul")
         # 0.2
         # 0.01
-        self.dx = self.h
+        if self.d_lambda == None:
+            self.dx = self.h
+        else:
+            self.dx = self.d_lambda
         #self.epsilon = 0.00000000000001
         x1 = x_new
         x2 = x_new + self.dx
