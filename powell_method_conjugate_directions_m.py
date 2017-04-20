@@ -558,8 +558,14 @@ class PMCD:
         ax.add_patch(patch)
 
         xs, ys = zip(*verts)
+        plt.xlabel('X1')
+        plt.ylabel('X2')
+        plt.title('The Powell method of conjugate directions')
         ax.plot(xs, ys, 'x--', lw=2, color='black', ms=10)
-
+        cord_x = np.array([self.result["xk"][1][0], self.result["xk"][3][0]])
+        cord_y = np.array([self.result["xk"][1][1], self.result["xk"][3][1]])
+        plt.plot(cord_x, cord_y, 'r--')
+        plt.grid(True)
         plt.show()
 
     def printresult_3d(self):
