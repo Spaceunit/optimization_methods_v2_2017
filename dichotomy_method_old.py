@@ -5,13 +5,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import mlab
 
-from matplotlib.path import Path
-import matplotlib.patches as patches
-
 from resource import expression
 
 
-class GSS:
+class DM:
     def __init__(self):
         self.commands = {
             "none": 0,
@@ -30,7 +27,8 @@ class GSS:
         }
         self.expression = expression.Expression("No name", "x**2")
         self.accuracy = 3
-        self.result = {"xk": []}
+        self.result = {"x1": [], "x2": [], "y": []}
+        self.way = True
         self.makedefault()
 
 
@@ -66,15 +64,10 @@ class GSS:
     def makedefault(self):
         self.epsilon = 10 ** (-self.accuracy)
         self.expression = expression.Expression("Parabola", "x**2")
-        self.d_expression = expression.Expression("Line", "2*x")
         self.expression.range = [-10.0, 10.0]
-        self.d_expression.range = self.expression.range
         self.expression.parameters["unimodal"] = True
-        self.d_expression.parameters["unimodal"] = False
-        self.x_start = -10.0
-        self.result = {"a": [], "b": [], "x1": [], "x2": [], "f1": [], "f2": [], "i": []}
-        self.h = 0.1
-        self.N = 10
+        self.x_start = -9.0
+        self.result = {"x1": [], "x2": [], "i": []}
         pass
 
     def importparam(self, accuracy):
@@ -130,7 +123,7 @@ class GSS:
         task = 0
         while (task != 1):
             print('')
-            print("Golden section search")
+            print("Dichotomy method")
             print('')
             task = self.enterCommand()
             if task == 2:
@@ -160,101 +153,77 @@ class GSS:
         self.expression.show_expr()
         pass
 
-
     def resolve(self):
-        #self.makedefault()
+        i = 0
         ab = self.expression.range.copy()
-        ab.sort()
-        i = 1
-        xk = []
-        fxk = []
-        self.result = {"a": [], "b": [], "x1": [], "x2": [], "f1": [], "f2": [], "i": []}
-        self.result["xk"] = []
-        self.result["fxk"] = []
-        self.t = self.get_t()
-        x1 = self.findx1(ab)
-        x2 = self.findx2(ab)
+        way = self.way
 
-        f1 = self.expression.execute(x1)
-        f2 = self.expression.execute(x2)
+        self.collect_result(i, ab)
 
-        self.collect_result(ab, x1, x2, f1, f2, i)
+        print("Begin Dichotomy method")
+        # print("i =", i, "a =", ab[0], "b =", ab[1])
         while math.fabs(ab[1] - ab[0]) > self.epsilon:
-            if f1 < f2:
-                ab[1] = x2
-                x2 = x1
-                f2 = f1
-                x1 = self.findx1(ab)
-                f1 = self.expression.execute(x1)
+            self.set_d(ab)
+            x1 = self.findx1(ab)
+            x2 = self.findx2(ab)
 
-                self.collect_result(ab, x1, x2, f1, f2, i)
-                #print("i=", i, "; x1=", x1, "; x2=", x2, "; f1=", f1, "; f2=", f2, ";")
+            y1 = self.expression.execute(x1)
+            y2 = self.expression.execute(x2)
+
+            print(i)
+            print(x1, x2)
+            print(y1, y2)
+
+            if y1 < y2:
+                if way == False:
+                    ab[0] = x2
+                    self.set_d(ab)
+                    #print("Overjump - change direction, go to B-point...")
+                    way = True
+                else:
+                    ab[1] = x2
             else:
-                ab[0] = x1
-                x1 = x2
-                f1 = f2
-                x2 = self.findx2(ab)
-                f2 = self.expression.execute(x2)
-
-                self.collect_result(ab, x1, x2, f1, f2, i)
-                #print("i=", i, "; x1=", x1, "; x2=", x2, "; f1=", f1, "; f2=", f2, ";")
+                if way == False:
+                    ab[1] = x1
+                    self.set_d(ab)
+                    #print("Overjump - change direction, go to A-point...")
+                    way = True
+                else:
+                    ab[0] = x1
             i += 1
-        if f1 < f2:
-            ab[1] = x2
-
-            self.collect_result(ab, x1, x2, f1, f2, i)
-            self.ea = (ab[1] - ab[0]) / 2
-        else:
-            ab[0] = x1
-            self.xmin = (ab[1] + ab[0]) / 2
-            self.ymin = self.expression.execute(self.xmin)
-            self.ea = (ab[1] - ab[0]) / 2
-
-            self.collect_result(ab, x1, x2, f1, f2, i)
-            #print(self.xmin, self.ymin, self.er, self.ea)
-        self.er = (ab[1] - ab[0]) / (2 * math.pow(self.t, i))
-        #print(self.er, self.ea)
-        pass
-
-    def findx1(self, ab):
-        return ab[1] - (ab[1] - ab[0]) / self.t
-
-    def findx2(self, ab):
-        return ab[0] + (ab[1] - ab[0]) / self.t
-
-    def get_t(self):
-        return (1 + math.sqrt(5)) / 2
+            self.collect_result(i, ab)
+            #print("i =", i, "a =", ab[0], "b =", ab[1], "d =", self.d)
 
 
-    def collect_result(self, ab, x1, x2, f1, f2, i):
-        self.result["a"].append(ab[0])
-        self.result["b"].append(ab[1])
-        self.result["x1"].append(x1)
-        self.result["x2"].append(x2)
-        self.result["f1"].append(f1)
-        self.result["f2"].append(f2)
+    def collect_result(self, i, ab):
+        self.result["x1"].append(ab[0])
+        self.result["x2"].append(ab[1])
         self.result["i"].append(i)
-        pass
 
     def set_d(self, ab):
         self.d = math.fabs(ab[1] - ab[0]) / 4
+
+    def findx1(self, ab):
+        return (ab[1] + ab[0]) / 2 - self.d
+
+    def findx2(self, ab):
+        return (ab[1] + ab[0]) / 2 + self.d
 
     def printresult_g(self):
         y = np.arange(0.0, float(self.result["i"][-1]), 1.0)
         #y = np.arange(0.0, 5.0, 0.1)
         fig = plt.figure(1)
         dm = fig.add_subplot(111)
-        dm.hlines(y, self.result["a"], self.result["b"], lw=2)
+        dm.hlines(y, self.result["x1"], self.result["x2"], lw=2)
         plt.show()
 
     def printresult(self):
         print("Result:")
         for i in range(len(self.result["i"])):
             print('')
-            print("i:", i,":")
-            print("a:", self.result["a"][i])
-            print("b:", self.result["b"][i])
-            print("x1:", self.result["x1"][i], "f(x1):", self.result["f1"][i])
-            print("x2:", self.result["x2"][i], "f(x2):", self.result["f2"][i])
-        print(self.er, self.ea)
+            print("i:", i, ":")
+            print("x1:", self.result["x1"][i])
+            print("x2:", self.result["x2"][i])
         pass
+
+    pass

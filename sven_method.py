@@ -32,6 +32,7 @@ class SM:
         self.expression = expression.Expression("No name", "x**2")
         self.accuracy = 3
         self.result = {"x1": [], "x2": [], "y": []}
+        self.x_start = 10
         self.makedefault()
 
 
@@ -71,7 +72,8 @@ class SM:
         self.expression.parameters["unimodal"] = True
         self.x_start = -9.0
         self.result = {"x1": [], "x2": [], "x0": []}
-        self.d = 0.001
+        # 0.001
+        self.d = 0.00000000001
         pass
 
     def importparam(self, accuracy):
@@ -174,21 +176,22 @@ class SM:
         f["x0"] = self.expression.execute(self.x_start)
         xk.append(self.x_start)
         fxk.append(f["x0"])
+        print(self.d)
         f["x0md"] = self.expression.execute(self.x_start - self.d)
         f["x0pd"] = self.expression.execute(self.x_start + self.d)
 
-        if f["x0"] < f["x0md"]:
-            #print("<m")
+        if f["x0"] < f["x0md"] and f["x0"] > f["x0pd"]:
+            print("<m")
             self.d = np.copysign(self.d, 1.0)
             fxk.append(f["x0pd"])
             xk.append(self.x_start + self.d)
-        elif f["x0"] < f["x0pd"]:
-            #print("<p")
+        elif f["x0"] < f["x0pd"] and f["x0"] > f["x0md"]:
+            print("<p")
             self.d = np.copysign(self.d, -1.0)
             fxk.append(f["x0md"])
             xk.append(self.x_start + self.d)
-        elif f["x0"] >= f["x0md"] and f["x0"] <= f["x0pd"]:
-            #print(">=<")
+        elif f["x0"] <= f["x0md"] and f["x0"] <= f["x0pd"]:
+            print(">=<")
             self.result["xk"] = [self.x_start - self.d, self.x_start, self.x_start + self.d]
             self.result["fxk"] = [f["x0md"], fxk[0], f["x0pd"]]
             status = True
@@ -202,17 +205,23 @@ class SM:
 
         if not status:
             x_next = None
+            print(self.d)
             d = self.d
             while not status:
                 if fxk[-1] < fxk[-2]:
+                    print("fxk[-1] < fxk[-2]")
                     x_next = xk[-1] + d
+                    print(x_next)
                     fxk.append(self.expression.execute(x_next))
                     xk.append(x_next)
-                    d *= 2
+                    d *= 2.0
                 elif fxk[-1] > fxk[-2]:
-                    #print("fxk[-1] > fxk[-2]")
-                    d /= 4
+                    print("fxk[-1] > fxk[-2]")
+                    d /= 4.0
+                    print(xk[-1])
+                    print(d)
                     x_next = xk[-1] - d
+                    print(x_next)
                     xk.append(xk[-1])
                     fxk.append(fxk[-1])
                     xk[-2] = x_next

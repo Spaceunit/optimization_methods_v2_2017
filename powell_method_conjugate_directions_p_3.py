@@ -121,6 +121,7 @@ class PMCD:
         #self.expression = expression.Expression("Function", "3*x1**2+2*x1*x2+2*x2**2")
         #self.expression = expression.Expression("Function", "(x1-15)**2-x1*x2+3*x2**2")
         self.expression = expression.Expression("Function", "2*x1**2+2*x1*x2+x2**2")
+        self.expression = expression.Expression("Function", "2*x1**2+x1*x2+x2*x3+2*x2**2+3*x3**2")
         self.r_expression = self.expression.copy()
 
         self.expression.parameters["unimodal"] = True
@@ -128,7 +129,7 @@ class PMCD:
         #self.x_start = [[8.0, 9.0], [10.0, 11.0], [8.0, 11.0]]
         #self.x_start = [7.0, 6.0]
         #self.x_start = [-23.5, -23.5]
-        self.x_start = [4.0, 4.0]
+        self.x_start = [3.0, 4.0, 5.0]
         self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "h": 0.001}
         self.result = {"i": [], "xk": [], "fx": [], "action": []}
         self.hg = matrix.Matrix([[0]], "Hessian matrix")
@@ -200,12 +201,12 @@ class PMCD:
         self.makedefault()
         action = "Next point"
         k = 0
-        flag = 0
+        flag = 2
         part = 0
         c_lambda = 0.0
-        x_w = [self.x_start[0], self.x_start[1]]
+        x_w = [self.x_start[0], self.x_start[1], self.x_start[2]]
         f_x_w = self.expression.execute_l(x_w)
-        gradient = matrix.Vector(self.get_gradient(x_w), "Gradient")
+        #gradient = matrix.Vector(self.get_gradient(x_w), "Gradient")
         s1 = matrix.Vector([1.0, 0.0], "Vector S(1)")
         s2 = matrix.Vector([0.0, 1.0], "Vector S(2)")
 
@@ -217,10 +218,10 @@ class PMCD:
         #s_flag.chel(flag, 1.0)
         s_flag.vector[flag] = 1.0
         d_lambda = self.norm(x_w) / self.norm(s_flag.vector)
-        while self.halting_check() and k <= 4 and d_lambda > 0.001:
+        while self.halting_check() and k <= 5 and d_lambda > 0.001:
             k += 1
 
-            if part < 3:
+            if part < 4:
                 #x_w[flag] = c_lambda
                 s_flag.makezero_f(len(x_w))
                 print(part)
@@ -228,13 +229,13 @@ class PMCD:
                 #s_flag.chel(flag, 1.0)
                 s_flag.vector[flag] = 1.0
                 interval = self.sven_method(x_w, s_flag, flag, part)
-                if part == 0:
+                if part == None:
                     c_lambda = self.dichotomy_method(interval)
                     action = "Next point by Dichotomy method"
-                elif part == 1:
+                elif part == 6:
                     c_lambda = self.golden_section_search_method(interval)
                     action = "Next point by Golden section search method"
-                elif part == 2:
+                elif part == 2 or part == 1 or part == 0:
                     c_lambda = self.dsk_paula(x_w[flag], d_lambda)
                     action = "Next point by DSK Paula method"
                 else:
@@ -246,7 +247,7 @@ class PMCD:
                 d_lambda = self.get_d_lambda(x_w, s_flag)
                 f_x_w = self.expression.execute_l(x_w)
                 self.collect_data(k, x_w, f_x_w, action)
-            elif part == 3:
+            elif part == 4:
                 action = "Next point by single lambda for all coordinates"
                 x_w = self.quad_step(x_w, s_flag, d_lambda, flag, part)
                 d_lambda = self.get_d_lambda(x_w, s_flag)
@@ -263,7 +264,7 @@ class PMCD:
             else:
                 flag += 1
 
-            if part > 3:
+            if part > 4:
                 part = 0
             else:
                 part += 1
@@ -281,12 +282,13 @@ class PMCD:
         start = 0.0
         c_lambda = []
         # S = matrix.Vector([0.0, 1.0], "Vector S(1)")
-        s.vector = self.dif(self.result["xk"][-1], self.result["xk"][-3])
+        s.vector = self.dif(self.result["xk"][-1], self.result["xk"][-4])
         #d_lambda = 0.1 * self.norm(x_w) / self.norm(s.vector)
 
         interval = self.sven_method(x_w, s, flag, part)
         print("For q dlambda is:", d_lambda)
         #0.0105
+
         c_lambda = self.dsk_paula(x_w[flag], self.epsilon[0])
         #c_lambda = self.dichotomy_method(interval)
         #c_lambda = -c_lambda
@@ -328,11 +330,11 @@ class PMCD:
         self.r_expression.rename(self.expression.name)
         #S = matrix.Vector([0.0, 1.0], "Vector S(1)")
         d_lambda = self.get_d_lambda(x_w, S)
-        if part < 3:
+        if part < 4:
             # S(flag)
             self.r_expression.replace_arg(self.arguments_list(x_w, flag))
             start = x_w[flag]
-        elif part == 3:
+        elif part == 4:
             self.r_expression.replace_arg(self.lambda_arguments_list(x_w, S, flag))
             start = x_w[0]
         else:
@@ -435,7 +437,7 @@ class PMCD:
             self.dichom.expression = self.r_expression.copy()
             self.dichom.expression.range = interval.copy()
             self.dichom.epsilon = self.epsilon[0]
-            self.dichom.way = False
+            self.dichom.way = True
             self.dichom.resolve()
             self.dichom.printresult()
             self.dichom.printresult_g()

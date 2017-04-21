@@ -98,7 +98,8 @@ class PGDM:
         #self.expression = expression.Expression("Function", "4*(x1-2)**2+(x2-1)**2")
         #self.expression = expression.Expression("Function", "4*(x1-5)**2+(x2-6)**2")
 
-        self.expression = expression.Expression("Function", "3*x1**2+2*x1*x2+2*x2**2")
+        #self.expression = expression.Expression("Function", "3*x1**2+2*x1*x2+2*x2**2")
+        self.expression = expression.Expression("Function", "2*x1**2+x1*x2+3*x2**2")
 
         self.expression.parameters["unimodal"] = True
         self.expression.parameters["global_min"] = [2.0, 1.0]

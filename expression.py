@@ -60,12 +60,12 @@ class Expression:
         while i < len(r_array):
             if r_array[i] != None:
                 #self.expression.replace('x'+str(i+1), '{'+ str(i)+'}')
-                self.expression = self.expression.replace("x" + str(i + 1), str(r_array[i]))
+                self.expression = self.expression.replace("x" + str(i + 1), '('+str(r_array[i])+')')
                 #print('x' + str(i + 1), r_array[i])
             i += 1
         #print(len(r_array))
         i = 0
-        if len(r_array) == 2:
+        if len(r_array) == 2 or len(r_array) == 3:
             while i < len(r_array):
                 if r_array[i] == None:
                     self.expression = self.expression.replace("x" + str(i + 1), "x")

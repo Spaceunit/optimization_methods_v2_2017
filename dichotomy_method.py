@@ -156,11 +156,14 @@ class DM:
     def resolve(self):
         i = 0
         ab = self.expression.range.copy()
-        way = self.way
+        ab.sort()
+        print(ab)
+        way = True
 
         self.collect_result(i, ab)
-
+        print('-----------------------')
         print("Begin Dichotomy method")
+        self.expression.show_expr()
         # print("i =", i, "a =", ab[0], "b =", ab[1])
         while math.fabs(ab[1] - ab[0]) > self.epsilon:
             self.set_d(ab)

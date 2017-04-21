@@ -23,6 +23,8 @@ import partan_gradient_descent
 import second_derivative_method_nm
 import powell_method_conjugate_directions_p
 import powell_method_conjugate_directions_m
+import powell_method_conjugate_directions_3
+import powell_method_conjugate_directions
 
 
 class Work:
@@ -54,8 +56,9 @@ class Work:
                 "gdm": 21,
                 "pgdm": 22,
                 "sdmnm": 23,
-                "pmcdm": 24,
-                "pmcdp": 25
+                "pmcd": 24,
+                "pmcdp": 25,
+                "pmcd3": 26
             },
             "description": {
                 "none": "do nothing",
@@ -82,8 +85,9 @@ class Work:
                 "gdm": "Gradient descent method",
                 "pgdm": "Partan gradient descent method",
                 "sdmnm": "Second derivative method: Newton`s method",
-                "pmcdm": "The Powell method of conjugate directions (m)",
-                "pmcdp": "The Powell method of conjugate directions (p)"
+                "pmcd": "The Powell method of conjugate directions",
+                "pmcdp": "The Powell method of conjugate directions (p)",
+                "pmcd3": "The Powell method of conjugate directions (p)"
             }
         }
         pass
@@ -208,12 +212,17 @@ class Work:
                 Task.dostaff()
                 pass
             elif task == 24:
-                Task = powell_method_conjugate_directions_m.PMCD()
+                Task = powell_method_conjugate_directions.PMCD()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
             elif task == 25:
                 Task = powell_method_conjugate_directions_p.PMCD()
+                Task.importparam(self.accuracy)
+                Task.dostaff()
+                pass
+            elif task == 26:
+                Task = powell_method_conjugate_directions_3.PMCD3()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass

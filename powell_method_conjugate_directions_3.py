@@ -17,14 +17,14 @@ import matplotlib.patches as patches
 import sven_method
 import dsk_paula_v2
 import golden_section_search
-import dichotomy_method_old
+import dichotomy_method
 
 
 
 from resource import expression
 
 
-class PMCD:
+class PMCD3:
     def __init__(self):
         self.commands = {
             "commands": {
@@ -83,7 +83,7 @@ class PMCD:
         self.gsm = golden_section_search.GSS()
         self.gsm.importparam(self.accuracy)
 
-        self.dichom = dichotomy_method_old.DM()
+        self.dichom = dichotomy_method.DM()
         self.importparam(self.accuracy)
 
     def showCommands(self):
@@ -120,7 +120,10 @@ class PMCD:
 
         #self.expression = expression.Expression("Function", "3*x1**2+2*x1*x2+2*x2**2")
         #self.expression = expression.Expression("Function", "(x1-15)**2-x1*x2+3*x2**2")
-        self.expression = expression.Expression("Function", "2*x1**2+2*x1*x2+x2**2")
+        #self.expression = expression.Expression("Function", "2*x1**2+2*x1*x2+x2**2")
+
+        self.expression = expression.Expression("Function", "2*x1**2+x1*x2+x2*x3+2*x2**2+3*x3**2")
+
         self.r_expression = self.expression.copy()
 
         self.expression.parameters["unimodal"] = True
@@ -128,7 +131,10 @@ class PMCD:
         #self.x_start = [[8.0, 9.0], [10.0, 11.0], [8.0, 11.0]]
         #self.x_start = [7.0, 6.0]
         #self.x_start = [-23.5, -23.5]
-        self.x_start = [4.0, 4.0]
+        #self.x_start = [-4.0, 4.0]
+
+        self.x_start = [3.0, 4.0, 5.0]
+
         self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "h": 0.001}
         self.result = {"i": [], "xk": [], "fx": [], "action": []}
         self.hg = matrix.Matrix([[0]], "Hessian matrix")
@@ -164,7 +170,7 @@ class PMCD:
         task = 0
         while (task != 1):
             print('')
-            print("The Powell method of conjugate directions")
+            print("The Powell method of conjugate directions original")
             print('')
             task = self.enterCommand()
             if task == 2:
@@ -198,14 +204,13 @@ class PMCD:
 
     def resolve(self):
         self.makedefault()
-        action = "Next point"
         k = 0
-        flag = 0
+        flag = 2
         part = 0
         c_lambda = 0.0
-        x_w = [self.x_start[0], self.x_start[1]]
+        x_w = self.x_start.copy()
         f_x_w = self.expression.execute_l(x_w)
-        gradient = matrix.Vector(self.get_gradient(x_w), "Gradient")
+        #gradient = matrix.Vector(self.get_gradient(x_w), "Gradient")
         s1 = matrix.Vector([1.0, 0.0], "Vector S(1)")
         s2 = matrix.Vector([0.0, 1.0], "Vector S(2)")
 
@@ -217,7 +222,7 @@ class PMCD:
         #s_flag.chel(flag, 1.0)
         s_flag.vector[flag] = 1.0
         d_lambda = self.norm(x_w) / self.norm(s_flag.vector)
-        while self.halting_check() and k <= 4 and d_lambda > 0.001:
+        while self.halting_check() and k <= 5 and d_lambda > 0.001:
             k += 1
 
             if part < 3:
@@ -228,25 +233,23 @@ class PMCD:
                 #s_flag.chel(flag, 1.0)
                 s_flag.vector[flag] = 1.0
                 interval = self.sven_method(x_w, s_flag, flag, part)
-                if part == 0:
+                if part in [0, 3]:
                     c_lambda = self.dichotomy_method(interval)
                     action = "Next point by Dichotomy method"
-                elif part == 1:
+                elif part in [2, 1]:
                     c_lambda = self.golden_section_search_method(interval)
                     action = "Next point by Golden section search method"
-                elif part == 2:
-                    c_lambda = self.dsk_paula(x_w[flag], d_lambda)
+                elif part == 6:
+                    c_lambda = self.dsk_paula(x_w[flag], d_lambda, interval)
                     action = "Next point by DSK Paula method"
                 else:
                     print("Error: part is wrong")
-
-                #c_lambda = -c_lambda
 
                 x_w[flag] = c_lambda
                 d_lambda = self.get_d_lambda(x_w, s_flag)
                 f_x_w = self.expression.execute_l(x_w)
                 self.collect_data(k, x_w, f_x_w, action)
-            elif part == 3:
+            elif part == 4:
                 action = "Next point by single lambda for all coordinates"
                 x_w = self.quad_step(x_w, s_flag, d_lambda, flag, part)
                 d_lambda = self.get_d_lambda(x_w, s_flag)
@@ -263,7 +266,7 @@ class PMCD:
             else:
                 flag += 1
 
-            if part > 3:
+            if part > 4:
                 part = 0
             else:
                 part += 1
@@ -281,13 +284,12 @@ class PMCD:
         start = 0.0
         c_lambda = []
         # S = matrix.Vector([0.0, 1.0], "Vector S(1)")
-        s.vector = self.dif(self.result["xk"][-1], self.result["xk"][-3])
+        s.vector = self.dif(self.result["xk"][-1], self.result["xk"][1])
         #d_lambda = 0.1 * self.norm(x_w) / self.norm(s.vector)
 
         interval = self.sven_method(x_w, s, flag, part)
-        print("For q dlambda is:", d_lambda)
-        #0.0105
-        c_lambda = self.dsk_paula(x_w[flag], self.epsilon[0])
+
+        c_lambda = self.dsk_paula(x_w[flag], d_lambda, interval)
         #c_lambda = self.dichotomy_method(interval)
         #c_lambda = -c_lambda
         print(c_lambda)
@@ -328,84 +330,55 @@ class PMCD:
         self.r_expression.rename(self.expression.name)
         #S = matrix.Vector([0.0, 1.0], "Vector S(1)")
         d_lambda = self.get_d_lambda(x_w, S)
-        if part < 3:
+        if part < 4:
             # S(flag)
             self.r_expression.replace_arg(self.arguments_list(x_w, flag))
             start = x_w[flag]
-        elif part == 3:
+        elif part == 4:
             self.r_expression.replace_arg(self.lambda_arguments_list(x_w, S, flag))
             start = x_w[0]
         else:
             print("Wrong Vector S([1, 2])")
-            start = x_w[0]
             stat = False
         if stat:
             self.sm.makedefault()
+            print("In Sven by part #", part)
+            print("Flag", flag)
             self.r_expression.show_expr()
             self.sm.expression = self.r_expression.copy()
             self.sm.x_start = start
+            # d_lambda here
+            print("D lambda is", d_lambda)
             self.sm.d = d_lambda
             self.sm.expression.show_expr()
             self.sm.resolve()
             raw_group = self.sm.find_min()
-            interval.append(raw_group["xk"][0])
-            interval.append(raw_group["xk"][1])
+            print("Raw group", raw_group)
+            self.sm.printresult_graph()
+            #self.par_sort(raw_group["xk"], raw_group["fxk"])
+            interval = raw_group["xk"].copy()
+            interval.sort()
+            interval.pop(1)
+            print("Raw group", interval)
+            #interval.append(raw_group["xk"][1])
+            #interval.append(raw_group["xk"][2])
+            print("Interval is:", interval)
             pass
         else:
             interval = None
         return interval
 
-    def sven_method0(self, x_w, S):
-        stat = True
-        start = 0.0
-        c_lambda = []
-        self.r_expression = self.expression.copy()
-        self.r_expression.rename(self.expression.name)
-        #S = matrix.Vector([0.0, 1.0], "Vector S(1)")
-        d_lambda = 0.1 * self.norm(x_w) / self.norm(S.vector)
-        if S.vector[0] == 0.0:
-            # S(2)
-            self.r_expression.replace_arg([x_w[0], None])
-            start = x_w[1]
-            pass
-        elif S.vector[1] == 0.0:
-            # S(1)
-            self.r_expression.replace_arg([None, x_w[1]])
-            start = x_w[0]
-            pass
-        elif S.name == "Vector S(3)":
-            self.r_expression.replace_arg([
-                "(" + str(x_w[0]) + "+" + str(S.vector[0]) + "*x" + ")",
-                "(" + str(x_w[1]) + "+" + str(S.vector[1]) + "*x" + ")"
-            ])
-            start = x_w[0]
-        else:
-            print("Wrong Vector S([1, 2])")
-            stat = False
-        if stat:
-            self.sm.makedefault()
-            self.r_expression.show_expr()
-            self.sm.expression = self.r_expression.copy()
-            self.sm.x_start = start
-            self.sm.expression.show_expr()
-            self.sm.resolve()
-            raw_group = self.sm.find_min()
-            c_lambda.append(raw_group["xk"][0])
-            c_lambda.append(raw_group["xk"][1])
-            pass
-        else:
-            c_lambda = None
-        return c_lambda
-
-    def dsk_paula(self, x_start, d_lambda):
+    def dsk_paula(self, x_start, d_lambda, interval):
         c_lambda = None
         if True:
             self.dsk.makedefault()
             self.dsk.x_start = x_start
-            self.dsk.d_lambda = d_lambda
+            #self.dsk.h = d_lambda
             self.dsk.expression = self.r_expression.copy()
             self.dsk.epsilon = self.epsilon.copy()
+            self.dsk.external_raw_group = {"xk": interval.copy()}
             self.dsk.resolve()
+            self.dsk.printresult_g()
             c_lambda = self.dsk.result["xst"]
         else:
             print("Error in DSK Paula method: Interval = None (must be list)")
@@ -421,6 +394,7 @@ class PMCD:
             self.gsm.expression.range = interval.copy()
             self.gsm.epsilon = self.epsilon[0]
             self.gsm.resolve()
+            self.gsm.printresult_g()
             c_lambda = (self.gsm.result["a"][-1] + self.gsm.result["b"][-1]) / 2.0
         else:
             print("Error in golden section method: Interval = None (must be list)")
@@ -433,11 +407,11 @@ class PMCD:
         if interval != None:
             self.dichom.makedefault()
             self.dichom.expression = self.r_expression.copy()
+            print("Interval in Dichotomy is:", interval)
             self.dichom.expression.range = interval.copy()
             self.dichom.epsilon = self.epsilon[0]
-            self.dichom.way = False
             self.dichom.resolve()
-            self.dichom.printresult()
+            self.dichom.way = True
             self.dichom.printresult_g()
             c_lambda = (self.dichom.result["x1"][-1] + self.dichom.result["x2"][-1]) / 2.0
         else:
@@ -502,8 +476,22 @@ class PMCD:
             i += 1
         return result
 
-    def par_sort(self):
-        pass
+    @staticmethod
+    def deepcopy(x):
+        xn = [[], [], []]
+        for i in range(len(x)):
+            for j in range(len(x[i])):
+                xn[i].append(x[i][j])
+        return xn
+
+    def par_sort(self, x, f):
+        f_temp = f.copy()
+        x_temp = x.copy()
+        f.sort()
+        index = [i for i in range(len(x))]
+        f.sort()
+        for i in range(len(x)):
+            x[i] = x_temp[f_temp.index(f[i])]
 
     @staticmethod
     def compare(x1, x2):
@@ -570,7 +558,6 @@ class PMCD:
         ax.add_patch(patch)
 
         xs, ys = zip(*verts)
-        ax.plot(xs, ys, 'x--', lw=2, color='black', ms=10)
         plt.xlabel('X1')
         plt.ylabel('X2')
         plt.title('The Powell method of conjugate directions')

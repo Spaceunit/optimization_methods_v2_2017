@@ -98,7 +98,8 @@ class GDM:
         #self.expression = expression.Expression("Function", "4*(x1-2)**2+(x2-1)**2")
         #self.expression = expression.Expression("Function", "4*(x1-5)**2+(x2-6)**2")
 
-        self.expression = expression.Expression("Function", "3*x1**2+2*x1*x2+2*x2**2")
+        #self.expression = expression.Expression("Function", "3*x1**2+2*x1*x2+2*x2**2")
+        self.expression = expression.Expression("Function", "2*x1**2+x1*x2+3*x2**2")
 
         self.expression.parameters["unimodal"] = True
         self.expression.parameters["global_min"] = [2.0, 1.0]
@@ -181,6 +182,7 @@ class GDM:
         dfd = self.get_dfd(x_w)
         print("Get lambda...")
         clambda = self.get_lambda(x_w)
+        clambda = 1.0
         print("Get lambda ok")
         f_x_w = self.expression.execute_l(x_w)
 
@@ -190,10 +192,11 @@ class GDM:
             k += 1
             print(k)
             dfd = self.mul(dfd, clambda)
-            x_w = self.dif(x_w, dfd)
+            x_w = self.sum(x_w, dfd)
 
             dfd = self.get_dfd(x_w)
             clambda = self.get_lambda(x_w)
+            clambda = 1.0
             f_x_w = self.expression.execute_l(x_w)
 
             self.collect_data(k, x_w, f_x_w, "Next point")

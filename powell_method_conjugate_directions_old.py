@@ -17,7 +17,7 @@ import matplotlib.patches as patches
 import sven_method
 import dsk_paula_v2
 import golden_section_search
-import dichotomy_method
+import dichotomy_method_old
 
 
 
@@ -83,7 +83,7 @@ class PMCD:
         self.gsm = golden_section_search.GSS()
         self.gsm.importparam(self.accuracy)
 
-        self.dichom = dichotomy_method.DM()
+        self.dichom = dichotomy_method_old.DM()
         self.importparam(self.accuracy)
 
     def showCommands(self):

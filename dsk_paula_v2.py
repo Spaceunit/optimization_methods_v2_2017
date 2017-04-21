@@ -36,6 +36,7 @@ class DSKP:
         self.sm.importparam(self.accuracy)
         self.result = {"xst": None, "fsxt" : None}
         self.raw_group = {}
+        self.external_raw_group = None
         self.h = 0.1
         self.makedefault()
 
@@ -201,10 +202,14 @@ class DSKP:
         self.sm.epsilon = self.epsilon[0]
         self.sm.expression = self.expression.copy()
         self.sm.resolve()
-        self.raw_group = self.sm.result
+        if self.external_raw_group == None:
+            self.raw_group = self.sm.result
+        else:
+            self.raw_group = self.external_raw_group
         self.dx = self.sm.d
-
+        print("Three points is", self.sm.find_min())
         x_new = self.dsk(self.sm.find_min())
+        print("X_NEW is ", x_new)
         #x_new = []
 
         self.paul(x_new)
@@ -259,8 +264,29 @@ class DSKP:
                 x3 = x_new - self.dx
             x = [x_new, x2, x3]
             f3 = self.expression.execute(min(x))
-            a1 = (f2 - f1) / (x2 - x1)
-            a2 = ((f3 - f1) / (x3 - x1) - (f2 - f1) / (x2 - x1)) / (x3 - x2)
+            try:
+                a1 = (f2 - f1) / (x2 - x1)
+            except ZeroDivisionError:
+                a1 = (f2 - f1) / float('Inf')
+            part1 = (x3 - x1)
+            part2 = (x2 - x1)
+            part3 = (x3 - x2)
+            try:
+                part01 = (f3 - f1) / part1
+            except ZeroDivisionError:
+                part01 = (f3 - f1) / float('Inf')
+
+            try:
+                part02 = (f2 - f1) / part2
+            except ZeroDivisionError:
+                part02 = (f2 - f1) / float('Inf')
+
+            try:
+                a2 = (part01 - part02) / part3
+            except ZeroDivisionError:
+                a2 = (part01 - part02) / float('Inf')
+
+            #a2 = ((f3 - f1) / part1 - (f2 - f1) / part2) / part3
             xst = 0.5 * (x1 + x2) - a1 / (a2)
             fs = self.expression.execute(xst)
             #print("i:", i)
