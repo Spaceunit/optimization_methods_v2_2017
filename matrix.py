@@ -298,6 +298,16 @@ class Matrix:
         else:
             print("Make dimatrix: dim is < 0")
 
+    def makedimatrix_f(self, dim):
+        if (dim > 0):
+            self.makezeromatrix(dim)
+            for i in range(0, dim):
+                self.matrix[i][i] = 1.0
+            self.len[0] = len(self.matrix)
+            self.len[1] = len(self.matrix[0])
+        else:
+            print("Make dimatrix: dim is < 0")
+
     def join(self, jm):
         for i in range(0, self.len[0]):
             for j in range(0, jm.len[1]):
