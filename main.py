@@ -25,6 +25,7 @@ import powell_method_conjugate_directions_p
 import powell_method_conjugate_directions_m
 import powell_method_conjugate_directions_3
 import powell_method_conjugate_directions
+import fletcher_reeves_conjugate_gradient_method
 
 
 class Work:
@@ -58,7 +59,8 @@ class Work:
                 "sdmnm": 23,
                 "pmcd": 24,
                 "pmcdp": 25,
-                "pmcd3": 26
+                "pmcd3": 26,
+                "frcgm": 27
             },
             "description": {
                 "none": "do nothing",
@@ -87,7 +89,8 @@ class Work:
                 "sdmnm": "Second derivative method: Newton`s method",
                 "pmcd": "The Powell method of conjugate directions",
                 "pmcdp": "The Powell method of conjugate directions (p)",
-                "pmcd3": "The Powell method of conjugate directions (p)"
+                "pmcd3": "The Powell method of conjugate directions (p)",
+                "frcgm": "The Fletcher-Reeves conjugate gradient method"
             }
         }
         pass
@@ -223,6 +226,11 @@ class Work:
                 pass
             elif task == 26:
                 Task = powell_method_conjugate_directions_3.PMCD3()
+                Task.importparam(self.accuracy)
+                Task.dostaff()
+                pass
+            elif task == 27:
+                Task = fletcher_reeves_conjugate_gradient_method.FRCGM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
