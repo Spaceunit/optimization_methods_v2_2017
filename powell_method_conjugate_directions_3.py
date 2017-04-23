@@ -225,7 +225,7 @@ class PMCD3:
         while self.halting_check() and k < 5 and d_lambda > 0.001:
             k += 1
 
-            if part < 3:
+            if part in [0, 1, 2, 3]:
                 #x_w[flag] = c_lambda
                 s_flag.makezero_f(len(x_w))
                 print(part)
@@ -236,10 +236,10 @@ class PMCD3:
                 if part in [0, 3]:
                     c_lambda = self.dichotomy_method(interval)
                     action = "Next point by Dichotomy method"
-                elif part in [2, 1]:
+                elif part in [1]:
                     c_lambda = self.golden_section_search_method(interval)
                     action = "Next point by Golden section search method"
-                elif part == 6:
+                elif part in [2]:
                     c_lambda = self.dsk_paula(x_w[flag], d_lambda, interval)
                     action = "Next point by DSK Paula method"
                 else:
@@ -249,9 +249,9 @@ class PMCD3:
                 d_lambda = self.get_d_lambda(x_w, s_flag)
                 f_x_w = self.expression.execute_l(x_w)
                 self.collect_data(k, x_w, f_x_w, action)
-            elif part == 4:
+            elif part in [4]:
                 action = "Next point by single lambda for all coordinates"
-                x_w = self.quad_step(x_w, s_flag, d_lambda, flag, part)
+                x_w = self.quad_step(x_w, s_flag, None, flag, part)
                 d_lambda = self.get_d_lambda(x_w, s_flag)
                 #s3.vector = self.dif(self.result["xk"][-1], self.result["xk"][-3])
                 #s3.vector = self.mul(s3.vector, c_lambda)
@@ -289,7 +289,7 @@ class PMCD3:
 
         interval = self.sven_method(x_w, s, flag, part)
 
-        c_lambda = self.dsk_paula(x_w[flag], d_lambda, interval)
+        c_lambda = self.dsk_paula(0.0, d_lambda, interval)
         #c_lambda = self.dichotomy_method(interval)
         #c_lambda = -c_lambda
         print(c_lambda)
@@ -373,7 +373,7 @@ class PMCD3:
         if True:
             self.dsk.makedefault()
             self.dsk.x_start = x_start
-            #self.dsk.h = d_lambda
+            self.dsk.d_lambda = d_lambda
             self.dsk.expression = self.r_expression.copy()
             self.dsk.epsilon = self.epsilon.copy()
             self.dsk.external_raw_group = {"xk": interval.copy()}

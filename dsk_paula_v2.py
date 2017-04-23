@@ -207,9 +207,14 @@ class DSKP:
         else:
             self.raw_group = self.external_raw_group
         self.dx = self.sm.d
+        #if self.external_raw_group == None:
         print("Three points is", self.sm.find_min())
         x_new = self.dsk(self.sm.find_min())
         print("X_NEW is ", x_new)
+        #else:
+        #    print("Three points is", self.raw_group)
+        #    x_new = self.dsk(self.raw_group)
+        #    print("X_NEW is ", x_new)
         #x_new = []
 
         self.paul(x_new)
