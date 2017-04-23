@@ -13,6 +13,10 @@ from matplotlib.path import Path
 import matplotlib.patches as patches
 
 
+import matplotlib as mpl
+from mpl_toolkits.mplot3d import Axes3D
+
+
 # methods...
 import sven_method
 import dsk_paula_v2
@@ -558,13 +562,38 @@ class PMCD:
         plt.ylabel('X2')
         plt.title('The Powell method of conjugate directions')
         ax.plot(xs, ys, 'x--', lw=2, color='black', ms=10)
-        cord_x = np.array([self.result["xk"][1][0], self.result["xk"][3][0]])
-        cord_y = np.array([self.result["xk"][1][1], self.result["xk"][3][1]])
+        cord_x = np.array([self.result["xk"][1][0], self.result["xk"][-1][0]])
+        cord_y = np.array([self.result["xk"][1][1], self.result["xk"][-1][1]])
         plt.plot(cord_x, cord_y, 'r--')
         plt.grid(True)
         plt.show()
 
     def printresult_3d(self):
+        mpl.rcParams['legend.fontsize'] = 14
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        # theta = np.linspace(-4 * np.pi, 4 * np.pi, 100)
+        # z = np.linspace(-2, 2, 100)
+        i = 0
+        path = []
+        while i < len(self.result["xk"]):
+            path.append((self.result["xk"][i][0], self.result["xk"][i][1], self.result["fx"][i]))
+            # path[1].append(self.result["xk"][i][1])
+            # path[2].append(self.result["xk"][i][2])
+            i += 1
+        # r = z ** 2 + 1
+        # x = r * np.sin(theta)
+        # y = r * np.cos(theta)
+        x, y, z = zip(*path)
+        ax.plot(x, y, z, 'x-', lw=2, color='black', ms=10, label='History of point movement')
+        cord_x = np.array([self.result["xk"][1][0], self.result["xk"][-1][0]])
+        cord_y = np.array([self.result["xk"][1][1], self.result["xk"][-1][1]])
+        cord_z = np.array([self.result["fx"][1], self.result["fx"][-1]])
+        ax.plot(cord_x, cord_y, cord_z, '--', lw=2, color='red', ms=10, label='line between x1 and xn')
+        ax.legend()
+
+        plt.show()
         pass
 
     def printresult(self):

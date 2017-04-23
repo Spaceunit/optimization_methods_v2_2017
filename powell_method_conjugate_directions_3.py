@@ -12,6 +12,11 @@ from matplotlib import mlab
 from matplotlib.path import Path
 import matplotlib.patches as patches
 
+import matplotlib as mpl
+from mpl_toolkits.mplot3d import Axes3D
+#import numpy as np
+#import matplotlib.pyplot as plt
+
 
 # methods...
 import sven_method
@@ -222,7 +227,7 @@ class PMCD3:
         #s_flag.chel(flag, 1.0)
         s_flag.vector[flag] = 1.0
         d_lambda = self.norm(x_w) / self.norm(s_flag.vector)
-        while self.halting_check() and k < 5 and d_lambda > 0.001:
+        while self.halting_check() and k < 5 and self.norm(x_w) > 0.001:
             k += 1
 
             if part in [0, 1, 2, 3]:
@@ -284,6 +289,11 @@ class PMCD3:
         start = 0.0
         c_lambda = []
         # S = matrix.Vector([0.0, 1.0], "Vector S(1)")
+        i = 0
+        #while i < len(self.result["xk"][1]):
+        #    self.result["xk"][1][i] = round(self.result["xk"][1][i], 1)
+        #    self.result["xk"][-1][i] = round(self.result["xk"][-1][i], 1)
+        #    i += 1
         s.vector = self.dif(self.result["xk"][-1], self.result["xk"][1])
         #d_lambda = 0.1 * self.norm(x_w) / self.norm(s.vector)
 
@@ -318,7 +328,7 @@ class PMCD3:
         i = 0
         replace_array = []
         while i < len(x_w):
-            replace_array.append("(" + str(x_w[i]) + "+" + str(s.vector[i]) + "*x" + ")")
+            replace_array.append("((" + str(x_w[i]) + ")+(" + str(s.vector[i]) + ")*x" + ")")
             i += 1
         return replace_array
 
@@ -336,7 +346,7 @@ class PMCD3:
             start = x_w[flag]
         elif part == 4:
             self.r_expression.replace_arg(self.lambda_arguments_list(x_w, S, flag))
-            start = x_w[0]
+            start = 0.0
         else:
             print("Wrong Vector S([1, 2])")
             stat = False
@@ -562,13 +572,38 @@ class PMCD3:
         plt.ylabel('X2')
         plt.title('The Powell method of conjugate directions')
         ax.plot(xs, ys, 'x--', lw=2, color='black', ms=10)
-        cord_x = np.array([self.result["xk"][1][0], self.result["xk"][3][0]])
-        cord_y = np.array([self.result["xk"][1][1], self.result["xk"][3][1]])
+        cord_x = np.array([self.result["xk"][1][0], self.result["xk"][-1][0]])
+        cord_y = np.array([self.result["xk"][1][1], self.result["xk"][-1][1]])
         plt.plot(cord_x, cord_y, 'r--')
         plt.grid(True)
         plt.show()
 
     def printresult_3d(self):
+        mpl.rcParams['legend.fontsize'] = 14
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        #theta = np.linspace(-4 * np.pi, 4 * np.pi, 100)
+        #z = np.linspace(-2, 2, 100)
+        i = 0
+        path = []
+        while i < len(self.result["xk"]):
+            path.append((self.result["xk"][i][0], self.result["xk"][i][1], self.result["xk"][i][2]))
+            #path[1].append(self.result["xk"][i][1])
+            #path[2].append(self.result["xk"][i][2])
+            i += 1
+        #r = z ** 2 + 1
+        #x = r * np.sin(theta)
+        #y = r * np.cos(theta)
+        x, y, z = zip(*path)
+        ax.plot(x, y, z, 'x-', lw=2, color='black', ms=10, label='History of point movement')
+        cord_x = np.array([self.result["xk"][1][0], self.result["xk"][-1][0]])
+        cord_y = np.array([self.result["xk"][1][1], self.result["xk"][-1][1]])
+        cord_z = np.array([self.result["xk"][1][2], self.result["xk"][-1][2]])
+        ax.plot(cord_x, cord_y, cord_z, '--', lw=2, color='red', ms=10, label='line between x1 and xn')
+        ax.legend()
+
+        plt.show()
         pass
 
     def printresult(self):
