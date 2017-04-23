@@ -120,6 +120,7 @@ class PMCD:
 
         #self.expression = expression.Expression("Function", "3*x1**2+2*x1*x2+2*x2**2")
         self.expression = expression.Expression("Function", "(x1-15)**2-x1*x2+3*x2**2")
+        #self.expression = expression.Expression("Function", "(x1-13)**2-x1*x2+3*x2**2")
         #self.expression = expression.Expression("Function", "2*x1**2+2*x1*x2+x2**2")
         self.r_expression = self.expression.copy()
 
@@ -128,6 +129,7 @@ class PMCD:
         #self.x_start = [[8.0, 9.0], [10.0, 11.0], [8.0, 11.0]]
         #self.x_start = [7.0, 6.0]
         self.x_start = [-23.5, -23.5]
+        #self.x_start = [-20.9, -20.9]
         #self.x_start = [-4.0, 4.0]
         self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "h": 0.001}
         self.result = {"i": [], "xk": [], "fx": [], "action": []}
@@ -216,7 +218,7 @@ class PMCD:
         #s_flag.chel(flag, 1.0)
         s_flag.vector[flag] = 1.0
         d_lambda = self.norm(x_w) / self.norm(s_flag.vector)
-        while self.halting_check() and k <= 4 and d_lambda > 0.001:
+        while self.halting_check() and k < 4 and d_lambda > 0.001:
             k += 1
 
             if part < 3:
@@ -260,7 +262,7 @@ class PMCD:
             else:
                 flag += 1
 
-            if part > 3:
+            if part > 2:
                 part = 0
             else:
                 part += 1
