@@ -27,6 +27,7 @@ import powell_method_conjugate_directions_3
 import powell_method_conjugate_directions
 import fletcher_reeves_conjugate_gradient_method
 import quasi_newton_method
+import conjugate_direction_method
 
 
 class Work:
@@ -62,7 +63,8 @@ class Work:
                 "pmcdp": 25,
                 "pmcd3": 26,
                 "frcgm": 27,
-                "qnm": 28
+                "qnm": 28,
+                "cdm": 29
             },
             "description": {
                 "none": "do nothing",
@@ -93,7 +95,8 @@ class Work:
                 "pmcdp": "The Powell method of conjugate directions (p)",
                 "pmcd3": "The Powell method of conjugate directions (p)",
                 "frcgm": "The Fletcher-Reeves conjugate gradient method",
-                "qnm": "Quasi-Newton method"
+                "qnm": "Quasi-Newton method",
+                "cdm": "Conjugate gradient method"
             }
         }
         pass
@@ -239,6 +242,11 @@ class Work:
                 pass
             elif task == 28:
                 Task = quasi_newton_method.QNM()
+                Task.importparam(self.accuracy)
+                Task.dostaff()
+                pass
+            elif task == 29:
+                Task = conjugate_direction_method.CDM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
