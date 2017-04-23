@@ -282,7 +282,7 @@ class PMCD3:
             d_lambda = self.norm(x_w) / self.norm(s.vector)
         except ZeroDivisionError:
             d_lambda = self.norm(x_w) / float('Inf')
-        return d_lambda
+        return 1.0 * d_lambda
 
     def quad_step(self, x_w, s, d_lambda, flag, part):
         stat = True
@@ -467,7 +467,7 @@ class PMCD3:
         except ZeroDivisionError:
             result = float('Inf')
 
-        return result
+        return 0.1 * result
 
     #direction of fatest descent
     def get_dfd(self, x_w):
