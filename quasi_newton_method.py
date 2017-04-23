@@ -199,11 +199,11 @@ class QNM:
 
         self.previous_s = matrix.Vector([0.0 for _ in self.x_start], "previous Vector S")
         self.s = matrix.Vector([0.0 for _ in self.x_start], "Vector S")
-        self.previous_g = matrix.Vector([0.0 for _ in self.x_start], "previous Gradient")
-        self.g = matrix.Vector(self.get_gradient(x_w), "Gradient")
 
+        self.g = matrix.Vector(self.get_gradient(x_w), "Gradient")
+        self.previous_g = matrix.Vector(self.g.vector, "previous Gradient")
         print("Get lambda...")
-        clambda = self.get_lambda(x_w)
+        clambda = 1
         print("Get lambda ok")
         f_x_w = self.expression.execute_l(x_w)
 
@@ -213,10 +213,19 @@ class QNM:
         self.collect_data(k, x_w, f_x_w, "Initial point")
 
         k += 1
+        print("step", k)
+        print("-----------------------------")
+        print("c_lambda", clambda)
         self.s.vector = self.mul(self.s.vector, clambda)
 
         self.s.showvector()
         x_w = self.sum(x_w, self.s.vector)
+        self.previous_g.vector = self.g.vector.copy()
+        self.g.vector = self.get_gradient(x_w)
+
+        self.g.showvector()
+        self.previous_g.showvector()
+
         f_x_w = self.expression.execute_l(x_w)
         self.ac.chel(0, 1, 1.0)
         self.ac.chel(1, 0, 1.0)
@@ -224,9 +233,13 @@ class QNM:
 
         self.collect_data(k, x_w, f_x_w, "First special point")
 
-        while self.halting_check() and k < 60 and self.norm(self.s.vector) > 0.01:
+        print("-----------------------------")
+
+        while self.halting_check() and k < 60 and self.norm(self.s.vector) > 0.1:
 
             k += 1
+            print("step", k)
+            print("-----------------------------")
             self.set_correction_matrix(x_w)
             self.ac.showmatrix()
 
@@ -237,12 +250,22 @@ class QNM:
             self.s.showvector()
 
             clambda = self.get_lambda(x_w)
+            print("c_lambda", clambda)
             self.s.vector = self.mul(self.s.vector, clambda)
+            self.s.showvector()
 
             x_w = self.sum(x_w, self.s.vector)
+            self.previous_g.vector = self.g.vector.copy()
+            self.g.vector = self.get_gradient(x_w)
+
+            self.g.showvector()
+            self.previous_g.showvector()
+
             f_x_w = self.expression.execute_l(x_w)
 
             self.collect_data(k, x_w, f_x_w, "Next point")
+
+            print("-----------------------------")
 
         self.printresult()
 
@@ -264,15 +287,24 @@ class QNM:
         return hg
 
     def set_correction_matrix(self, x_w):
-        delta_x = matrix.Vector(self.dif(x_w, self.result["xk"][-1]), "Delta x")
+        print("Point", x_w)
+        print("Previous point", self.result["xk"][-2])
+        delta_x = matrix.Vector(self.dif(x_w, self.result["xk"][-2]), "Delta x")
         delta_grad = matrix.Vector(self.dif(self.g.vector, self.previous_g.vector), "Delta gradient")
+
+        delta_x.showvector()
+        delta_grad.showvector()
+
         matrix_1 = delta_x.vhm(delta_x, 20)
         try:
             cof = 1.0 / delta_x.hvm(delta_grad, 20)
         except ZeroDivisionError:
             cof = 1.0 / float('Inf')
 
+        print("cof", cof)
         matrix_1.matrixmnum(cof, 20)
+        matrix_1.rename("matrix 1")
+        matrix_1.showmatrix()
 
         matrix_2 = delta_grad.vhm(delta_grad, 20)
         matrix_2 = self.ac.matrixm(matrix_2, 20)
@@ -295,15 +327,10 @@ class QNM:
 
     def get_lambda(self, x_w):
         hg = self.get_hessian_matrix(x_w)
-        #gradient = self.get_gradient(x_w)
-        #dfd = self.get_dfd(x_w)
 
-        gradient = matrix.Vector(self.get_gradient(x_w), "Gradient")
-        dfd = matrix.Vector(self.get_dfd(x_w), "DFD")
-
-        part_up = gradient.hvm(dfd, 20)
-        part_down_temp = hg.matrixmv(dfd, 20)
-        part_down = dfd.hvm(part_down_temp, 20)
+        part_up = self.g.hvm(self.s, 20)
+        part_down_temp = hg.matrixmv(self.s, 20)
+        part_down = self.s.hvm(part_down_temp, 20)
 
         try:
             result = part_up / part_down
