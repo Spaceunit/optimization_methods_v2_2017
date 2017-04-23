@@ -215,30 +215,44 @@ class Matrix:
     def rowmnumber(self, i, num, accuracy):
         if (i >= 0):
             if (i < self.len[0]):
-                for j in range(0, self.len[1]):
+                j = 0
+                while j < self.len[1]:
                     self.matrix[i][j] = round(self.matrix[i][j] * num, accuracy)
+                    j += 1
             else:
                 print("rowmnumber: List assignment index out of range!")
         elif (i < 0):
             if (i >= -self.len[0]):
-                for j in range(0, self.len[1]):
+                j = 0
+                while j < self.len[1]:
                     self.matrix[i + self.len[0]][j] = round(self.matrix[i + self.len[0]][j] * num, accuracy)
+                    j += 1
             else:
                 print("rowmnumber: List assignment index out of range!")
         else:
             print("rowmnumber: List assignment index out of range! (sign)")
 
+    def matrixmnum(self, num, accuracy):
+        i = 0
+        while i < self.len[0]:
+            self.rowmnumber(i, num, accuracy)
+            i += 1
+
     def rowdnumber(self, i, num, accuracy):
         if (i >= 0):
             if (i < self.len[0]):
-                for j in range(0, self.len[1]):
+                j = 0
+                while j < self.len[1]:
                     self.matrix[i][j] = round(self.matrix[i][j] / num, accuracy)
+                    j +=1
             else:
                 print("rowdnumber: List assignment index out of range!")
         elif (i < 0):
             if (i >= -self.len[0]):
-                for j in range(0, self.len[1]):
+                j = 0
+                while j < self.len[1]:
                     self.matrix[i + self.len[0]][j] = round(self.matrix[i + self.len[0]][j] / num, accuracy)
+                    j += 1
             else:
                 print("rowdnumber: List assignment index out of range!")
         else:
@@ -264,15 +278,19 @@ class Matrix:
     def rowsummarize(self, i, i2, accuracy):
         if (i >= 0 and i2 >= 0):
             if (i < self.len[0] and i2 < self.len[0]):
-                for j in range(0, self.len[1]):
+                j = 0
+                while j < self.len[1]:
                     self.matrix[i][j] = round(self.matrix[i][j] + self.matrix[i2][j], accuracy)
+                    j += 1
             else:
                 print("rowsubtract: List assignment index out of range!")
         elif (i < 0 and i2 < 0):
             if (i >= -self.len[0] and i2 >= -self.len[0]):
-                for j in range(0, self.len[1]):
+                j = 0
+                while j < self.len[1]:
                     self.matrix[i + self.len[0]][j] = round(
                         self.matrix[i + self.len[0]][j] + self.matrix[i2 + self.len[0]][j], accuracy)
+                    j += 1
             else:
                 print("rowsubtract: List assignment index out of range!")
         else:
@@ -355,42 +373,74 @@ class Matrix:
     def matrixm(self, B, accuracy):
         if (self.len[1] == B.len[0]):
             R = Matrix([], "Result")
-            for n in range(0, self.len[0]):
+            n = 0
+            while n < self.len[0]:
                 R.appendrow(B.len[1])
-                for m in range(0, B.len[1]):
-                    for i in range(0, self.len[1]):
+                m = 0
+                while m < B.len[1]:
+                    i = 0
+                    while i < self.len[1]:
                         sum = R.matrix[n][m]
                         R.matrix[n][m] += round(self.matrix[n][i] * B.matrix[i][m], accuracy)
                         #print("C[",n,m,"]+=","A[",n,i,"]*","B[",i,m,"]")
                         #print(R.matrix[n][m]," is sum of ", sum,"+", self.matrix[n][i],"*", B.matrix[i][m], " n: ", n," i: ", i, " i: ", i," m: ", m)
                         #R.showmatrix()
                 #print("Row [",n,"] is done")
+                        i += 1
+                    m += 1
+                n += 1
             return R
         else:
             print("Matrixm: error j != m")
             return 0
 
     def matrixmv(self, V, accuracy):
-        if (self.len[0] == V.len):
+        if self.len[0] == V.len:
             R = Vector([], "Result")
             R.makezero(self.len[0])
-            for i in range(0, self.len[0]):
-                for j in range(0, V.len):
+            i = 0
+            while i < self.len[0]:
+                j = 0
+                while j < V.len:
                     R.vector[i] += round(self.matrix[i][j] * V.vector[j], accuracy)
+                    j += 1
+                i += 1
             return R
         else:
             print("Matrixmv: error j != m")
             return 0
 
     def matrixsubtract(self, B, accuracy):
-        if (self.len[0] == B.len[0] and self.len[1] == B.len[1]):
+        if self.len[0] == B.len[0] and self.len[1] == B.len[1]:
             R = self.copy()
             R.rename("Result")
-            for i in range(0, self.len[0]):
-                for j in range(0, B.len[1]):
+            i = 0
+            while i < self.len[0]:
+                j = 0
+                while j < B.len[1]:
                     #R.matrix[i][j] -= B.matrix[i][j]
                     R.matrix[i][j] = round(R.matrix[i][j] - B.matrix[i][j], accuracy)
                     #round(R.matrix[i][j], accuracy)
+                    j += 1
+                i += 1
+            return R
+        else:
+            print("Matrix subtract: error j != m")
+            return 0
+
+    def matrixsum(self, B, accuracy):
+        if (self.len[0] == B.len[0] and self.len[1] == B.len[1]):
+            R = self.copy()
+            R.rename("Result")
+            i = 0
+            while i < self.len[0]:
+                j = 0
+                while j < B.len[1]:
+                    #R.matrix[i][j] += B.matrix[i][j]
+                    R.matrix[i][j] = round(R.matrix[i][j] + B.matrix[i][j], accuracy)
+                    #round(R.matrix[i][j], accuracy)
+                    j += 1
+                i += 1
             return R
         else:
             print("Matrix subtract: error j != m")
@@ -398,8 +448,10 @@ class Matrix:
 
     def getcol(self,j):
         r = Vector([],"Column #" + str(j + 1) + "of " + self.name)
-        for i in range(self.len[0]):
+        i = 0
+        while i < self.len[0]:
             r.appendel(self.getel(i, j))
+            i += 1
         return r
 
     def getminor2(self, i, j, vh_r):
@@ -612,6 +664,22 @@ class Vector:
             summ += round(self.vector[i] * v.vector[i], accuracy)
             i += 1
         return summ
+
+    def vhm(self, v, accuracy):
+        if self.len == v.len:
+            R = Matrix([], "Result")
+            n = 0
+            while n < self.len:
+                R.appendrow(v.len)
+                m = 0
+                while m < v.len:
+                    R.matrix[n][m] += round(self.vector[n] * v.vector[m], accuracy)
+                    m += 1
+                n += 1
+            return R
+        else:
+            print("vhm: error j != m")
+            return 0
 
     def dnumber(self, num, accuracy):
         for i in range(0, self.len):

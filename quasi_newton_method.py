@@ -58,6 +58,13 @@ class QNM:
         self.ac = matrix.Matrix([[0]], "Correction matrix")
         self.expression = expression.Expression("No name", "x**2")
         self.accuracy = 3
+
+        self.previous_s = matrix.Vector([0.0, 0.0], "previous Vector S")
+        self.s = matrix.Vector([0.0, 0.0], "Vector S")
+        self.previous_g = matrix.Vector([0.0, 0.0], "previous Gradient")
+        self.g = matrix.Vector([0.0, 0.0], "Gradient")
+
+
         self.epsilon = [1, 1]
         self.mm = True
         self.msycle = 3
@@ -111,7 +118,13 @@ class QNM:
         self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "h": 0.001}
         self.result = {"i": [], "xk": [], "fx": [], "action": []}
         self.hg = matrix.Matrix([[0]], "Hessian matrix")
-        self.hg.makedimatrix(2)
+        self.hg.makedimatrix_f(2)
+        self.ac.makedimatrix_f(len(self.x_start))
+
+        self.previous_s = matrix.Vector([0.0 for _ in self.x_start], "previous Vector S")
+        self.s = matrix.Vector([0.0 for _ in self.x_start], "Vector S")
+        self.previous_g = matrix.Vector([0.0 for _ in self.x_start], "previous Gradient")
+        self.g = matrix.Vector([0.0 for _ in self.x_start], "Gradient")
 
 
     def importparam(self, accuracy):
@@ -178,21 +191,56 @@ class QNM:
     def resolve(self):
         self.makedefault()
         k = 0
-        self.ac.makedimatrix_f()
+        x_w = self.x_start.copy()
+        self.ac.makedimatrix_f(len(x_w))
         turn = True
         x_w = self.x_start.copy()
         hg = self.get_hessian_matrix(x_w)
-        print(gradient)
+
+        self.previous_s = matrix.Vector([0.0 for _ in self.x_start], "previous Vector S")
+        self.s = matrix.Vector([0.0 for _ in self.x_start], "Vector S")
+        self.previous_g = matrix.Vector([0.0 for _ in self.x_start], "previous Gradient")
+        self.g = matrix.Vector(self.get_gradient(x_w), "Gradient")
 
         print("Get lambda...")
         clambda = self.get_lambda(x_w)
         print("Get lambda ok")
         f_x_w = self.expression.execute_l(x_w)
 
+        self.s.vector = self.mul(self.g.vector, -1.0)
+        self.s.showvector()
+
         self.collect_data(k, x_w, f_x_w, "Initial point")
 
-        while self.halting_check() and k < 60 and self.norm(x_w) > 0.01:
+        k += 1
+        self.s.vector = self.mul(self.s.vector, clambda)
+
+        self.s.showvector()
+        x_w = self.sum(x_w, self.s.vector)
+        f_x_w = self.expression.execute_l(x_w)
+        self.ac.chel(0, 1, 1.0)
+        self.ac.chel(1, 0, 1.0)
+        self.ac.showmatrix()
+
+        self.collect_data(k, x_w, f_x_w, "First special point")
+
+        while self.halting_check() and k < 60 and self.norm(self.s.vector) > 0.01:
+
             k += 1
+            self.set_correction_matrix(x_w)
+            self.ac.showmatrix()
+
+            name = self.s.name
+            self.s = self.ac.matrixmv(self.g, 20)
+            self.s.vector = self.mul(self.s.vector, -1.0)
+            self.s.rename(name)
+            self.s.showvector()
+
+            clambda = self.get_lambda(x_w)
+            self.s.vector = self.mul(self.s.vector, clambda)
+
+            x_w = self.sum(x_w, self.s.vector)
+            f_x_w = self.expression.execute_l(x_w)
 
             self.collect_data(k, x_w, f_x_w, "Next point")
 
@@ -215,6 +263,36 @@ class QNM:
 
         return hg
 
+    def set_correction_matrix(self, x_w):
+        delta_x = matrix.Vector(self.dif(x_w, self.result["xk"][-1]), "Delta x")
+        delta_grad = matrix.Vector(self.dif(self.g.vector, self.previous_g.vector), "Delta gradient")
+        matrix_1 = delta_x.vhm(delta_x, 20)
+        try:
+            cof = 1.0 / delta_x.hvm(delta_grad, 20)
+        except ZeroDivisionError:
+            cof = 1.0 / float('Inf')
+
+        matrix_1.matrixmnum(cof, 20)
+
+        matrix_2 = delta_grad.vhm(delta_grad, 20)
+        matrix_2 = self.ac.matrixm(matrix_2, 20)
+        matrix_2 = matrix_2.matrixm(self.ac, 20)
+
+        vector = self.ac.matrixmv(delta_grad, 20)
+
+        try:
+            cof = 1.0 / delta_x.hvm(vector, 20)
+        except ZeroDivisionError:
+            cof = 1.0 / float('Inf')
+
+        matrix_2.matrixmnum(cof, 20)
+
+        matrix_1.matrixsubtract(matrix_2, 20)
+
+        name = self.ac.name
+        self.ac = self.ac.matrixsum(matrix_1, 20)
+        self.ac.rename(name)
+
     def get_lambda(self, x_w):
         hg = self.get_hessian_matrix(x_w)
         #gradient = self.get_gradient(x_w)
@@ -232,7 +310,7 @@ class QNM:
         except ZeroDivisionError:
             result = part_up / float('Inf')
 
-        return result
+        return -result
 
     #direction of fatest descent
     def get_dfd(self, x_w):
