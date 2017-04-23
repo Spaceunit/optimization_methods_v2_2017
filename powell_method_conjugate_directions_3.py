@@ -222,7 +222,7 @@ class PMCD3:
         #s_flag.chel(flag, 1.0)
         s_flag.vector[flag] = 1.0
         d_lambda = self.norm(x_w) / self.norm(s_flag.vector)
-        while self.halting_check() and k <= 5 and d_lambda > 0.001:
+        while self.halting_check() and k < 5 and d_lambda > 0.001:
             k += 1
 
             if part < 3:
@@ -266,7 +266,7 @@ class PMCD3:
             else:
                 flag += 1
 
-            if part > 4:
+            if part > 3:
                 part = 0
             else:
                 part += 1
