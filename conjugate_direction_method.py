@@ -108,14 +108,14 @@ class CDM:
 
         #self.expression = expression.Expression("Function", "3*x1**2+2*x1*x2+2*x2**2")
 
-        self.expression = expression.Expression("Function", "2*x1**2+2*x1*x2+3*x2**2")
+        self.expression = expression.Expression("Function", "4*x1**2+1*x1*x2+2*x2**2")
         #self.expression = expression.Expression("Function", "x1**2+x2**2-4")
 
         self.expression.parameters["unimodal"] = True
         self.expression.parameters["global_min"] = [2.0, 1.0]
         #self.x_start = [[8.0, 9.0], [10.0, 11.0], [8.0, 11.0]]
         #self.x_start = [5.0, 5.0]
-        self.x_start = [1.0, 10.0]
+        self.x_start = [4.0, 4.0]
         self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "h": 0.001}
         self.result = {"i": [], "xk": [], "fx": [], "action": []}
         self.hg = matrix.Matrix([[0]], "Hessian matrix")
