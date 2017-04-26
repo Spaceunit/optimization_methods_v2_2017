@@ -126,6 +126,7 @@ class PMCD:
         self.expression = expression.Expression("Function", "(x1-15)**2-x1*x2+3*x2**2")
         #self.expression = expression.Expression("Function", "(x1-13)**2-x1*x2+3*x2**2")
         #self.expression = expression.Expression("Function", "2*x1**2+2*x1*x2+x2**2")
+        #self.expression = expression.Expression("Function", "(x1-12)**2-x1*x2+3*x2**2")
         self.r_expression = self.expression.copy()
 
         self.expression.parameters["unimodal"] = True
@@ -135,6 +136,7 @@ class PMCD:
         self.x_start = [-23.5, -23.5]
         #self.x_start = [-20.9, -20.9]
         #self.x_start = [-4.0, 4.0]
+        #self.x_start = [-19.6, -19.6]
         self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "h": 0.001}
         self.result = {"i": [], "xk": [], "fx": [], "action": []}
         self.hg = matrix.Matrix([[0]], "Hessian matrix")
@@ -354,6 +356,7 @@ class PMCD:
             self.sm.resolve()
             raw_group = self.sm.find_min()
             print("Raw group", raw_group)
+            self.sm.printresult()
             self.sm.printresult_graph()
             #self.par_sort(raw_group["xk"], raw_group["fxk"])
             interval = raw_group["xk"].copy()
@@ -378,6 +381,7 @@ class PMCD:
             self.dsk.epsilon = self.epsilon.copy()
             self.dsk.external_raw_group = {"xk": interval.copy()}
             self.dsk.resolve()
+            self.dsk.printresult()
             self.dsk.printresult_g()
             c_lambda = self.dsk.result["xst"]
         else:
@@ -394,6 +398,7 @@ class PMCD:
             self.gsm.expression.range = interval.copy()
             self.gsm.epsilon = self.epsilon[0]
             self.gsm.resolve()
+            self.gsm.printresult()
             self.gsm.printresult_g()
             c_lambda = (self.gsm.result["a"][-1] + self.gsm.result["b"][-1]) / 2.0
         else:
@@ -412,6 +417,7 @@ class PMCD:
             self.dichom.epsilon = self.epsilon[0]
             self.dichom.resolve()
             self.dichom.way = True
+            self.dichom.printresult()
             self.dichom.printresult_g()
             c_lambda = (self.dichom.result["x1"][-1] + self.dichom.result["x2"][-1]) / 2.0
         else:
