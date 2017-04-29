@@ -96,14 +96,21 @@ class NMM:
         self.epsilon[1] = self.epsilon[0]
         # a = 4 b = 2 c = 1
         #self.expression = expression.Expression("Function", "4*(x1-3)**2+(x2-2)**2")
-        self.expression = expression.Expression("Function", "4*(x1-2)**2+(x2-1)**2")
+        #self.expression = expression.Expression("Function", "4*(x1-2)**2+(x2-1)**2")
         #self.expression = expression.Expression("Function", "4*(x1-5)**2+(x2-6)**2")
+
+        self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
+
         self.expression.parameters["unimodal"] = True
         self.expression.parameters["global_min"] = [5.0, 6.0]
         #self.x_start = [[8.0, 9.0], [10.0, 11.0], [8.0, 11.0]]
-        self.x_start = [[5.0, 4.0], [7.0, 6.0], [5.0, 6.0]]
+        #self.x_start = [[5.0, 4.0], [7.0, 6.0], [5.0, 6.0]]
         #self.x_start = [[6.0, 5.0], [8.0, 7.0], [6.0, 7.0]]
         # self.x_start = [[6.0, 4.0], [8.0, 7.0], [6.0, 7.0]]
+
+
+        self.x_start = [[-1.2, -1.2], [0.0, 1.2], [1.2, -1.2]]
+
         self.cof = {"a": 1.0, "g": 2.0, "b": 0.5}
         self.result = {"i": [], "xk": [], "fx": [], "action": []}
 
