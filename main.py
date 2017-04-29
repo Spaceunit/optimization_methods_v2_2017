@@ -29,6 +29,8 @@ import fletcher_reeves_conjugate_gradient_method
 import quasi_newton_method
 import conjugate_direction_method
 
+import nelder_mead_method_cw
+
 
 class Work:
     def __init__(self):
@@ -64,7 +66,8 @@ class Work:
                 "pmcd3": 26,
                 "frcgm": 27,
                 "qnm": 28,
-                "cdm": 29
+                "cdm": 29,
+                "cw": 30,
             },
             "description": {
                 "none": "do nothing",
@@ -96,7 +99,8 @@ class Work:
                 "pmcd3": "The Powell method of conjugate directions (p)",
                 "frcgm": "The Fletcher-Reeves conjugate gradient method",
                 "qnm": "Quasi-Newton method",
-                "cdm": "Conjugate gradient method"
+                "cdm": "Conjugate gradient method",
+                "cw": "Course work"
             }
         }
         pass
@@ -250,6 +254,10 @@ class Work:
                 Task.importparam(self.accuracy)
                 Task.dostaff()
                 pass
+            elif task == 30:
+                Task = nelder_mead_method_cw.NMM()
+                Task.importparam(self.accuracy)
+                Task.dostaff()
         pass
 
 
