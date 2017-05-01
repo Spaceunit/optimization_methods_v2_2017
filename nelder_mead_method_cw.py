@@ -148,6 +148,7 @@ class NMM:
             print('')
             task = self.enterCommand()
             if task == 2:
+                self.print_boundary()
                 pass
             elif task == 3:
                 pass
@@ -327,8 +328,38 @@ class NMM:
         self.result["fx"].append(fx.copy())
         self.result["action"].append(action)
 
-    def get_contour_line(self):
+    def get_contour_line(self, a, step):
+        cl_path_up = []
+        cl_path_down = []
+        boundary = self.get_boundary_for_cl(a)
+        boundary.sort()
+        x1 = boundary[0]
+
+        while x1 < boundary[1]:
+            pair = self.cl_expression_x2(x1, a)
+            cl_path_down.append([x1, pair[0]])
+            cl_path_up.append([x1, pair[1]])
+            x1 += step
+
+        pair = self.cl_expression_x2(boundary[1], a)
+        cl_path_down.append([boundary[1], pair[0]])
+        cl_path_up.append([boundary[1], pair[1]])
+
+        cl_path_down.reverse()
+
+        cl_path_down.pop(-1)
+        cl_path_down.pop(0)
+
+        return cl_path_up + cl_path_down
+
         pass
+
+    def cl_expression_x2(self, x1, a):
+        part_root = (0.1 *(a**4 - (x1 - 1)**2))**0.5
+        x2_up = x1 + part_root
+        x2_down = x1 - part_root
+        return [x2_down, x2_up]
+
 
 
     def get_boundary_for_cl(self, a):
@@ -358,6 +389,39 @@ class NMM:
         pass
 
     def printresult_3d(self):
+        pass
+
+    def print_boundary(self):
+        a = 2.0
+        cl_x = []
+        cl_y = []
+        cl = self.get_contour_line(a, 0.1)
+        print(cl)
+
+        i = 0
+        while i < len(cl):
+            cl_x.append(cl[i][0])
+            cl_y.append(cl[i][1])
+            i += 1
+        x = np.array(cl_x)
+        y = np.array(cl_y)
+
+        X, Y = np.meshgrid(x, y)
+
+        Z1 = mlab.bivariate_normal(X, Y, 1.0, 1.0, 0.0, 0.0)
+        Z2 = mlab.bivariate_normal(X, Y, 1.5, 0.5, 1, 1)
+
+        Z = 10.0 * (Z2 - Z1)
+
+        print(Z)
+
+        plt.figure()
+        CS = plt.contour(X, Y, Z,
+                         colors='k',  # negative contours will be dashed by default
+                         )
+        plt.clabel(CS, fontsize=9, inline=1)
+        plt.title('Single color - negative contours dashed')
+        plt.show()
         pass
 
     def printresult(self):
