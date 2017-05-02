@@ -111,6 +111,10 @@ class NMM:
 
         self.x_start = [[-1.2, -1.2], [0.0, 1.2], [1.2, -1.2]]
 
+        #self.x_start = [[-1.2, -1.2], [0.0, 1.2], [-1.2, 1.2]]
+
+        #self.x_start = [[-0.023444155834422054 - 3, 1.203772072451931], [0.0, 1.203772072451931 + 3], [0.023444155834422054 + 3, 1.203772072451931]]
+
         self.cof = {"a": 1.0, "g": 2.0, "b": 0.5}
         self.result = {"i": [], "xk": [], "fx": [], "action": []}
 
@@ -224,8 +228,13 @@ class NMM:
                 self.collect_data(k, x_w, f_arr, "compression")
             else:
                 self.reduction(x_w)
+                i = 0
+                while i < len(x_w):
+                    f_arr[i] = exp_r.execute_l(x_w[i])
+                    i += 1
                 self.collect_data(k, x_w, f_arr, "reduction")
             self.par_sort(x_w, f_arr, cycling)
+
             #self.collect_data(k, x_w, f_arr, "default iterration")
             #k += 1
         self.printresult()
@@ -267,12 +276,20 @@ class NMM:
             cycling[i] = cycling_temp[f_temp.index(f[i])]
 
     @staticmethod
-    def compare(x1, x2):
+    def compare0(x1, x2):
         ansver = False
         for i in range(len(x1)):
             for j in range(len(x1[0])):
                 if x1[i][j] in x2:
                     ansver = True
+        return ansver
+
+    @staticmethod
+    def compare(x1, x2):
+        ansver = False
+        for i in range(len(x1)):
+            if x1[i] in x2:
+                ansver = True
         return ansver
 
     def halting_check(self, f_arr, center):

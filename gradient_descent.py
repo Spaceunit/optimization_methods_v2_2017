@@ -99,14 +99,18 @@ class GDM:
         #self.expression = expression.Expression("Function", "4*(x1-5)**2+(x2-6)**2")
 
         #self.expression = expression.Expression("Function", "3*x1**2+2*x1*x2+2*x2**2")
-        self.expression = expression.Expression("Function", "2*x1**2+x1*x2+3*x2**2")
+        #self.expression = expression.Expression("Function", "2*x1**2+x1*x2+3*x2**2")
+
+        self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
 
         self.expression.parameters["unimodal"] = True
         self.expression.parameters["global_min"] = [2.0, 1.0]
         #self.x_start = [[8.0, 9.0], [10.0, 11.0], [8.0, 11.0]]
         #self.x_start = [7.0, 6.0]
-        self.x_start = [6.0, 4.0]
-        self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "h": 0.001}
+        #self.x_start = [6.0, 4.0]
+        self.x_start = [1.2, 0.0]
+        h = 0.00000001
+        self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "h": 0.1}
         self.result = {"i": [], "xk": [], "fx": [], "action": []}
         self.hg = matrix.Matrix([[0]], "Hessian matrix")
         self.hg.makedimatrix(2)
@@ -182,7 +186,7 @@ class GDM:
         dfd = self.get_dfd(x_w)
         print("Get lambda...")
         clambda = self.get_lambda(x_w)
-        clambda = 1.0
+        #clambda = 1.0
         print("Get lambda ok")
         f_x_w = self.expression.execute_l(x_w)
 
@@ -191,12 +195,15 @@ class GDM:
         while self.halting_check() and k <= 60 and self.norm(dfd) > 0.1:
             k += 1
             print(k)
+            print("Lambda is", clambda)
+            gradient = self.get_gradient(x_w)
+            print("gradient is", gradient)
             dfd = self.mul(dfd, clambda)
             x_w = self.sum(x_w, dfd)
 
             dfd = self.get_dfd(x_w)
             clambda = self.get_lambda(x_w)
-            clambda = 1.0
+            #clambda = 1.0
             f_x_w = self.expression.execute_l(x_w)
 
             self.collect_data(k, x_w, f_x_w, "Next point")
