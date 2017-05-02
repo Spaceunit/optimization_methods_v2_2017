@@ -403,24 +403,61 @@ class NMM:
             cl_x.append(cl[i][0])
             cl_y.append(cl[i][1])
             i += 1
-        x = np.array(cl_x)
-        y = np.array(cl_y)
+        print(cl_x)
+        print(cl_y)
+        #cl_x.sort()
+        #cl_y.sort()
+        #x = np.array(cl_x)
+        #y = np.array(cl_y)
+        delta = 0.001
+        sector = [-1.6, 1.5]
+        x = np.arange(sector[0], sector[1], delta)
+        y = np.arange(sector[0], sector[1], delta)
 
         X, Y = np.meshgrid(x, y)
 
-        Z1 = mlab.bivariate_normal(X, Y, 1.0, 1.0, 0.0, 0.0)
-        Z2 = mlab.bivariate_normal(X, Y, 1.5, 0.5, 1, 1)
+        #Z1 = mlab.bivariate_normal(X, Y, 1.0, 1.0, 0.0, 0.0)
+        #Z2 = mlab.bivariate_normal(X, Y, 1.5, 0.5, 1, 1)
 
-        Z = 10.0 * (Z2 - Z1)
+        #Z = 10.0 * (Z2 - Z1)
+        # "(10*(x1-x2)**2+(x1-1)**2)**0.25"
+        #Z = 10.0 * ((X - Y)**2 + (X - 1)**2)**0.25
+
+        Z = self.expression.execute_l([X, Y])
 
         print(Z)
 
-        plt.figure()
-        CS = plt.contour(X, Y, Z,
-                         colors='k',  # negative contours will be dashed by default
-                         )
-        plt.clabel(CS, fontsize=9, inline=1)
-        plt.title('Single color - negative contours dashed')
+        #
+        fig, ax = plt.subplots()
+        patches = []
+        N = 3
+        for i in range(len(self.result["i"])):
+            for j in range(N):
+                polygon = Polygon(np.array(self.result["xk"][i]), True)
+            patches.append(polygon)
+
+        p = PatchCollection(patches, cmap=matplotlib.cm.jet, alpha=0.4)
+
+        colors = 100 * np.random.rand(len(patches))
+        p.set_array(np.array(colors))
+
+        ax.add_collection(p)
+
+
+        #
+
+        #plt.figure()
+        #CS = plt.contour(X, Y, Z,
+        #                 colors='k'  # negative contours will be dashed by default
+        #                 )
+        #plt.clabel(CS, fontsize=9, inline=1)
+        #plt.title('Single color - negative contours dashed')
+
+        #plt.figure()
+        CS = plt.contour(X, Y, Z)
+        plt.clabel(CS, inline=1, fontsize=10)
+        plt.title('Simplest default with labels')
+
         plt.show()
         pass
 
