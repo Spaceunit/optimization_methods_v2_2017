@@ -184,6 +184,7 @@ class NMM:
     def resolve(self):
         self.makedefault()
         k = 0
+        flag = False
         exp_r = self.expression
         x_w = self.deepcopy(self.x_start)
         center = [0 for _ in range(len(x_w[0]))]
@@ -210,7 +211,15 @@ class NMM:
             print("h_temp is", h_temp)
             f_h_temp = exp_r.execute_l(h_temp)
             print("fcenter is", f_h_temp)
-            if f_h_temp <= f_arr[0]:
+            if flag:
+                self.reduction(x_w)
+                i = 0
+                while i < len(x_w):
+                    f_arr[i] = exp_r.execute_l(x_w[i])
+                    i += 1
+                flag = False
+                self.collect_data(k, x_w, f_arr, "reduction for cycling of min")
+            elif f_h_temp <= f_arr[0]:
                 h_temp_new = self.expansion(center, h_temp, x_w)
                 f_h_temp_new = exp_r.execute_l(h_temp_new)
                 if f_h_temp_new < f_arr[0]:
@@ -234,6 +243,32 @@ class NMM:
                     i += 1
                 self.collect_data(k, x_w, f_arr, "reduction")
             self.par_sort(x_w, f_arr, cycling)
+            cycling_test = self.find_cycling(x_w, self.result["xk"][-1], cycling, self.msycle)
+            if cycling_test != None:
+                print("-------------------")
+                print("Cycling on step", k)
+                action_type = self.analyse_cycling(cycling_test, f_arr, self.result["fx"][-1])
+                if action_type == 0:
+                    x_temp = x_w[-1]
+                    x_w[-1] = x_w[-2]
+                    x_w[-2] = x_temp
+                    f_temp = f_arr[-1]
+                    f_arr[-1] = f_arr[-2]
+                    f_arr[-2] = f_temp
+                    cycling[-1] = 0
+                elif action_type == 1:
+                    x_temp = x_w[0]
+                    x_w[0] = x_w[1]
+                    x_w[1] = x_temp
+                    f_temp = f_arr[0]
+                    f_arr[0] = f_arr[1]
+                    f_arr[1] = f_temp
+                    flag = True
+                    cycling[0] = 0
+                elif action_type == 2:
+                    pass
+                else:
+                    print("WTF")
 
             #self.collect_data(k, x_w, f_arr, "default iterration")
             #k += 1
@@ -274,6 +309,31 @@ class NMM:
         for i in range(len(x)):
             x[i] = x_temp[f_temp.index(f[i])]
             cycling[i] = cycling_temp[f_temp.index(f[i])]
+
+    @staticmethod
+    def analyse_cycling(i_cycling, f_x, f_xp):
+        answer = None
+        if max(f_x) == max(f_xp):
+            answer = 0
+        elif i_cycling == f_x.index(min(f_x)):
+            answer = 1
+        else:
+            answer = 2
+        return answer
+
+
+    @staticmethod
+    def find_cycling(x, xp, cycling, m_cycling):
+        answer = None
+        if NMM.compare(x, xp):
+            i = 0
+            while i < len(x):
+                if x[i] in xp[i]:
+                    cycling[i] += 1
+                if cycling[i] > m_cycling:
+                    answer = i
+                i += 1
+        return answer
 
     @staticmethod
     def compare0(x1, x2):
