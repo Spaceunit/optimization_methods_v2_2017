@@ -97,19 +97,21 @@ class NMM:
         # a = 4 b = 2 c = 1
         #self.expression = expression.Expression("Function", "4*(x1-3)**2+(x2-2)**2")
         #self.expression = expression.Expression("Function", "4*(x1-2)**2+(x2-1)**2")
-        #self.expression = expression.Expression("Function", "4*(x1-5)**2+(x2-6)**2")
+        self.expression = expression.Expression("Function", "4*(x1-5)**2+(x2-6)**2")
+        self.expression.parameters["global_min"] = [5.0, 6.0]
 
-        self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
+        #self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
+        #self.expression.parameters["global_min"] = [1.0, 1.0]
 
         self.expression.parameters["unimodal"] = True
-        self.expression.parameters["global_min"] = [5.0, 6.0]
+        #self.expression.parameters["global_min"] = [5.0, 6.0]
         #self.x_start = [[8.0, 9.0], [10.0, 11.0], [8.0, 11.0]]
         #self.x_start = [[5.0, 4.0], [7.0, 6.0], [5.0, 6.0]]
         #self.x_start = [[6.0, 5.0], [8.0, 7.0], [6.0, 7.0]]
-        # self.x_start = [[6.0, 4.0], [8.0, 7.0], [6.0, 7.0]]
+        self.x_start = [[6.0, 4.0], [8.0, 7.0], [6.0, 7.0]]
 
 
-        self.x_start = [[-1.2, -1.2], [0.0, 1.2], [1.2, -1.2]]
+        #self.x_start = [[-1.2, -1.2], [0.0, 1.2], [1.2, -1.2]]
 
         #self.x_start = [[-1.2, -1.2], [0.0, 1.2], [-1.2, 1.2]]
 
@@ -197,6 +199,9 @@ class NMM:
         self.collect_data(k, x_w, f_arr, "initial simplex")
         while self.halting_check(f_arr, center) and k <= 600:
             k += 1
+            print('')
+            print("----------")
+            print("Index", k)
             i = 1
             #for i in range(len(x_w) - 1):
             #    center = self.sum(center, x_w[i])
@@ -289,7 +294,7 @@ class NMM:
         return h_temp
 
     def compression(self, center, h_temp, x_w):
-        h_temp = self.dif(h_temp, center)
+        h_temp = self.dif(x_w[-1], center)
         h_temp = self.mul(h_temp, self.cof["b"])
         h_temp = self.sum(h_temp, center)
         return h_temp
@@ -309,6 +314,7 @@ class NMM:
         for i in range(len(x)):
             x[i] = x_temp[f_temp.index(f[i])]
             cycling[i] = cycling_temp[f_temp.index(f[i])]
+            f_temp[f_temp.index(f[i])] = None
 
     @staticmethod
     def analyse_cycling(i_cycling, f_x, f_xp):
@@ -366,7 +372,12 @@ class NMM:
 
     @staticmethod
     def dif(v1, v2):
-        return [v1[i] - v2[i] for i in range(len(v1))]
+        i = 0
+        r = []
+        while i < len(v1):
+            r.append(v1[i] - v2[i])
+            i += 1
+        return r
 
     @staticmethod
     def dif_part(v1, v2, part):
@@ -376,7 +387,12 @@ class NMM:
 
     @staticmethod
     def sum(v1, v2):
-        return [v1[i] + v2[i] for i in range(len(v1))]
+        i = 0
+        r = []
+        while i < len(v1):
+            r.append(v1[i] + v2[i])
+            i += 1
+        return r
 
     @staticmethod
     def sum_part(v1, v2, part):
@@ -487,7 +503,8 @@ class NMM:
         #x = np.array(cl_x)
         #y = np.array(cl_y)
         delta = 0.001
-        sector = [-1.6, 1.5]
+        sector = self.expression.parameters["global_min"].copy()
+        sector = [sector[0] - 2, sector[0] + 2]
         x = np.arange(sector[0], sector[1], delta)
         y = np.arange(sector[0], sector[1], delta)
 
