@@ -119,21 +119,31 @@ class PMCD:
     def makedefault(self):
         self.epsilon[0] = 10 ** (-self.accuracy)
         self.epsilon[1] = self.epsilon[0]
-        #self.expression = expression.Expression("Function", "4*(x1-2)**2+(x2-1)**2")
-        #self.expression = expression.Expression("Function", "4*(x1-5)**2+(x2-6)**2")
+        # self.expression = expression.Expression("Function", "4*(x1-2)**2+(x2-1)**2")
+        # self.expression = expression.Expression("Function", "4*(x1-5)**2+(x2-6)**2")
 
-        #self.expression = expression.Expression("Function", "3*x1**2+2*x1*x2+2*x2**2")
-        self.expression = expression.Expression("Function", "(x1-15)**2-x1*x2+3*x2**2")
-        #self.expression = expression.Expression("Function", "(x1-13)**2-x1*x2+3*x2**2")
-        #self.expression = expression.Expression("Function", "2*x1**2+2*x1*x2+x2**2")
-        #self.expression = expression.Expression("Function", "(x1-12)**2-x1*x2+3*x2**2")
+        # self.expression = expression.Expression("Function", "3*x1**2+2*x1*x2+2*x2**2")
+        # My RGR task
+        # self.expression = expression.Expression("Function", "(x1-15)**2-x1*x2+3*x2**2")
+
+        # self.expression = expression.Expression("Function", "(x1-13)**2-x1*x2+3*x2**2")
+        # self.expression = expression.Expression("Function", "2*x1**2+2*x1*x2+x2**2")
+        # self.expression = expression.Expression("Function", "(x1-12)**2-x1*x2+3*x2**2")
+
+        self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
+        self.expression.parameters["global_min"] = [1.0, 1.0]
+
         self.r_expression = self.expression.copy()
 
         self.expression.parameters["unimodal"] = True
-        self.expression.parameters["global_min"] = [2.0, 1.0]
-        #self.x_start = [[8.0, 9.0], [10.0, 11.0], [8.0, 11.0]]
-        #self.x_start = [7.0, 6.0]
-        self.x_start = [-23.5, -23.5]
+        # self.expression.parameters["global_min"] = [2.0, 1.0]
+        # self.x_start = [[8.0, 9.0], [10.0, 11.0], [8.0, 11.0]]
+        # self.x_start = [7.0, 6.0]
+        # My RGR task
+        # self.x_start = [-23.5, -23.5]
+
+        self.x_start = [1.2, 0.0]
+
         #self.x_start = [-20.9, -20.9]
         #self.x_start = [-4.0, 4.0]
         #self.x_start = [-19.6, -19.6]
@@ -224,7 +234,7 @@ class PMCD:
         #s_flag.chel(flag, 1.0)
         s_flag.vector[flag] = 1.0
         d_lambda = self.norm(x_w) / self.norm(s_flag.vector)
-        while self.halting_check() and k < 4 and d_lambda > 0.001:
+        while self.halting_check() and k < 8 and d_lambda > 0.001:
             k += 1
 
             if part < 3:

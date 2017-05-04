@@ -107,10 +107,10 @@ class GDM:
         self.expression.parameters["global_min"] = [2.0, 1.0]
         #self.x_start = [[8.0, 9.0], [10.0, 11.0], [8.0, 11.0]]
         #self.x_start = [7.0, 6.0]
-        #self.x_start = [6.0, 4.0]
-        self.x_start = [1.2, 0.0]
+        self.x_start = [6.0, 4.0]
+        # self.x_start = [1.2, 0.0]
         h = 0.00000001
-        self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "h": 0.1}
+        self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "h": 0.001}
         self.result = {"i": [], "xk": [], "fx": [], "action": []}
         self.hg = matrix.Matrix([[0]], "Hessian matrix")
         self.hg.makedimatrix(2)
@@ -192,7 +192,7 @@ class GDM:
 
         self.collect_data(k,x_w,f_x_w, "Initial point")
 
-        while self.halting_check() and k <= 60 and self.norm(dfd) > 0.1:
+        while self.halting_check() and k <= 60 and self.norm(gradient) > 0.1:
             k += 1
             print(k)
             print("Lambda is", clambda)
@@ -243,9 +243,9 @@ class GDM:
         try:
             result = part_up / part_down
         except ZeroDivisionError:
-            result = float('Inf')
+            result = part_up / float('Inf')
 
-        return result
+        return -result
 
     #direction of fatest descent
     def get_dfd(self, x_w):
@@ -257,6 +257,27 @@ class GDM:
         return dfd
 
     def get_gradient(self, x):
+        result = []
+        i = 0
+        x1 = x[0]
+        x2 = x[1]
+
+        d_dx1 = None
+        d_dx2 = None
+
+        try:
+            d_dx1 = (5.5 * x1 - 5 * x2 - 0.5) / ((10 * (x1 - x2) ** 2 + (x1 - 1) ** 2) ** 0.75)
+        except ZeroDivisionError:
+            d_dx1 = (5.5 * x1 - 5 * x2 - 0.5) / float('Inf')
+
+        try:
+            d_dx2 = (5.0 * (x1 - x2)) / ((10 * (x1 - x2) ** 2 + (x1 - 1) ** 2) ** 0.75)
+        except ZeroDivisionError:
+            d_dx2 = (5.0 * (x1 - x2)) / float('Inf')
+
+        return [d_dx1, d_dx2]
+
+    def get_gradient0(self, x):
         result = []
         i = 0
         while i < len(x):

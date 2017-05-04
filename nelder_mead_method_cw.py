@@ -97,23 +97,25 @@ class NMM:
         # a = 4 b = 2 c = 1
         #self.expression = expression.Expression("Function", "4*(x1-3)**2+(x2-2)**2")
         #self.expression = expression.Expression("Function", "4*(x1-2)**2+(x2-1)**2")
-        self.expression = expression.Expression("Function", "4*(x1-5)**2+(x2-6)**2")
-        self.expression.parameters["global_min"] = [5.0, 6.0]
+        #self.expression = expression.Expression("Function", "4*(x1-5)**2+(x2-6)**2")
+        #self.expression.parameters["global_min"] = [5.0, 6.0]
 
-        #self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
-        #self.expression.parameters["global_min"] = [1.0, 1.0]
+        self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
+        self.expression.parameters["global_min"] = [1.0, 1.0]
 
         self.expression.parameters["unimodal"] = True
         #self.expression.parameters["global_min"] = [5.0, 6.0]
         #self.x_start = [[8.0, 9.0], [10.0, 11.0], [8.0, 11.0]]
         #self.x_start = [[5.0, 4.0], [7.0, 6.0], [5.0, 6.0]]
         #self.x_start = [[6.0, 5.0], [8.0, 7.0], [6.0, 7.0]]
-        self.x_start = [[6.0, 4.0], [8.0, 7.0], [6.0, 7.0]]
+        #self.x_start = [[6.0, 4.0], [8.0, 7.0], [6.0, 7.0]]
+
+        #self.x_start = [[600.0, 400.0], [-800.0, 700.0], [600.0, 700.0]]
 
 
         #self.x_start = [[-1.2, -1.2], [0.0, 1.2], [1.2, -1.2]]
 
-        #self.x_start = [[-1.2, -1.2], [0.0, 1.2], [-1.2, 1.2]]
+        self.x_start = [[-1.2, -1.2], [0.0, 1.2], [-1.2, 1.2]]
 
         #self.x_start = [[-0.023444155834422054 - 3, 1.203772072451931], [0.0, 1.203772072451931 + 3], [0.023444155834422054 + 3, 1.203772072451931]]
 
@@ -502,9 +504,10 @@ class NMM:
         #cl_y.sort()
         #x = np.array(cl_x)
         #y = np.array(cl_y)
-        delta = 0.001
+        delta = 0.055
+        radius = 10
         sector = self.expression.parameters["global_min"].copy()
-        sector = [sector[0] - 2, sector[0] + 2]
+        sector = [sector[0] - math.copysign(radius, sector[0]), sector[1] + math.copysign(radius, sector[1])]
         x = np.arange(sector[0], sector[1], delta)
         y = np.arange(sector[0], sector[1], delta)
 
