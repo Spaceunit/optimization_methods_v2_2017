@@ -115,7 +115,9 @@ class NMM:
 
         #self.x_start = [[-1.2, -1.2], [0.0, 1.2], [1.2, -1.2]]
 
-        self.x_start = [[-1.2, -1.2], [0.0, 1.2], [-1.2, 1.2]]
+        #self.x_start = [[-1.2, -1.2], [0.0, 1.2], [-1.2, 1.2]]
+        self.x_start = [[-1.2, -1.2], [-1.2, 1.2], [1.2, 1.2], [1.2, -1.2]]
+        self.msycle = len(self.x_start)
 
         #self.x_start = [[-0.023444155834422054 - 3, 1.203772072451931], [0.0, 1.203772072451931 + 3], [0.023444155834422054 + 3, 1.203772072451931]]
 
@@ -411,7 +413,7 @@ class NMM:
 
     @staticmethod
     def deepcopy(x):
-        xn = [[], [], []]
+        xn = [[]for _ in x]
         for i in range(len(x)):
             for j in range(len(x[i])):
                 xn[i].append(x[i][j])
