@@ -116,10 +116,11 @@ class NMM:
 
         self.x_start = [[-1.2, -1.2], [0.0, 1.2], [1.2, -1.2]]
 
-        #self.x_start = [[-1.2, -1.2], [0.0, 1.2], [-1.2, 1.2]]
-        #self.x_start = [[-1.2, -1.2], [-1.2, 1.2], [1.2, 1.2], [1.2, -1.2]]
+        # self.x_start = [[-1.2, -1.2], [0.0, 1.2], [-1.2, 1.2]]
+        # self.x_start = [[-1.2, -1.2], [-1.2, 1.2], [1.2, 1.2], [1.2, -1.2]]
 
-        #self.x_start = [[-5.0, -5.0], [-5.0, -4.0], [-4.0, -4.0], [-4.0, -5.0]]
+        # self.x_start = [[-5.0, -5.0], [-5.0, -4.0], [-4.0, -4.0], [-4.0, -5.0]]
+        # self.x_start = [[-5.0, -5.0], [-5.0, -4.0], [-4.0, -4.0], [-4.0, -5.0]]
 
         self.msycle = len(self.x_start)
 
@@ -532,16 +533,33 @@ class NMM:
 
         #
         fig, ax = plt.subplots()
-        patches = []
-        N = 3
+        center = []
+        m_patches = []
+        verts = []
+        N = len(self.x_start)
         for i in range(len(self.result["i"])):
-            for j in range(N):
-                polygon = Polygon(np.array(self.result["xk"][i]), True)
-            patches.append(polygon)
+            polygon = Polygon(np.array(self.result["xk"][i]), True)
+            # count center...
+            j = 1
+            center = self.result["xk"][i][0].copy()
+            while j < N:
+                center = self.sum(center, self.result["xk"][i][j])
+                j += 1
+            center = self.mul(center, 1.0 / float(N))
+            # print("Center is", center)
+            verts.append((center[0], center[1]))
+            ax.text(center[0], center[1], "#"+str(self.result["i"][i])+" ", color="black", fontsize="10", verticalalignment='bottom', horizontalalignment='right')
+            # ...
+            m_patches.append(polygon)
 
-        p = PatchCollection(patches, cmap=matplotlib.cm.jet, alpha=0.4)
+        path = Path(verts)
+        patch = patches.PathPatch(path, facecolor='none', lw=0.5)
+        ax.add_patch(patch)
+        xs, ys = zip(*verts)
+        plt.plot(xs, ys, "x--", lw=1.5, color='black', ms=10)
+        p = PatchCollection(m_patches, cmap=matplotlib.cm.jet, alpha=0.4, lw=1.0)
 
-        colors = 100 * np.random.rand(len(patches))
+        colors = 100 * np.random.rand(len(m_patches))
         p.set_array(np.array(colors))
 
         ax.add_collection(p)
@@ -559,7 +577,7 @@ class NMM:
         #plt.figure()
         CS = plt.contour(X, Y, Z)
         plt.clabel(CS, inline=1, fontsize=10)
-        plt.title('Simplest default with labels')
+        plt.title("Path of simplex with "+str(N)+" vertexes")
 
         plt.show()
         pass
