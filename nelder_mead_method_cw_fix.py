@@ -162,7 +162,7 @@ class NMM:
         task = 0
         while (task != 1):
             print('')
-            print("Nelder–Mead method")
+            print("Nelder–Mead method with fix")
             print('')
             task = self.enterCommand()
             if task == 2:

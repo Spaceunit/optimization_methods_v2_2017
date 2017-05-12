@@ -30,6 +30,7 @@ import quasi_newton_method
 import conjugate_direction_method
 
 import nelder_mead_method_cw
+import nelder_mead_method_cw_fix
 
 
 class Work:

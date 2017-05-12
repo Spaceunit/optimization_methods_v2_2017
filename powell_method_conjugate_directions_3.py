@@ -227,7 +227,7 @@ class PMCD3:
         #s_flag.chel(flag, 1.0)
         s_flag.vector[flag] = 1.0
         d_lambda = self.norm(x_w) / self.norm(s_flag.vector)
-        while self.halting_check() and k < 15 and self.norm(x_w) > 0.001:
+        while self.halting_check() and k < 5 and self.norm(x_w) > 0.001:
             k += 1
 
             if part in [0, 1, 2, 3]:

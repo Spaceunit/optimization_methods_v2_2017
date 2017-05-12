@@ -124,14 +124,19 @@ class PMCD:
 
         # self.expression = expression.Expression("Function", "3*x1**2+2*x1*x2+2*x2**2")
         # My RGR task
-        # self.expression = expression.Expression("Function", "(x1-15)**2-x1*x2+3*x2**2")
+        self.expression = expression.Expression("Function", "(x1-15)**2-x1*x2+3*x2**2")
 
         # self.expression = expression.Expression("Function", "(x1-13)**2-x1*x2+3*x2**2")
+
         # self.expression = expression.Expression("Function", "2*x1**2+2*x1*x2+x2**2")
+
         # self.expression = expression.Expression("Function", "(x1-12)**2-x1*x2+3*x2**2")
 
-        self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
-        self.expression.parameters["global_min"] = [1.0, 1.0]
+        #self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
+        #self.expression.parameters["global_min"] = [1.0, 1.0]
+
+        # self.expression = expression.Expression("Function", "(x1)**2 + (x2)**2 - 4")
+        # self.expression.parameters["global_min"] = [0.0, 0.0]
 
         self.r_expression = self.expression.copy()
 
@@ -140,9 +145,11 @@ class PMCD:
         # self.x_start = [[8.0, 9.0], [10.0, 11.0], [8.0, 11.0]]
         # self.x_start = [7.0, 6.0]
         # My RGR task
-        # self.x_start = [-23.5, -23.5]
+        self.x_start = [-23.5, -23.5]
 
-        self.x_start = [1.2, 0.0]
+        # self.x_start = [1.2, 0.0]
+
+        # self.x_start = [4.0, 4.0]
 
         #self.x_start = [-20.9, -20.9]
         #self.x_start = [-4.0, 4.0]
@@ -245,7 +252,7 @@ class PMCD:
                 #s_flag.chel(flag, 1.0)
                 s_flag.vector[flag] = 1.0
                 interval = self.sven_method(x_w, s_flag, flag, part)
-                if part == 0:
+                if part == 0 or part == 3:
                     c_lambda = self.dichotomy_method(interval)
                     action = "Next point by Dichotomy method"
                 elif part == 1:
@@ -261,7 +268,7 @@ class PMCD:
                 d_lambda = self.get_d_lambda(x_w, s_flag)
                 f_x_w = self.expression.execute_l(x_w)
                 self.collect_data(k, x_w, f_x_w, action)
-            elif part == 3:
+            elif part == 6:
                 action = "Next point by single lambda for all coordinates"
                 x_w = self.quad_step(x_w, s_flag, d_lambda, flag, part)
                 d_lambda = self.get_d_lambda(x_w, s_flag)
