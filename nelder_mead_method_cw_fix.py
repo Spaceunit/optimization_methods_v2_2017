@@ -276,6 +276,7 @@ class NMM:
                     i += 1
                 self.collect_data(k, x_w, f_arr, "reduction")
             self.par_sort(x_w, f_arr, cycling)
+            print("Condition: ", self.check_condition(x_w))
             cycling_test = self.find_cycling(x_w, self.result["xk"][-2], cycling, self.msycle)
             if cycling_test != None:
                 print("-------------------")
@@ -310,7 +311,15 @@ class NMM:
             #k += 1
         self.printresult()
 
-
+    def check_condition(self, x_w):
+        result = []
+        i = 0
+        while i < len(x_w):
+            x = {"x": x_w[i][0], "y": x_w[i][1]}
+            self.condition.parameters.update(x)
+            result.append(self.condition.execute_d(self.condition.parameters))
+            i += 1
+        return result
 
     def build_initial_simplex_zero(self, size_s, f_dim, count_of_vertex):
         i = 0
@@ -427,6 +436,7 @@ class NMM:
                     cycling[i] += 1
                 if cycling[i] >= m_cycling:
                     answer = i
+                    cycling[i] = 0
                 i += 1
         return answer
 
