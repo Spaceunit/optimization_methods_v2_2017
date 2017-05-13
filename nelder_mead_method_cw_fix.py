@@ -101,11 +101,12 @@ class NMM:
         # self.expression.parameters["global_min"] = [5.0, 6.0]
 
         # self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
-        self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
+        #self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
+        self.expression = expression.Expression("Function", "100*(x2-x1**2)**2+(1-x1)**2")
 
         self.condition = expression.Expression("Сondition", "(x-a)**2 + (y-b)**2 <= R**2")
-        self.condition.parameters["a"] = 0.0
-        self.condition.parameters["b"] = 0.0
+        self.condition.parameters["a"] = 1.0
+        self.condition.parameters["b"] = 1.0
         self.condition.parameters["R"] = 2.0
 
 
@@ -131,14 +132,14 @@ class NMM:
 
         self.start_point = [-1.2, 0.0]
 
-        self.count_of_vertex = 3
+        self.count_of_vertex = 12
 
         # self.x_start = [[-1.2, -1.2], [-1.2, 1.2], [1.2, 1.2], [1.2, -1.2]]
 
         # self.x_start = [[-5.0, -5.0], [-5.0, -4.0], [-4.0, -4.0], [-4.0, -5.0]]
         # self.x_start = [[-5.0, -5.0], [-5.0, -4.0], [-4.0, -4.0], [-4.0, -5.0]]
 
-        self.msycle = len(self.x_start)
+        self.msycle = self.count_of_vertex
 
         # self.x_start = [[-0.023444155834422054 - 3, 1.203772072451931], [0.0, 1.203772072451931 + 3], [0.023444155834422054 + 3, 1.203772072451931]]
 
@@ -214,7 +215,7 @@ class NMM:
         flag = False
         exp_r = self.expression
         # x_w = self.deepcopy(self.x_start)
-        x_w = self.build_initial_simplex_basic(100.0, len(self.start_point), self.count_of_vertex, self.start_point)
+        x_w = self.build_initial_simplex_basic(10.0, len(self.start_point), self.count_of_vertex, self.start_point)
         # x_w = self.build_initial_simplex_zero(100.0, len(self.start_point), self.count_of_vertex)
         center = [0 for _ in range(len(x_w[0]))]
         f_arr = [exp_r.execute_l(x) for x in x_w]
@@ -336,7 +337,7 @@ class NMM:
         except ZeroDivisionError:
             d2 = float('Inf')
 
-        while i < f_dim:
+        while i < count_of_vertex - 1:
             j = 0
             vertex = []
             while j < f_dim:
@@ -626,7 +627,7 @@ class NMM:
         center = []
         m_patches = []
         verts = []
-        N = len(self.x_start)
+        N = self.count_of_vertex
         for i in range(len(self.result["i"])):
             polygon = Polygon(np.array(self.result["xk"][i]), True)
             # count center...
