@@ -102,6 +102,15 @@ class NMM:
 
         # self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
         self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
+
+        self.condition = expression.Expression("Сondition", "(x-a)**2 + (y-b)**2 <= R**2")
+        self.condition.parameters["a"] = 0.0
+        self.condition.parameters["b"] = 0.0
+        self.condition.parameters["R"] = 2.0
+
+
+        # self.expression = expression.Expression("Function", "100.0*((x1)**2-x2)**2+(x1-1)**2")
+
         self.expression.parameters["global_min"] = [1.0, 1.0]
 
         self.expression.parameters["unimodal"] = True
@@ -119,6 +128,10 @@ class NMM:
 
 
         self.x_start = [[-1.2, -1.2], [0.0, 1.2], [-1.2, 1.2]]
+
+        self.start_point = [-1.2, 0.0]
+
+        self.count_of_vertex = 3
 
         # self.x_start = [[-1.2, -1.2], [-1.2, 1.2], [1.2, 1.2], [1.2, -1.2]]
 
@@ -200,7 +213,9 @@ class NMM:
         k = 0
         flag = False
         exp_r = self.expression
-        x_w = self.deepcopy(self.x_start)
+        # x_w = self.deepcopy(self.x_start)
+        x_w = self.build_initial_simplex_basic(100.0, len(self.start_point), self.count_of_vertex, self.start_point)
+        # x_w = self.build_initial_simplex_zero(100.0, len(self.start_point), self.count_of_vertex)
         center = [0 for _ in range(len(x_w[0]))]
         f_arr = [exp_r.execute_l(x) for x in x_w]
         h_temp = [0 for _ in range(len(x_w[0]))]
@@ -228,8 +243,9 @@ class NMM:
             print("h_temp is", h_temp)
             f_h_temp = exp_r.execute_l(h_temp)
             print("fcenter is", f_h_temp)
+            print("Cycling count", cycling)
             if flag:
-                self.reduction(x_w)
+                self.reduction(x_w, 0)
                 i = 0
                 while i < len(x_w):
                     f_arr[i] = exp_r.execute_l(x_w[i])
@@ -253,18 +269,20 @@ class NMM:
                 f_arr[-1] = exp_r.execute_l(h_temp_new)
                 self.collect_data(k, x_w, f_arr, "compression")
             else:
-                self.reduction(x_w)
+                self.reduction(x_w, 0)
                 i = 0
                 while i < len(x_w):
                     f_arr[i] = exp_r.execute_l(x_w[i])
                     i += 1
                 self.collect_data(k, x_w, f_arr, "reduction")
             self.par_sort(x_w, f_arr, cycling)
-            cycling_test = self.find_cycling(x_w, self.result["xk"][-1], cycling, self.msycle)
+            cycling_test = self.find_cycling(x_w, self.result["xk"][-2], cycling, self.msycle)
             if cycling_test != None:
                 print("-------------------")
                 print("Cycling on step", k)
-                action_type = self.analyse_cycling(cycling_test, f_arr, self.result["fx"][-1])
+                action_type = self.analyse_cycling(cycling_test, f_arr, self.result["fx"][-2])
+                # max_f == max_f_xp
+                print("action type", action_type)
                 if action_type == 0:
                     x_temp = x_w[-1]
                     x_w[-1] = x_w[-2]
@@ -273,6 +291,7 @@ class NMM:
                     f_arr[-1] = f_arr[-2]
                     f_arr[-2] = f_temp
                     cycling[-1] = 0
+                # cycling of min > 3
                 elif action_type == 1:
                     x_temp = x_w[0]
                     x_w[0] = x_w[1]
@@ -291,12 +310,70 @@ class NMM:
             #k += 1
         self.printresult()
 
-    def reduction(self, x_w):
+
+
+    def build_initial_simplex_zero(self, size_s, f_dim, count_of_vertex):
+        i = 0
+        simplex = [[0.0] * f_dim]
+
+        sqrt_two = math.sqrt(2.0)
+        try:
+            d1 = (size_s / (float(f_dim) * sqrt_two)) * (math.sqrt(float(f_dim) + 1.0) + float(f_dim) - 1.0)
+        except ZeroDivisionError:
+            d1 = float('Inf')
+
+        try:
+            d2 = (size_s / (float(f_dim) * sqrt_two)) * (math.sqrt(float(f_dim) + 1.0) - 1.0)
+        except ZeroDivisionError:
+            d2 = float('Inf')
+
+        while i < f_dim:
+            j = 0
+            vertex = []
+            while j < f_dim:
+                if j == i:
+                    vertex.append(d1)
+                else:
+                    vertex.append(d2)
+                j += 1
+            simplex.append(vertex)
+            i += 1
+        return simplex
+
+    def build_initial_simplex_basic(self, size_s, f_dim, count_of_vertex, x_start):
+        i = 0
+        simplex = []
+
+        sqrt_two = math.sqrt(2.0)
+        try:
+            d1 = (size_s / (float(f_dim) * sqrt_two)) * (math.sqrt(float(f_dim) + 1.0) + float(f_dim) - 1.0)
+        except ZeroDivisionError:
+            d1 = float('Inf')
+
+        try:
+            d2 = (size_s / (float(f_dim) * sqrt_two)) * (math.sqrt(float(f_dim) + 1.0) - 1.0)
+        except ZeroDivisionError:
+            d2 = float('Inf')
+
+        while i < count_of_vertex:
+            j = 0
+            vertex = []
+            while j < f_dim:
+                if j == i:
+                    vertex.append(x_start[j] + d1)
+                else:
+                    vertex.append(x_start[j] + d2)
+                j += 1
+            simplex.append(vertex)
+            i += 1
+        return simplex
+
+    def reduction(self, x_w, vertex):
         i = 1
         while i < len(x_w):
-            x_w[i] = self.dif(x_w[i], x_w[0])
+            x_w[i] = self.dif(x_w[i], x_w[vertex])
             x_w[i] = self.mul(x_w[i], 0.5)
-            x_w[i] = self.sum(x_w[i], x_w[0])
+            x_w[i] = self.sum(x_w[i], x_w[vertex])
             i += 1
 
     def expansion(self, center, h_temp, x_w):
@@ -346,9 +423,9 @@ class NMM:
         if NMM.compare(x, xp):
             i = 0
             while i < len(x):
-                if x[i] in xp[i]:
+                if x[i] in xp:
                     cycling[i] += 1
-                if cycling[i] > m_cycling:
+                if cycling[i] >= m_cycling:
                     answer = i
                 i += 1
         return answer
@@ -578,6 +655,8 @@ class NMM:
         #plt.title('Single color - negative contours dashed')
 
         #plt.figure()
+        circle2 = plt.Circle((self.condition.parameters["a"], self.condition.parameters["b"]), self.condition.parameters["R"], color='r', fill=False)
+        ax.add_artist(circle2)
         CS = plt.contour(X, Y, Z)
         plt.clabel(CS, inline=1, fontsize=10)
         plt.title("Path of simplex with "+str(N)+" vertexes")

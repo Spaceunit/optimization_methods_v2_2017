@@ -256,7 +256,7 @@ class Work:
                 Task.dostaff()
                 pass
             elif task == 30:
-                Task = nelder_mead_method_cw.NMM()
+                Task = nelder_mead_method_cw_fix.NMM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
         pass
