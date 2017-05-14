@@ -46,7 +46,7 @@ class NMM:
                 "help": "display helpfull information",
                 "new": "enter new raw data",
                 "show slist": "show raw data",
-                "show scount": "show something",
+                "show acc": "show accuracy",
                 "acc": "set accuracy",
                 "mk": "set default raw data",
                 "start": "start calculation process",
@@ -92,7 +92,8 @@ class NMM:
         self.showCommands()
 
     def makedefault(self):
-        self.epsilon[0] = 10 ** (-self.accuracy)
+        self.accuracy = 3
+        self.epsilon[0] = 10.0 ** (-self.accuracy)
         self.epsilon[1] = self.epsilon[0]
         # a = 4 b = 2 c = 1
         # self.expression = expression.Expression("Function", "4*(x1-3)**2+(x2-2)**2")
@@ -102,12 +103,14 @@ class NMM:
 
         # self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
         #self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
-        self.expression = expression.Expression("Function", "100*(x2-x1**2)**2+(1-x1)**2")
+        self.expression = expression.Expression("Function of Rozenbrok", "100*(x2-x1**2)**2+(1-x1)**2")
+
+        self.start_point = [-1.2, 0.0]
 
         self.condition = expression.Expression("Сondition", "(x-a)**2 + (y-b)**2 <= R**2")
-        self.condition.parameters["a"] = 1.0
-        self.condition.parameters["b"] = 1.0
-        self.condition.parameters["R"] = 2.0
+        self.condition.parameters["a"] = self.start_point[0] + 13.0
+        self.condition.parameters["b"] = self.start_point[1]
+        self.condition.parameters["R"] = 9.0
 
 
         # self.expression = expression.Expression("Function", "100.0*((x1)**2-x2)**2+(x1-1)**2")
@@ -128,11 +131,12 @@ class NMM:
         # self.x_start = [[-1.2, -1.2], [0.0, 1.2], [1.2, -1.2]]
 
 
-        self.x_start = [[-1.2, -1.2], [0.0, 1.2], [-1.2, 1.2]]
+        # self.x_start = [[-1.2, -1.2], [0.0, 1.2], [-1.2, 1.2]]
 
-        self.start_point = [-1.2, 0.0]
+        # self.start_point = [-1.2, 0.0]
 
-        self.count_of_vertex = 12
+        self.count_of_vertex = 3
+        self.simplex_border_length = 10.0
 
         # self.x_start = [[-1.2, -1.2], [-1.2, 1.2], [1.2, 1.2], [1.2, -1.2]]
 
@@ -213,10 +217,11 @@ class NMM:
         self.makedefault()
         k = 0
         flag = False
+        out_of_condition = False
         exp_r = self.expression
         # x_w = self.deepcopy(self.x_start)
-        x_w = self.build_initial_simplex_basic(10.0, len(self.start_point), self.count_of_vertex, self.start_point)
-        # x_w = self.build_initial_simplex_zero(100.0, len(self.start_point), self.count_of_vertex)
+        x_w = self.build_initial_simplex_basic(self.simplex_border_length, len(self.start_point), self.count_of_vertex, self.start_point)
+        # x_w = self.build_initial_simplex_zero(self.simplex_border_length, len(self.start_point), self.count_of_vertex)
         center = [0 for _ in range(len(x_w[0]))]
         f_arr = [exp_r.execute_l(x) for x in x_w]
         h_temp = [0 for _ in range(len(x_w[0]))]
@@ -276,8 +281,17 @@ class NMM:
                     f_arr[i] = exp_r.execute_l(x_w[i])
                     i += 1
                 self.collect_data(k, x_w, f_arr, "reduction")
+            # self.par_sort(x_w, f_arr, cycling)
+            condition = self.check_condition(x_w)
+            print("Condition: ", condition)
+            if not condition[0]:
+                i = 0
+                while i < self.count_of_vertex:
+                    if not condition[1][i]:
+                        f_arr[i] = float('Inf')
+                        self.result["fx"][-1][i] = f_arr[i]
+                    i += 1
             self.par_sort(x_w, f_arr, cycling)
-            print("Condition: ", self.check_condition(x_w))
             cycling_test = self.find_cycling(x_w, self.result["xk"][-2], cycling, self.msycle)
             if cycling_test != None:
                 print("-------------------")
@@ -313,16 +327,19 @@ class NMM:
         self.printresult()
 
     def check_condition(self, x_w):
-        result = []
+        result = [[True], []]
         i = 0
         while i < len(x_w):
             x = {"x": x_w[i][0], "y": x_w[i][1]}
             self.condition.parameters.update(x)
-            result.append(self.condition.execute_d(self.condition.parameters))
+            result[1].append(self.condition.execute_d(self.condition.parameters))
+            if not result[1][-1]:
+                result[0] = False
             i += 1
         return result
 
-    def build_initial_simplex_zero(self, size_s, f_dim, count_of_vertex):
+    @staticmethod
+    def build_initial_simplex_zero(size_s: float, f_dim: int, count_of_vertex: int) -> list:
         i = 0
         simplex = [[0.0] * f_dim]
 
@@ -350,7 +367,8 @@ class NMM:
             i += 1
         return simplex
 
-    def build_initial_simplex_basic(self, size_s, f_dim, count_of_vertex, x_start):
+    @staticmethod
+    def build_initial_simplex_basic(size_s: float, f_dim: int, count_of_vertex: int, x_start: list) -> list:
         i = 0
         simplex = []
 
