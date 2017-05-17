@@ -18,6 +18,7 @@ from matplotlib.collections import PatchCollection
 
 from resource import expression
 
+import powell_method_conjugate_directions_cw_c
 
 class NMM:
     def __init__(self):
@@ -92,7 +93,7 @@ class NMM:
         self.showCommands()
 
     def makedefault(self):
-        self.accuracy = 3
+        self.accuracy = 5
         self.epsilon[0] = 10.0 ** (-self.accuracy)
         self.epsilon[1] = self.epsilon[0]
         # a = 4 b = 2 c = 1
@@ -102,13 +103,15 @@ class NMM:
         # self.expression.parameters["global_min"] = [5.0, 6.0]
 
         # self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
-        #self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
-        self.expression = expression.Expression("Function of Rozenbrok", "100*(x2-x1**2)**2+(1-x1)**2")
 
-        self.start_point = [-1.2, 0.0]
+        self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
+
+        # self.expression = expression.Expression("Function of Rozenbrok", "100*(x2-x1**2)**2+(1-x1)**2")
+
+        self.start_point = [-10.2, 0.0]
 
         self.condition = expression.Expression("Сondition", "(x-a)**2 + (y-b)**2 <= R**2")
-        self.condition.parameters["a"] = self.start_point[0] + 13.0
+        self.condition.parameters["a"] = self.start_point[0]
         self.condition.parameters["b"] = self.start_point[1]
         self.condition.parameters["R"] = 9.0
 
@@ -230,6 +233,10 @@ class NMM:
         self.par_sort(x_w, f_arr, cycling)
         print(x_w)
         self.collect_data(k, x_w, f_arr, "initial simplex")
+        condition = self.check_condition(x_w)
+        print("Condition: ", condition)
+        self.redirect_way(f_arr, condition)
+        self.par_sort(x_w, f_arr, cycling)
         while self.halting_check(f_arr, center) and k <= 600:
             k += 1
             print('')
@@ -284,13 +291,9 @@ class NMM:
             # self.par_sort(x_w, f_arr, cycling)
             condition = self.check_condition(x_w)
             print("Condition: ", condition)
-            if not condition[0]:
-                i = 0
-                while i < self.count_of_vertex:
-                    if not condition[1][i]:
-                        f_arr[i] = float('Inf')
-                        self.result["fx"][-1][i] = f_arr[i]
-                    i += 1
+
+            self.redirect_way(f_arr, condition)
+
             self.par_sort(x_w, f_arr, cycling)
             cycling_test = self.find_cycling(x_w, self.result["xk"][-2], cycling, self.msycle)
             if cycling_test != None:
@@ -337,6 +340,15 @@ class NMM:
                 result[0] = False
             i += 1
         return result
+
+    def redirect_way(self, f, condition):
+        if not condition[0]:
+            i = 0
+            while i < self.count_of_vertex:
+                if not condition[1][i]:
+                    f[i] = float('Inf')
+                    self.result["fx"][-1][i] = f[i]
+                i += 1
 
     @staticmethod
     def build_initial_simplex_zero(size_s: float, f_dim: int, count_of_vertex: int) -> list:
