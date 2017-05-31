@@ -368,6 +368,8 @@ class NMM:
         self.dm = dichotomy_method_lc_cw.DM()
         self.dm.d_for_sven = 0.1
         self.dm.importparam(self.accuracy, self.expression, self.condition, x)
+        self.dm.makedefault()
+        self.dm.sm.printresult_graph()
         self.dm.resolve()
         self.pcd["xk"] = [self.dm.result["x1"][-1].copy(), self.dm.result["x2"][-1].copy()]
         self.pcd["fxk"] = self.dm.result["fxk"][-1].copy()
@@ -383,6 +385,8 @@ class NMM:
         self.gss = golden_section_search_lc_cw.GSS()
         self.gss.d_for_sven = 0.1
         self.gss.importparam(self.accuracy, self.expression, self.condition, x)
+        self.gss.makedefault()
+        self.gss.sm.printresult_graph()
         self.gss.resolve()
         self.pcd["xk"] = [self.gss.result["a"][-1].copy(), self.gss.result["b"][-1].copy()]
         self.pcd["fxk"] = [self.expression.execute_l(self.pcd["xk"][0]), self.expression.execute_l(self.pcd["xk"][1])]
