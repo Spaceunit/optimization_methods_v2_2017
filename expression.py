@@ -86,6 +86,8 @@ class Expression:
             result = eval(self.expression, x)
         except ZeroDivisionError:
             result = eval(self.parameters["ZDE_expression"], x)
+        except OverflowError:
+            result = float('Inf')
         return result
 
     def execute_l(self, x):

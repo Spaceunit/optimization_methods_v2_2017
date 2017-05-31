@@ -33,7 +33,7 @@ class DM:
         self.condition.parameters["a"] = 2.0
         self.condition.parameters["b"] = 1.0
         self.condition.parameters["c"] = 1.0
-        self.nv = [self.condition.parameters["a"], self.condition.parameters["b"]]
+        self.nv = [-self.condition.parameters["a"], self.condition.parameters["b"]]
         self.accuracy = 5
         self.result = {"x1": [], "x2": [], "y": [], "fxk": []}
         self.way = True
