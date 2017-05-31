@@ -31,6 +31,7 @@ import conjugate_direction_method
 
 import nelder_mead_method_cw
 import nelder_mead_method_cw_fix
+import nelder_mead_method_cw_ds
 
 
 class Work:
@@ -256,7 +257,7 @@ class Work:
                 Task.dostaff()
                 pass
             elif task == 30:
-                Task = nelder_mead_method_cw_fix.NMM()
+                Task = nelder_mead_method_cw_ds.NMM()
                 Task.importparam(self.accuracy)
                 Task.dostaff()
         pass

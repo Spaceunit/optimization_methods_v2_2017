@@ -91,7 +91,7 @@ class HJPS:
         self.epsilon[0] = 10 ** (-self.accuracy)
         self.epsilon[1] = self.epsilon[0]
         #self.expression = expression.Expression("Function", "(x1-2)**2+1*x2**2")
-        self.expression = expression.Expression("Function", "(x1-3)**2+1*x2**2")
+        self.expression = expression.Expression("Function", "(x1-3)**2+2*(x2**2)")
         self.expression.parameters["unimodal"] = True
         #self.x_start = [4.0, 6.0]
         self.x_start = [6.0, 9.0]

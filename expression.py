@@ -15,6 +15,7 @@ class Expression:
             copy_ex.range = self.range
         copy_ex.local_min = self.local_min
         copy_ex.local_max = self.local_max
+        copy_ex.parameters.update(self.parameters)
         return copy_ex
 
     def input_range(self):

@@ -18,8 +18,10 @@ from matplotlib.collections import PatchCollection
 
 from resource import expression
 
-import powell_method_conjugate_directions_cw_c
-
+# import powell_method_conjugate_directions_cw_c
+import sven_method_lc_cw
+import golden_section_search
+import dichotomy_method_lc_cw
 class NMM:
     def __init__(self):
         self.commands = {
@@ -58,11 +60,16 @@ class NMM:
             }
         }
         self.expression = expression.Expression("No name", "x**2")
-        self.accuracy = 3
+        self.condition = expression.Expression("No name", "x < 5")
+        self.accuracy = 5
         self.epsilon = [1, 1]
         self.mm = True
         self.msycle = 3
         self.result = {"i": [], "xk": [], "fx": [], "action": []}
+        # self.pcd = powell_method_conjugate_directions_cw_c.PMCD()
+        # self.pcd.importparam(self.accuracy, self.condition)
+        self.pcd = {"i": [], "xk": [], "fxk": [], "action": []}
+        self.sm = sven_method_lc_cw.SM()
         self.makedefault()
 
 
@@ -105,16 +112,29 @@ class NMM:
 
         # self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
 
-        self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
+        # self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
+        self.condition = expression.Expression("Linear Condition", "a*(x1)+b*(x2) <= c")
+        self.condition.parameters["a"] = -1.0
+        self.condition.parameters["b"] = -1.0
+        self.condition.parameters["c"] = -6.0
 
         # self.expression = expression.Expression("Function of Rozenbrok", "100*(x2-x1**2)**2+(1-x1)**2")
 
         self.start_point = [-1.2, 0.0]
 
-        self.condition = expression.Expression("Сondition", "(x-a)**2 + (y-b)**2 <= R**2")
-        self.condition.parameters["a"] = self.start_point[0] + 10.0
-        self.condition.parameters["b"] = self.start_point[1]
-        self.condition.parameters["R"] = 15.0
+        # self.condition = expression.Expression("Сondition", "(x-a)**2 + (y-b)**2 <= R**2")
+        # self.condition = expression.Expression("Сondition", "(x1-a)**2 + (x2-b)**2 <= R**2")
+        # self.condition.parameters["a"] = self.start_point[0] + 10.0
+        # self.condition.parameters["b"] = self.start_point[1]
+        # self.condition.parameters["R"] = 15.0
+
+        self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
+        # self.condition = expression.Expression("Linear Condition", "a*x1+b*x2+c <= 1")
+        # self.condition.parameters["a"] = 2.0
+        # self.condition.parameters["b"] = 1.0
+        # self.condition.parameters["c"] = 1.0
+
+        # self.pcd.importparam(self.accuracy, self.condition)
 
 
         # self.expression = expression.Expression("Function", "100.0*((x1)**2-x2)**2+(x1-1)**2")
@@ -155,6 +175,9 @@ class NMM:
 
         self.cof = {"a": 1.0, "g": 2.0, "b": 0.5}
         self.result = {"i": [], "xk": [], "fx": [], "action": []}
+        self.pcd = {"i": [], "xk": [], "fxk": [], "action": []}
+
+        self.sm.importparam(self.accuracy, self.expression, self.condition)
 
 
     def importparam(self, accuracy):
@@ -332,13 +355,53 @@ class NMM:
 
             #self.collect_data(k, x_w, f_arr, "default iterration")
             #k += 1
+        self.par_sort(x_w, f_arr, cycling)
+        self.do_linear_condition(x_w[0], f_arr[0])
         self.printresult()
+
+    def do_linear_condition(self, x_lin: type([]), f: type([])):
+        x = x_lin.copy()
+        # self.sm.importparam(self.accuracy, self.expression, self.condition)
+        # self.sm.start_point = x.copy()
+        # self.sm.d = self.epsilon[0]
+        # self.sm.resolve()
+        self.dm = dichotomy_method_lc_cw.DM()
+        self.dm.importparam(self.accuracy, self.expression, self.condition, x)
+        self.dm.resolve()
+        self.pcd["xk"] = [self.dm.result["x1"][-1].copy(), self.dm.result["x2"][-1].copy()]
+        self.pcd["fxk"] = self.dm.result["fxk"][-1].copy()
+
+        self.dm.par_sort(self.pcd["xk"], self.pcd["fxk"])
+
+    def do_linear_condition_1(self, x_lin: type([]), f: type([])):
+        x = x_lin.copy()
+        # self.sm.importparam(self.accuracy, self.expression, self.condition)
+        # self.sm.start_point = x.copy()
+        # self.sm.d = self.epsilon[0]
+        # self.sm.resolve()
+        self.dm = dichotomy_method_lc_cw.DM()
+        self.dm.importparam(self.accuracy, self.expression, self.condition, x)
+        self.dm.resolve()
+        self.pcd["xk"] = [self.dm.result["x1"][-1].copy(), self.dm.result["x2"][-1].copy()]
+        self.pcd["fxk"] = self.dm.result["fxk"][-1].copy()
+
+        self.dm.par_sort(self.pcd["xk"], self.pcd["fxk"])
+
+
+
+
+
 
     def check_condition(self, x_w):
         result = [[True], []]
         i = 0
         while i < len(x_w):
-            x = {"x": x_w[i][0], "y": x_w[i][1]}
+            # x = {"x": x_w[i][0], "y": x_w[i][1]}
+            x = {}
+            j = 0
+            while j < len(x_w[i]):
+                x["x"+str(j+1)] = x_w[i][j]
+                j += 1
             self.condition.parameters.update(x)
             result[1].append(self.condition.execute_d(self.condition.parameters))
             if not result[1][-1]:
@@ -354,6 +417,89 @@ class NMM:
                     f[i] = float('Inf')
                     self.result["fx"][-1][i] = f[i]
                 i += 1
+
+    def sven_method(self, x_w, S, flag, part):
+        stat = True
+        start = 0.0
+        interval = []
+        self.r_expression = self.expression.copy()
+        self.r_expression.rename(self.expression.name)
+
+        self.r_condition = self.condition.copy()
+        self.r_condition.rename(self.condition.name)
+        # S = matrix.Vector([0.0, 1.0], "Vector S(1)")
+        # d_lambda = self.get_d_lambda(x_w, S)
+        d_lambda = self.epsilon[0]
+        if part < 3:
+            # S(flag)
+            self.r_expression.replace_arg(self.arguments_list(x_w, flag))
+            self.r_condition.replace_arg(self.arguments_list(x_w, flag))
+            start = x_w[flag]
+        elif part == 3:
+            self.r_expression.replace_arg(self.lambda_arguments_list(x_w, S, flag))
+            self.r_condition.replace_arg(self.lambda_arguments_list(x_w, S, flag))
+            start = x_w[0]
+        else:
+            print("Wrong Vector S([1, 2])")
+            stat = False
+        if stat:
+            self.sm.makedefault()
+            print("In Sven by part #", part)
+            print("Flag", flag)
+            self.r_expression.show_expr()
+            self.sm.expression = self.r_expression.copy()
+            self.sm.condition = self.r_condition.copy()
+
+            self.sm.x_start = start
+            # d_lambda here
+            print("D lambda is", d_lambda)
+            self.sm.d = d_lambda
+            self.sm.expression.show_expr()
+            self.sm.resolve()
+            raw_group = self.sm.find_min()
+            print("Raw group", raw_group)
+            self.sm.printresult()
+            self.sm.printresult_graph()
+            #self.par_sort(raw_group["xk"], raw_group["fxk"])
+            interval = raw_group["xk"].copy()
+            interval.sort()
+            interval.pop(1)
+            print("Raw group", interval)
+            #interval.append(raw_group["xk"][1])
+            #interval.append(raw_group["xk"][2])
+            print("Interval is:", interval)
+            pass
+        else:
+            interval = None
+        return interval
+
+    def get_d_lambda(self, x_w, s):
+        try:
+            d_lambda = self.norm(x_w) / self.norm(s.vector)
+        except ZeroDivisionError:
+            d_lambda = float('Inf')
+        return d_lambda
+
+    @staticmethod
+    def arguments_list(x_w, flag):
+        i = 0
+        replace_array = []
+        while i < len(x_w):
+            if i != flag:
+                replace_array.append(x_w[i])
+            else:
+                replace_array.append(None)
+            i += 1
+        return replace_array
+
+    @staticmethod
+    def lambda_arguments_list(x_w, s, flag):
+        i = 0
+        replace_array = []
+        while i < len(x_w):
+            replace_array.append("(" + str(x_w[i]) + "+" + str(s.vector[i]) + "*x" + ")")
+            i += 1
+        return replace_array
 
     @staticmethod
     def build_initial_simplex_zero(size_s: float, f_dim: int, count_of_vertex: int) -> list:
@@ -678,6 +824,14 @@ class NMM:
             # ...
             m_patches.append(polygon)
 
+        verts.append((self.result["xk"][-1][0][0], self.result["xk"][-1][0][1]))
+        i = 0
+        while i < len(self.pcd["xk"]):
+            verts.append((self.pcd["xk"][i][0], self.pcd["xk"][i][1]))
+            ax.text(self.pcd["xk"][i][0], self.pcd["xk"][i][1], "#" + str(self.result["i"][i]) + " ", color="red", fontsize="10",
+                    verticalalignment='bottom', horizontalalignment='right')
+            i += 1
+
         path = Path(verts)
         patch = patches.PathPatch(path, facecolor='none', lw=0.5)
         ax.add_patch(patch)
@@ -701,8 +855,18 @@ class NMM:
         #plt.title('Single color - negative contours dashed')
 
         #plt.figure()
-        circle2 = plt.Circle((self.condition.parameters["a"], self.condition.parameters["b"]), self.condition.parameters["R"], color='r', fill=False)
-        ax.add_artist(circle2)
+        # circle2 = plt.Circle((self.condition.parameters["a"], self.condition.parameters["b"]), self.condition.parameters["R"], color='r', fill=False)
+        # ax.add_artist(circle2)
+        NV = [-self.condition.parameters["a"], self.condition.parameters["b"]]
+
+        NV = self.mul(NV, 10)
+
+        BX = [0 - NV[0]*2.0 - self.condition.parameters["c"], -self.condition.parameters["a"] + NV[0] - self.condition.parameters["c"]]
+        BY = [0 - NV[1]*2.0, self.condition.parameters["b"] + NV[1]]
+
+
+
+        plt.plot(BX, BY)
         CS = plt.contour(X, Y, Z)
         plt.clabel(CS, inline=1, fontsize=10)
         plt.title("Path of simplex with "+str(N)+" vertexes")
@@ -769,6 +933,15 @@ class NMM:
             # ...
             m_patches.append(polygon)
 
+        verts.append((self.result["xk"][-1][0][0], self.result["xk"][-1][0][1]))
+        i = 0
+        while i < len(self.pcd["xk"]):
+            verts.append((self.pcd["xk"][i][0], self.pcd["xk"][i][1]))
+            ax.text(self.pcd["xk"][i][0], self.pcd["xk"][i][1], "#" + str(self.result["i"][i]) + " ", color="red",
+                    fontsize="10",
+                    verticalalignment='bottom', horizontalalignment='right')
+            i += 1
+
         path = Path(verts)
         patch = patches.PathPatch(path, facecolor='none', lw=0.5)
         ax.add_patch(patch)
@@ -792,8 +965,14 @@ class NMM:
         #plt.title('Single color - negative contours dashed')
 
         #plt.figure()
-        circle2 = plt.Circle((self.condition.parameters["a"], self.condition.parameters["b"]), self.condition.parameters["R"], color='r', fill=False)
-        ax.add_artist(circle2)
+        # circle2 = plt.Circle((self.condition.parameters["a"], self.condition.parameters["b"]), self.condition.parameters["R"], color='r', fill=False)
+        # ax.add_artist(circle2)
+        NV = [-self.condition.parameters["a"], self.condition.parameters["b"]]
+        BX = [0 - NV[0] * 2.0 - self.condition.parameters["c"],
+              -self.condition.parameters["a"] + NV[0] - self.condition.parameters["c"]]
+        BY = [0 - NV[1] * 2.0, self.condition.parameters["b"] + NV[1]]
+
+        plt.plot(BX, BY)
         CS = plt.contour(X, Y, Z)
         plt.clabel(CS, inline=1, fontsize=10)
         plt.title("Path of simplex with "+str(N)+" vertexes")

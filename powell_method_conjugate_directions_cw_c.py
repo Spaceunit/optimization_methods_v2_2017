@@ -67,9 +67,16 @@ class PMCD:
         self.hg = matrix.Matrix([[0]], "Hessian matrix")
         self.hg.makedimatrix(2)
         self.expression = expression.Expression("No name", "x**2")
-        self.condition = expression.Expression("No name", "x**2")
+
+        self.start_point = [10.0, 10.0]
+
+        self.condition = expression.Expression("Сondition", "(x1-a)**2 + (x2-b)**2 <= R**2")
+        self.condition.parameters["a"] = self.start_point[0] + 10.0
+        self.condition.parameters["b"] = self.start_point[1]
+        self.condition.parameters["R"] = 15.0
+
         self.r_expression = expression.Expression("No name", "x**2")
-        self.accuracy = 20
+        self.accuracy = 5
         self.epsilon = [1, 1]
         self.mm = True
         self.msycle = 3
@@ -89,7 +96,7 @@ class PMCD:
         self.gsm.importparam(self.accuracy)
 
         self.dichom = dichotomy_method.DM()
-        self.importparam(self.accuracy)
+        self.dichom.importparam(self.accuracy)
 
     def showCommands(self):
         print('')
@@ -141,12 +148,24 @@ class PMCD:
 
         self.r_expression = self.expression.copy()
 
+
+
+
         self.expression.parameters["unimodal"] = True
         # self.expression.parameters["global_min"] = [2.0, 1.0]
         # self.x_start = [[8.0, 9.0], [10.0, 11.0], [8.0, 11.0]]
         # self.x_start = [7.0, 6.0]
         # My RGR task
         self.x_start = [-23.5, -23.5]
+
+        self.start_point = self.x_start
+
+        self.condition = expression.Expression("Сondition", "(x1-a)**2 + (x2-b)**2 <= R**2")
+        self.condition.parameters["a"] = self.start_point[0] + 10.0
+        self.condition.parameters["b"] = self.start_point[1]
+        self.condition.parameters["R"] = 15.0
+
+        self.r_condition = self.condition.copy()
 
         # self.x_start = [1.2, 0.0]
 
@@ -260,7 +279,7 @@ class PMCD:
                 elif part == 1:
                     c_lambda = self.golden_section_search_method(interval)
                     action = "Next point by Golden section search method"
-                elif part == 2:
+                elif part == 6:
                     c_lambda = self.dsk_paula(x_w[flag], d_lambda, interval)
                     action = "Next point by DSK Paula method"
                 else:
@@ -270,7 +289,7 @@ class PMCD:
                 d_lambda = self.get_d_lambda(x_w, s_flag)
                 f_x_w = self.expression.execute_l(x_w)
                 self.collect_data(k, x_w, f_x_w, action)
-            elif part == 3:
+            elif part == 7:
                 action = "Next point by single lambda for all coordinates"
                 x_w = self.quad_step(x_w, s_flag, d_lambda, flag, part)
                 d_lambda = self.get_d_lambda(x_w, s_flag)
@@ -310,9 +329,10 @@ class PMCD:
 
         interval = self.sven_method(x_w, s, flag, part)
 
-        c_lambda = self.dsk_paula(x_w[flag], d_lambda, interval)
+        # c_lambda = self.dsk_paula(x_w[flag], d_lambda, interval)
         #c_lambda = self.dichotomy_method(interval)
         #c_lambda = -c_lambda
+        c_lambda = self.golden_section_search_method(interval)
         print(c_lambda)
         s_temp = s.copy()
         s_temp.rename(s.name)
@@ -349,14 +369,19 @@ class PMCD:
         interval = []
         self.r_expression = self.expression.copy()
         self.r_expression.rename(self.expression.name)
+
+        self.r_condition = self.condition.copy()
+        self.r_condition.rename(self.condition.name)
         #S = matrix.Vector([0.0, 1.0], "Vector S(1)")
         d_lambda = self.get_d_lambda(x_w, S)
         if part < 3:
             # S(flag)
             self.r_expression.replace_arg(self.arguments_list(x_w, flag))
+            self.r_condition.replace_arg(self.arguments_list(x_w, flag))
             start = x_w[flag]
         elif part == 3:
             self.r_expression.replace_arg(self.lambda_arguments_list(x_w, S, flag))
+            self.r_condition.replace_arg(self.lambda_arguments_list(x_w, S, flag))
             start = x_w[0]
         else:
             print("Wrong Vector S([1, 2])")
@@ -367,6 +392,8 @@ class PMCD:
             print("Flag", flag)
             self.r_expression.show_expr()
             self.sm.expression = self.r_expression.copy()
+            self.sm.condition = self.r_condition.copy()
+
             self.sm.x_start = start
             # d_lambda here
             print("D lambda is", d_lambda)
@@ -632,3 +659,6 @@ class PMCD:
             print("action:", self.result["action"][i])
             print("----------------------------------------")
         pass
+
+# TWork = PMCD()
+# TWork.dostaff()

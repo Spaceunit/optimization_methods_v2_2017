@@ -29,11 +29,20 @@ class SM:
             "image 1": 12,
             "start -g": 13
         }
-        self.expression = expression.Expression("No name", "x**2")
-        self.condition = expression.Expression("No name", "x < -5")
+        #self.expression = expression.Expression("No name", "x**2")
+
+        self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
+
+        self.condition = expression.Expression("Linear Condition", "a*x1+b*x2+c <= 1")
+        self.condition.parameters["a"] = 2.0
+        self.condition.parameters["b"] = 1.0
+        self.condition.parameters["c"] = 1.0
+
         self.accuracy = 3
         self.result = {"x1": [], "x2": [], "y": []}
         self.x_start = 10
+
+        self.start_point = [3.0, 3.0]
         self.makedefault()
 
 
@@ -68,18 +77,19 @@ class SM:
 
     def makedefault(self):
         self.epsilon = 10 ** (-self.accuracy)
-        self.expression = expression.Expression("Parabola", "x**2")
+        #self.expression = expression.Expression("Parabola", "x**2")
         self.expression.range = [-10.0, 10.0]
         self.expression.parameters["unimodal"] = True
-        self.x_start = -9.0
+        # self.x_start = -9.0
         self.result = {"x1": [], "x2": [], "x0": []}
         # 0.001
-        self.d = 0.00000000001
+        self.d = 1.0
         pass
 
-    def importparam(self, accuracy: int, condition: expression.Expression):
+    def importparam(self, accuracy: int, main_expresson: expression.Expression, condition: expression.Expression):
         self.accuracy = accuracy
-        self.condition = condition
+        self.expression = main_expresson.copy()
+        self.condition = condition.copy()
 
     def setaccuracy(self):
         task = 0
@@ -168,33 +178,47 @@ class SM:
 
 
     def resolve(self):
+        print("--------------")
         print("Sven Begin...")
+        self.condition.show_expr()
+        self.expression.show_expr()
+        nv = [-self.condition.parameters["a"],self.condition.parameters["b"]]
+        #nv = self.mul(nv, 1.0 / self.norm(nv))
         i = 0
         status = False
         f = {}
         f["xk"] = []
         xk = []
         fxk = []
-        f["x0"] = self.expression.execute(self.x_start)
+        self.x_start = self.start_point.copy()
+        f["x0"] = self.expression.execute_l(self.x_start)
         xk.append(self.x_start)
         fxk.append(f["x0"])
         print(self.d)
-        f["x0md"] = self.expression.execute(self.x_start - self.d)
-        f["x0pd"] = self.expression.execute(self.x_start + self.d)
+        # f["x0md"] = self.expression.execute_l(self.x_start - self.d)
+
+        x_dif = self.dif(self.x_start, self.mul(nv, self.d))
+        x_sum = self.sum(self.x_start, self.mul(nv, self.d))
+
+        f["x0md"] = self.expression.execute_l(x_dif)
+
+        # f["x0pd"] = self.expression.execute_l(self.x_start + self.d)
+
+        f["x0pd"] = self.expression.execute_l(x_sum)
 
         if f["x0"] < f["x0md"] and f["x0"] > f["x0pd"]:
             print("<m")
             self.d = np.copysign(self.d, 1.0)
             fxk.append(f["x0pd"])
-            xk.append(self.x_start + self.d)
+            xk.append(x_sum)
         elif f["x0"] < f["x0pd"] and f["x0"] > f["x0md"]:
             print("<p")
             self.d = np.copysign(self.d, -1.0)
             fxk.append(f["x0md"])
-            xk.append(self.x_start + self.d)
+            xk.append(x_dif)
         elif f["x0"] <= f["x0md"] and f["x0"] <= f["x0pd"]:
             print(">=<")
-            self.result["xk"] = [self.x_start - self.d, self.x_start, self.x_start + self.d]
+            self.result["xk"] = [x_dif, self.x_start, x_sum]
             self.result["fxk"] = [f["x0md"], fxk[0], f["x0pd"]]
             status = True
         else:
@@ -206,52 +230,17 @@ class SM:
         #print("x:", xk[-1], "f(x):", fxk[-1])
 
         if not status:
-            print("Now xk",xk)
-            first = False
-            condition = True
-            x_next = xk[-1]
+            x_next = None
             print(self.d)
             d = self.d
-            self.condition.show_expr()
             while not status:
-                condition = self.check_condition(xk[-1])
-                print("Condition: ", condition)
-                if condition == False:
-                    d /= 4.0
-                    d = -d
-                    while not status:
-                        if math.fabs(d) > self.epsilon:
-                            m = 0
-                            print("-------------> + ")
-                            while condition == False and m < 200:
-                                x_next = x_next + d
-                                condition = self.check_condition(x_next)
-                                print("condition", condition)
-                                print("d:", d)
-                                print("+d:", x_next)
-                                m += 1
-
-                            print("-------------> - ")
-                            d /= 2.0
-                            m = 0
-                            while condition == True and m < 200:
-                                x_next = x_next - d
-                                condition = self.check_condition(x_next)
-                                print("d:", d)
-                                print("-d:", x_next)
-                                m += 1
-                            d /= 2.0
-                        else:
-                            status = True
-                            print(x_next)
-                            xk[-1] = x_next
-                            fxk[-1] = self.expression.execute(x_next)
-                        d /= 2.0
-                elif fxk[-1] < fxk[-2]:
+                if fxk[-1] < fxk[-2]:
                     print("fxk[-1] < fxk[-2]")
-                    x_next = xk[-1] + d
+                    # x_next = xk[-1] + d
+                    print(xk[-1])
+                    x_next = self.sum(xk[-1], self.mul(nv, self.d))
                     print(x_next)
-                    fxk.append(self.expression.execute(x_next))
+                    fxk.append(self.expression.execute_l(x_next))
                     xk.append(x_next)
                     d *= 2.0
                 elif fxk[-1] > fxk[-2]:
@@ -259,12 +248,13 @@ class SM:
                     d /= 4.0
                     print(xk[-1])
                     print(d)
-                    x_next = xk[-1] - d
+                    # x_next = xk[-1] - d
+                    x_next = self.dif(xk[-1], self.mul(nv, self.d))
                     print(x_next)
-                    xk.append(xk[-1])
+                    xk.append(xk[-1].copy())
                     fxk.append(fxk[-1])
-                    xk[-2] = x_next
-                    fxk[-2] = self.expression.execute(x_next)
+                    xk[-2] = x_next.copy()
+                    fxk[-2] = self.expression.execute_l(x_next)
                     #print("x:", xk[-3], "f(x):", fxk[-3])
                     #print("x:", xk[-2], "f(x):", fxk[-2])
                     #print("x:", xk[-1], "f(x):", fxk[-1])
@@ -274,29 +264,14 @@ class SM:
                     status = True
                 else:
                     print("WTF")
-                # condition = self.check_condition(xk[-1])
-                # print("Condition: ", condition)
-
-            if len(xk) == 2:
-                xk = [xk[0], (xk[-1]+xk[-2]) * 0.5, xk[1]]
-                fxk = [fxk[0], self.expression.execute(xk[1]), fxk[1]]
             self.result["xk"] = xk
             self.result["fxk"] = fxk
             self.d = d
 
-    def check_condition(self, x_w):
-        result = True
-        x = {}
-        x["x"] = x_w
-        self.condition.parameters.update(x)
-        result = self.condition.execute_d(self.condition.parameters)
-        return result
-
-
     def collect_final_result(self, x, f):
-        self.result["x0"].append(x[1])
-        self.result["x1"].append(x[0])
-        self.result["x2"].append(x[2])
+        self.result["x0"].append(x[1].copy())
+        self.result["x1"].append(x[0].copy())
+        self.result["x2"].append(x[2].copy())
 
         self.result["f0"].append(f[1])
         self.result["f1"].append(f[0])
@@ -311,38 +286,72 @@ class SM:
     def find_f2(self, ab):
         return (ab[1] + ab[0]) / 2 + self.d
 
+    @staticmethod
+    def norm(v):
+        return math.sqrt(sum([math.pow(item, 2) for item in v]))
+
+    @staticmethod
+    def dif(v1, v2):
+        i = 0
+        r = []
+        while i < len(v1):
+            r.append(v1[i] - v2[i])
+            i += 1
+        return r
+
+    @staticmethod
+    def dif_part(v1, v2, part):
+        r = v1.copy()
+        r[part] -= v2[part]
+        return r
+
+    @staticmethod
+    def sum(v1, v2):
+        i = 0
+        r = []
+        while i < len(v1):
+            r.append(v1[i] + v2[i])
+            i += 1
+        return r
+
+    @staticmethod
+    def sum_part(v1, v2, part):
+        r = v1.copy()
+        r[part] += v2[part]
+        return r
+
+    @staticmethod
+    def mul(v1, c):
+        r = v1.copy()
+        for i in range(len(r)):
+            r[i] *= c
+        return r
+
+    @staticmethod
+    def deepcopy(x):
+        xn = [[] for _ in x]
+        for i in range(len(x)):
+            for j in range(len(x[i])):
+                xn[i].append(x[i][j])
+        return xn
+
     def find_min(self):
         array = {"xk": [None, None, None], "fxk": [None, None, None]}
         pos = self.result["fxk"].index(min(self.result["fxk"]))
 
-        if pos != (len(self.result["fxk"]) - 1) and len(self.result["fxk"]) > 2:
-            array["xk"][1] = self.result["xk"][pos]
-            array["xk"][0] = self.result["xk"][pos - 1]
-            array["xk"][2] = self.result["xk"][pos + 1]
+        array["xk"][1] = self.result["xk"][pos]
+        array["xk"][0] = self.result["xk"][pos - 1]
+        array["xk"][2] = self.result["xk"][pos + 1]
 
-            array["fxk"][1] = self.result["fxk"][pos]
-            array["fxk"][0] = self.result["fxk"][pos - 1]
-            array["fxk"][2] = self.result["fxk"][pos + 1]
-        elif len(self.result["fxk"]) > 2:
-            array["xk"][0] = self.result["xk"][pos]
-            array["xk"][1] = self.result["xk"][pos - 1]
-            array["xk"][2] = self.result["xk"][pos - 2]
-
-            array["fxk"][0] = self.result["fxk"][pos]
-            array["fxk"][1] = self.result["fxk"][pos - 1]
-            array["fxk"][2] = self.result["fxk"][pos - 2]
-        else:
-            array["xk"][0] = self.result["xk"][pos]
-            array["xk"][1] = self.result["xk"][pos - 1]
-
-            array["fxk"][0] = self.result["fxk"][pos]
-            array["fxk"][1] = self.result["fxk"][pos - 1]
+        array["fxk"][1] = self.result["fxk"][pos]
+        array["fxk"][0] = self.result["fxk"][pos - 1]
+        array["fxk"][2] = self.result["fxk"][pos + 1]
         return array
 
     def printresult_graph(self):
         verts = []
         for i in range(len(self.result["xk"])):
-            verts.append((self.result["xk"][i], self.result["fxk"][i]))
+            verts.append((self.result["xk"][i][0], self.result["xk"][i][1]))
         path = Path(verts)
 
         fig = plt.figure()
@@ -360,5 +369,6 @@ class SM:
         for i in range(len(self.result["xk"])):
             print("i:", i, "x:", self.result["xk"][i], "f(x):", self.result["fxk"][i])
         pass
+
 # TWork = SM()
 # TWork.dostaff()
