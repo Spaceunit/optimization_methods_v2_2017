@@ -38,10 +38,11 @@ class GSS:
         self.condition.parameters["c"] = 1.0
         self.nv = [-self.condition.parameters["a"], self.condition.parameters["b"]]
         self.accuracy = 5
+        self.d_for_sven = 1.0
         self.sm = sven_method_lc_cw.SM()
         self.result = {"xk": []}
         self.start_point = [3.0, 3.0]
-        self.makedefault()
+        # self.makedefault()
 
 
 
@@ -79,7 +80,7 @@ class GSS:
         self.x_start = self.start_point.copy()
         self.sm.start_point = self.start_point.copy()
 
-        self.sm.d = 1.0
+        self.sm.d = self.d_for_sven
         self.sm.resolve()
         self.expression.range = self.sm.find_min()
         self.par_sort(self.expression.range["xk"], self.expression.range["fxk"])
@@ -339,10 +340,10 @@ class GSS:
 
 
     def collect_result(self, ab, x1, x2, f1, f2, i):
-        self.result["a"].append(ab[0])
-        self.result["b"].append(ab[1])
-        self.result["x1"].append(x1)
-        self.result["x2"].append(x2)
+        self.result["a"].append(ab[0].copy())
+        self.result["b"].append(ab[1].copy())
+        self.result["x1"].append(x1.copy())
+        self.result["x2"].append(x2.copy())
         self.result["f1"].append(f1)
         self.result["f2"].append(f2)
         self.result["i"].append(i)
@@ -371,5 +372,5 @@ class GSS:
         print(self.er, self.ea)
         pass
 
-TWork = GSS()
-TWork.dostaff()
+#TWork = GSS()
+#TWork.dostaff()

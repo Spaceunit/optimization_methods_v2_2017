@@ -238,7 +238,7 @@ class SM:
                     print("fxk[-1] < fxk[-2]")
                     # x_next = xk[-1] + d
                     print(xk[-1])
-                    x_next = self.sum(xk[-1], self.mul(nv, self.d))
+                    x_next = self.sum(xk[-1], self.mul(nv, d))
                     print(x_next)
                     fxk.append(self.expression.execute_l(x_next))
                     xk.append(x_next)
@@ -249,7 +249,7 @@ class SM:
                     print(xk[-1])
                     print(d)
                     # x_next = xk[-1] - d
-                    x_next = self.dif(xk[-1], self.mul(nv, self.d))
+                    x_next = self.dif(xk[-1], self.mul(nv, d))
                     print(x_next)
                     xk.append(xk[-1].copy())
                     fxk.append(fxk[-1])

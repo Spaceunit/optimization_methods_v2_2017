@@ -35,6 +35,7 @@ class DM:
         self.condition.parameters["c"] = 1.0
         self.nv = [-self.condition.parameters["a"], self.condition.parameters["b"]]
         self.accuracy = 5
+        self.d_for_sven = 1.0
         self.result = {"x1": [], "x2": [], "y": [], "fxk": []}
         self.way = True
         self.sm = sven_method_lc_cw.SM()
@@ -79,7 +80,7 @@ class DM:
         self.sm.start_point = self.start_point.copy()
         self.epsilon = 10 ** (-self.accuracy)
 
-        self.sm.d = 1.0
+        self.sm.d = self.d_for_sven
         self.sm.resolve()
         self.expression.range = self.sm.find_min()
         self.par_sort(self.expression.range["xk"], self.expression.range["fxk"])

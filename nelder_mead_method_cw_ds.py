@@ -20,7 +20,7 @@ from resource import expression
 
 # import powell_method_conjugate_directions_cw_c
 import sven_method_lc_cw
-import golden_section_search
+import golden_section_search_lc_cw
 import dichotomy_method_lc_cw
 class NMM:
     def __init__(self):
@@ -356,7 +356,7 @@ class NMM:
             #self.collect_data(k, x_w, f_arr, "default iterration")
             #k += 1
         self.par_sort(x_w, f_arr, cycling)
-        self.do_linear_condition(x_w[0], f_arr[0])
+        self.do_linear_condition_g(x_w[0], f_arr[0])
         self.printresult()
 
     def do_linear_condition(self, x_lin: type([]), f: type([])):
@@ -366,6 +366,7 @@ class NMM:
         # self.sm.d = self.epsilon[0]
         # self.sm.resolve()
         self.dm = dichotomy_method_lc_cw.DM()
+        self.dm.d_for_sven = 0.1
         self.dm.importparam(self.accuracy, self.expression, self.condition, x)
         self.dm.resolve()
         self.pcd["xk"] = [self.dm.result["x1"][-1].copy(), self.dm.result["x2"][-1].copy()]
@@ -373,19 +374,20 @@ class NMM:
 
         self.dm.par_sort(self.pcd["xk"], self.pcd["fxk"])
 
-    def do_linear_condition_1(self, x_lin: type([]), f: type([])):
+    def do_linear_condition_g(self, x_lin: type([]), f: type([])):
         x = x_lin.copy()
         # self.sm.importparam(self.accuracy, self.expression, self.condition)
         # self.sm.start_point = x.copy()
         # self.sm.d = self.epsilon[0]
         # self.sm.resolve()
-        self.dm = dichotomy_method_lc_cw.DM()
-        self.dm.importparam(self.accuracy, self.expression, self.condition, x)
-        self.dm.resolve()
-        self.pcd["xk"] = [self.dm.result["x1"][-1].copy(), self.dm.result["x2"][-1].copy()]
-        self.pcd["fxk"] = self.dm.result["fxk"][-1].copy()
+        self.gss = golden_section_search_lc_cw.GSS()
+        self.gss.d_for_sven = 0.1
+        self.gss.importparam(self.accuracy, self.expression, self.condition, x)
+        self.gss.resolve()
+        self.pcd["xk"] = [self.gss.result["a"][-1].copy(), self.gss.result["b"][-1].copy()]
+        self.pcd["fxk"] = [self.expression.execute_l(self.pcd["xk"][0]), self.expression.execute_l(self.pcd["xk"][1])]
 
-        self.dm.par_sort(self.pcd["xk"], self.pcd["fxk"])
+        self.gss.par_sort(self.pcd["xk"], self.pcd["fxk"])
 
 
 
