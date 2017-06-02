@@ -22,6 +22,7 @@ from resource import expression
 import sven_method_lc_cw
 import golden_section_search_lc_cw
 import dichotomy_method_lc_cw
+import dsk_paula_lc_cw
 class NMM:
     def __init__(self):
         self.commands = {
@@ -113,20 +114,22 @@ class NMM:
         # self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
 
         # self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
-        self.condition = expression.Expression("Linear Condition", "a*(x1)+b*(x2) <= c")
-        self.condition.parameters["a"] = -1.0
-        self.condition.parameters["b"] = -1.0
-        self.condition.parameters["c"] = -6.0
+        #self.condition = expression.Expression("Linear Condition", "a*(x1)+b*(x2) <= c")
+        #self.condition.parameters["linear"] = True
+        #self.condition.parameters["a"] = -1.0
+        #self.condition.parameters["b"] = -1.0
+        #self.condition.parameters["c"] = -6.0
 
         # self.expression = expression.Expression("Function of Rozenbrok", "100*(x2-x1**2)**2+(1-x1)**2")
 
         self.start_point = [-1.2, 0.0]
 
         # self.condition = expression.Expression("Сondition", "(x-a)**2 + (y-b)**2 <= R**2")
-        # self.condition = expression.Expression("Сondition", "(x1-a)**2 + (x2-b)**2 <= R**2")
-        # self.condition.parameters["a"] = self.start_point[0] + 10.0
-        # self.condition.parameters["b"] = self.start_point[1]
-        # self.condition.parameters["R"] = 15.0
+        self.condition = expression.Expression("Сondition", "(x1-a)**2 + (x2-b)**2 <= R**2")
+        self.condition.parameters["linear"] = False
+        self.condition.parameters["a"] = self.start_point[0] + 10.0
+        self.condition.parameters["b"] = self.start_point[1]
+        self.condition.parameters["R"] = 15.0
 
         self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
         # self.condition = expression.Expression("Linear Condition", "a*x1+b*x2+c <= 1")
@@ -356,10 +359,14 @@ class NMM:
             #self.collect_data(k, x_w, f_arr, "default iterration")
             #k += 1
         self.par_sort(x_w, f_arr, cycling)
-        self.do_linear_condition_g(x_w[0], f_arr[0])
-        self.printresult()
+        if self.condition.parameters["linear"]:
+            self.do_linear_condition_p(x_w[0], f_arr[0])
+            self.printresult()
+            self.dskp.printresult()
+        else:
+            self.printresult()
 
-    def do_linear_condition(self, x_lin: type([]), f: type([])):
+    def do_linear_condition_d(self, x_lin: type([]), f: type([])):
         x = x_lin.copy()
         # self.sm.importparam(self.accuracy, self.expression, self.condition)
         # self.sm.start_point = x.copy()
@@ -390,8 +397,27 @@ class NMM:
         self.gss.resolve()
         self.pcd["xk"] = [self.gss.result["a"][-1].copy(), self.gss.result["b"][-1].copy()]
         self.pcd["fxk"] = [self.expression.execute_l(self.pcd["xk"][0]), self.expression.execute_l(self.pcd["xk"][1])]
+        self.gss.printresult()
 
         self.gss.par_sort(self.pcd["xk"], self.pcd["fxk"])
+
+    def do_linear_condition_p(self, x_lin: type([]), f: type([])):
+        x = x_lin.copy()
+        # self.sm.importparam(self.accuracy, self.expression, self.condition)
+        # self.sm.start_point = x.copy()
+        # self.sm.d = self.epsilon[0]
+        # self.sm.resolve()
+        self.dskp = dsk_paula_lc_cw.DSKP()
+        self.dskp.d_for_sven = 0.1
+        self.dskp.importparam(self.accuracy, self.expression, self.condition, x)
+        self.dskp.makedefault()
+        self.dskp.sm.printresult_graph()
+        self.dskp.resolve()
+        self.pcd["xk"] = [self.dskp.result["xst"][-1].copy()]
+        self.pcd["fxk"] = [self.dskp.result["fsxt"][-1]]
+        self.dskp.printresult()
+
+        # self.gss.par_sort(self.pcd["xk"], self.pcd["fxk"])
 
 
 
@@ -863,16 +889,16 @@ class NMM:
         #plt.figure()
         # circle2 = plt.Circle((self.condition.parameters["a"], self.condition.parameters["b"]), self.condition.parameters["R"], color='r', fill=False)
         # ax.add_artist(circle2)
-        NV = [-self.condition.parameters["a"], self.condition.parameters["b"]]
+        if self.condition.parameters["linear"]:
+            NV = [-self.condition.parameters["a"], self.condition.parameters["b"]]
+            NV = self.mul(NV, 10)
+            BX = [0 - NV[0]*2.0 - self.condition.parameters["c"], -self.condition.parameters["a"] + NV[0] - self.condition.parameters["c"]]
+            BY = [0 - NV[1]*2.0, self.condition.parameters["b"] + NV[1]]
+            plt.plot(BX, BY)
+        else:
+            circle2 = plt.Circle((self.condition.parameters["a"], self.condition.parameters["b"]), self.condition.parameters["R"], color='r', fill=False)
+            ax.add_artist(circle2)
 
-        NV = self.mul(NV, 10)
-
-        BX = [0 - NV[0]*2.0 - self.condition.parameters["c"], -self.condition.parameters["a"] + NV[0] - self.condition.parameters["c"]]
-        BY = [0 - NV[1]*2.0, self.condition.parameters["b"] + NV[1]]
-
-
-
-        plt.plot(BX, BY)
         CS = plt.contour(X, Y, Z)
         plt.clabel(CS, inline=1, fontsize=10)
         plt.title("Path of simplex with "+str(N)+" vertexes")
@@ -971,14 +997,18 @@ class NMM:
         #plt.title('Single color - negative contours dashed')
 
         #plt.figure()
-        # circle2 = plt.Circle((self.condition.parameters["a"], self.condition.parameters["b"]), self.condition.parameters["R"], color='r', fill=False)
-        # ax.add_artist(circle2)
-        NV = [-self.condition.parameters["a"], self.condition.parameters["b"]]
-        BX = [0 - NV[0] * 2.0 - self.condition.parameters["c"],
-              -self.condition.parameters["a"] + NV[0] - self.condition.parameters["c"]]
-        BY = [0 - NV[1] * 2.0, self.condition.parameters["b"] + NV[1]]
 
-        plt.plot(BX, BY)
+        if self.condition.parameters["linear"]:
+            NV = [-self.condition.parameters["a"], self.condition.parameters["b"]]
+            BX = [0 - NV[0] * 2.0 - self.condition.parameters["c"],
+                  -self.condition.parameters["a"] + NV[0] - self.condition.parameters["c"]]
+            BY = [0 - NV[1] * 2.0, self.condition.parameters["b"] + NV[1]]
+
+            plt.plot(BX, BY)
+        else:
+            circle2 = plt.Circle((self.condition.parameters["a"], self.condition.parameters["b"]), self.condition.parameters["R"], color='r', fill=False)
+            ax.add_artist(circle2)
+
         CS = plt.contour(X, Y, Z)
         plt.clabel(CS, inline=1, fontsize=10)
         plt.title("Path of simplex with "+str(N)+" vertexes")

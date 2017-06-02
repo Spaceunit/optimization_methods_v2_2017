@@ -1,4 +1,5 @@
 import openpyxl
+from openpyxl.utils import get_column_letter
 import matrix
 
 class Excel:
@@ -14,7 +15,8 @@ class Excel:
             "new": 5,
             "show slist": 6,
             "mk": 8,
-            "QR": 9
+            "QR": 9,
+            "WR": 10
 
         }
         pass
@@ -23,6 +25,9 @@ class Excel:
         self.setpath("./")
         self.setfilename("file.xlsx")
         self.setsheetname("Sheet1")
+        pass
+
+    def importparam(self):
         pass
 
 
@@ -69,7 +74,7 @@ class Excel:
         task = 0
         while (task != 1):
             print('')
-            print("Matrix calculation v0.0002 betta task #15")
+            print("Work with Excel")
             print('')
             task = self.enterCommand()
             if (task == 2):
@@ -86,6 +91,8 @@ class Excel:
                 pass
             elif (task == 8):
                 self.makedafault()
+            elif (task == 10):
+                self.write_data()
         pass
 
     def inputnewdata(self):
@@ -116,3 +123,23 @@ class Excel:
             pass
         else:
             return 1
+
+    def write_data(self):
+        wb = openpyxl.Workbook()
+        dest_filename = 'empty_book.xlsx'
+        ws1 = wb.active
+        ws1.title = "range names"
+
+        for row in range(1, 40):
+            ws1.append(range(600))
+
+        ws2 = wb.create_sheet(title="Pi")
+
+        ws2['F5'] = 3.14
+
+        ws3 = wb.create_sheet(title="Data")
+        for row in range(10, 20):
+            for col in range(27, 54):
+                _ = ws3.cell(column=col, row=row, value="{0}".format(get_column_letter(col)))
+        print(ws3['AA10'].value)
+        wb.save(filename=dest_filename)

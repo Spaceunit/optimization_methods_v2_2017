@@ -277,15 +277,6 @@ class SM:
         self.result["f1"].append(f[0])
         self.result["f2"].append(f[2])
 
-    def set_d(self, ab):
-        self.d = math.fabs(ab[1] - ab[0]) / 4
-
-    def find_f1(self, ab):
-        return (ab[1] + ab[0]) / 2 - self.d
-
-    def find_f2(self, ab):
-        return (ab[1] + ab[0]) / 2 + self.d
-
     @staticmethod
     def norm(v):
         return math.sqrt(sum([math.pow(item, 2) for item in v]))

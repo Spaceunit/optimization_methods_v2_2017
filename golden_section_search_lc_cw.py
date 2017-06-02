@@ -37,11 +37,11 @@ class GSS:
         self.condition.parameters["b"] = 1.0
         self.condition.parameters["c"] = 1.0
         self.nv = [-self.condition.parameters["a"], self.condition.parameters["b"]]
-        self.accuracy = 5
+        self.accuracy = 10
         self.d_for_sven = 1.0
         self.sm = sven_method_lc_cw.SM()
         self.result = {"xk": []}
-        self.start_point = [3.0, 3.0]
+        self.start_point = [3.0, 5.0]
         # self.makedefault()
 
 
@@ -85,8 +85,8 @@ class GSS:
         self.expression.range = self.sm.find_min()
         self.par_sort(self.expression.range["xk"], self.expression.range["fxk"])
 
-        self.expression.range["xk"].pop(1)
-        self.expression.range["fxk"].pop(1)
+        self.expression.range["xk"].pop(0)
+        self.expression.range["fxk"].pop(0)
 
         self.expression.parameters["unimodal"] = True
         self.result = {"a": [], "b": [], "x1": [], "x2": [], "f1": [], "f2": [], "i": [], "fxk": []}
@@ -372,5 +372,5 @@ class GSS:
         print(self.er, self.ea)
         pass
 
-#TWork = GSS()
-#TWork.dostaff()
+# TWork = GSS()
+# TWork.dostaff()

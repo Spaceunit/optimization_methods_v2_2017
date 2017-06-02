@@ -70,6 +70,7 @@ class Work:
                 "qnm": 28,
                 "cdm": 29,
                 "cw": 30,
+                "pe": 31
             },
             "description": {
                 "none": "do nothing",
@@ -102,7 +103,8 @@ class Work:
                 "frcgm": "The Fletcher-Reeves conjugate gradient method",
                 "qnm": "Quasi-Newton method",
                 "cdm": "Conjugate gradient method",
-                "cw": "Course work"
+                "cw": "Course work",
+                "pe": "python excel 2010"
             }
         }
         pass
@@ -259,6 +261,10 @@ class Work:
             elif task == 30:
                 Task = nelder_mead_method_cw_ds.NMM()
                 Task.importparam(self.accuracy)
+                Task.dostaff()
+            elif task == 31:
+                Task = excel_transfer.Excel()
+                Task.importparam()
                 Task.dostaff()
         pass
 
