@@ -229,6 +229,7 @@ class DSKP:
         else:
             self.raw_group = self.external_raw_group
         self.dx = self.sm.d
+        # self.dx = 0.001
         #if self.external_raw_group == None:
         print("Three points is", self.sm.find_min())
         x_new = self.dsk(self.sm.find_min())
@@ -256,11 +257,150 @@ class DSKP:
             part_1 = float('Inf')
 
         x_new = self.sum(raw["xk"][1], self.mul(self.nv, part_1))
+        xn = [None, None, None]
+        if self.distantion(x_new, raw["xk"][0]) < self.distantion(x_new, raw["xk"][2]):
+            xn[2] = raw["xk"][1].copy()
+            xn[1] = x_new.copy()
+            xn[0] = raw["xk"][0].copy()
+        else:
+            xn[0] = raw["xk"][1].copy()
+            xn[1] = x_new.copy()
+            xn[2] = raw["xk"][0].copy()
 
         #print("x* = ", x_new)
-        return x_new
+        return xn
 
-    def paul(self, x_new):
+    def dsk_0(self, raw):
+        return raw["xk"][1].copy()
+
+    def paul(self, xn: type([])):
+        print("Begin Paul")
+        xst = xn[1].copy()
+        fs = self.expression.execute_l(xst)
+        x = self.deepcopy(xn)
+        f_x = [self.expression.execute_l(x[0]), self.expression.execute_l(x[1]),
+               self.expression.execute_l(x[2])]
+        # self.par_sort(x, f_x)
+        i = 0
+        fxn = [self.expression.execute_l(xn[0]), self.expression.execute_l(xn[1]),
+               self.expression.execute_l(xn[2])]
+        self.collect_result(i, xn, xst.copy(), fxn, fs)
+        while self.distantion(x[0], xst) > self.epsilon[0] and math.fabs(f_x[0] - fs) > self.epsilon[1] and i < 1000:
+            x = self.deepcopy(xn)
+            self.par_sort(x, fxn.copy())
+            #f3 = self.expression.execute_l(x3)
+            x1 = xn[0].copy()
+            x2 = xn[1].copy()
+            x3 = xn[2].copy()
+            f1 = self.expression.execute_l(x1)
+            f2 = self.expression.execute_l(x2)
+            f3 = self.expression.execute_l(x3)
+            try:
+                # a1 = (f2 - f1) / (x2 - x1)
+                a1 = (f2 - f1) / self.distantion(x2, x1)
+            except ZeroDivisionError:
+                a1 = float('Inf')
+            part1 = self.distantion(x3, x1)
+            part2 = self.distantion(x2, x1)
+            part3 = self.distantion(x3, x2)
+            try:
+                part01 = (f3 - f1) / part1
+            except ZeroDivisionError:
+                part01 = float('Inf')
+
+            try:
+                part02 = (f2 - f1) / part2
+            except ZeroDivisionError:
+                part02 = float('Inf')
+
+            try:
+                a2 = (part01 - part02) / part3
+            except ZeroDivisionError:
+                a2 = float('Inf')
+
+            #a2 = ((f3 - f1) / part1 - (f2 - f1) / part2) / part3
+            # xst = 0.5 * (x1 + x2) - a1 / (a2)
+            try:
+                a1_a2_1 = a1 / (2.0 * a2)
+            except ZeroDivisionError:
+                a1_a2_1 = float('Inf')
+
+
+            try:
+                # a1 = (f2 - f1) / (x2 - x1)
+                a1 = (f3 - f2) / self.distantion(x3, x2)
+            except ZeroDivisionError:
+                a1 = float('Inf')
+            part1 = self.distantion(x3, x1)
+            part2 = self.distantion(x3, x2)
+            part3 = self.distantion(x2, x1)
+            try:
+                part01 = (f3 - f1) / part1
+            except ZeroDivisionError:
+                part01 = float('Inf')
+
+            try:
+                part02 = (f3 - f2) / part2
+            except ZeroDivisionError:
+                part02 = float('Inf')
+
+            try:
+                a2 = (part01 - part02) / part3
+            except ZeroDivisionError:
+                a2 = float('Inf')
+
+            #a2 = ((f3 - f1) / part1 - (f2 - f1) / part2) / part3
+            # xst = 0.5 * (x1 + x2) - a1 / (a2)
+            try:
+                a1_a2_2 = a1 / (2.0 * a2)
+            except ZeroDivisionError:
+                a1_a2_2 = float('Inf')
+
+            xst_1 = self.mul(self.sum(x1, x2), 0.5)
+            xst_1 = self.dif(xst_1, self.mul(self.nv, a1_a2_1))
+
+            xst_2 = self.mul(self.sum(x2, x3), 0.5)
+            xst_2 = self.dif(xst_2, self.mul(self.nv, a1_a2_2))
+
+            fs_1 = self.expression.execute_l(xst_1)
+            fs_2 = self.expression.execute_l(xst_2)
+
+            print("fs_1 < fs_2", fs_1 < fs_2)
+            xst = xst_1.copy()
+            # if fs_1 < fs_2:
+            #     xst = xst_1.copy()
+            # else:
+            #     xst = xst_2.copy()
+
+            fs = self.expression.execute_l(xst)
+            #print("i:", i)
+            #print("xst =", xst, "f(xst) =", fs)
+            #print("x2 =", x2, "f(x2) =", f2)
+            #print(math.fabs(x2 - xst), math.fabs(f2 - fs))
+            i += 1
+            x = [x1.copy(), x2.copy(), x3.copy()]
+            f_x = [self.expression.execute_l(x1), self.expression.execute_l(x2),
+                                 self.expression.execute_l(x3)]
+            self.par_sort(x, f_x)
+            xn = [x1.copy(), x2.copy(), x3.copy()]
+            if self.distantion(xst, x1) < self.distantion(xst, x3):
+                xn[2] = x2.copy()
+                xn[1] = xst.copy()
+                xn[0] = x1.copy()
+            else:
+                xn[0] = x2.copy()
+                xn[1] = xst.copy()
+                xn[2] = x3.copy()
+            fxn = [self.expression.execute_l(xn[0]), self.expression.execute_l(xn[1]),
+                   self.expression.execute_l(xn[2])]
+
+            self.collect_result(i, xn, xst.copy(), fxn, fs)
+        # self.result["xst"] = xst
+        # self.result["fsxt"] = fs
+        #print("xst =", xst, "f(xst) =", fs)
+        pass
+
+    def paul0(self, x_new):
         print("Begin Paul")
         # 0.2
         # 0.01
@@ -346,10 +486,11 @@ class DSKP:
         fs_2 = self.expression.execute_l(xst_2)
 
         print("fs_1 < fs_2", fs_1 < fs_2)
-        if fs_1 < fs_2:
-            xst = xst_1.copy()
-        else:
-            xst = xst_2.copy()
+        xst = xst_1.copy()
+        # if fs_1 < fs_2:
+        #     xst = xst_1.copy()
+        # else:
+        #     xst = xst_2.copy()
 
         fs = self.expression.execute_l(xst)
         i = 0
@@ -462,10 +603,11 @@ class DSKP:
             fs_2 = self.expression.execute_l(xst_2)
 
             print("fs_1 < fs_2", fs_1 < fs_2)
-            if fs_1 < fs_2:
-                xst = xst_1.copy()
-            else:
-                xst = xst_2.copy()
+            xst = xst_1.copy()
+            # if fs_1 < fs_2:
+            #     xst = xst_1.copy()
+            # else:
+            #     xst = xst_2.copy()
 
             fs = self.expression.execute_l(xst)
             #print("i:", i)

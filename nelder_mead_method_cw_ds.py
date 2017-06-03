@@ -114,22 +114,22 @@ class NMM:
         # self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
 
         # self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
-        #self.condition = expression.Expression("Linear Condition", "a*(x1)+b*(x2) <= c")
-        #self.condition.parameters["linear"] = True
-        #self.condition.parameters["a"] = -1.0
-        #self.condition.parameters["b"] = -1.0
-        #self.condition.parameters["c"] = -6.0
+        self.condition = expression.Expression("Linear Condition", "a*(x1)+b*(x2) <= c")
+        self.condition.parameters["linear"] = True
+        self.condition.parameters["a"] = -1.0
+        self.condition.parameters["b"] = -1.0
+        self.condition.parameters["c"] = -6.0
 
         # self.expression = expression.Expression("Function of Rozenbrok", "100*(x2-x1**2)**2+(1-x1)**2")
 
         self.start_point = [-1.2, 0.0]
 
         # self.condition = expression.Expression("Сondition", "(x-a)**2 + (y-b)**2 <= R**2")
-        self.condition = expression.Expression("Сondition", "(x1-a)**2 + (x2-b)**2 <= R**2")
-        self.condition.parameters["linear"] = False
-        self.condition.parameters["a"] = self.start_point[0] + 10.0
-        self.condition.parameters["b"] = self.start_point[1]
-        self.condition.parameters["R"] = 15.0
+        # self.condition = expression.Expression("Сondition", "(x1-a)**2 + (x2-b)**2 <= R**2")
+        # self.condition.parameters["linear"] = False
+        # self.condition.parameters["a"] = self.start_point[0] + 10.0
+        # self.condition.parameters["b"] = self.start_point[1]
+        # self.condition.parameters["R"] = 15.0
 
         self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
         # self.condition = expression.Expression("Linear Condition", "a*x1+b*x2+c <= 1")
@@ -565,7 +565,7 @@ class NMM:
     @staticmethod
     def build_initial_simplex_basic(size_s: float, f_dim: int, count_of_vertex: int, x_start: list) -> list:
         i = 0
-        simplex = []
+        simplex = [x_start.copy()]
 
         sqrt_two = math.sqrt(2.0)
         try:
@@ -578,7 +578,7 @@ class NMM:
         except ZeroDivisionError:
             d2 = float('Inf')
 
-        while i < count_of_vertex:
+        while i < count_of_vertex - 1:
             j = 0
             vertex = []
             while j < f_dim:
