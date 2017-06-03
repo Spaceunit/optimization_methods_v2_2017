@@ -71,6 +71,7 @@ class NMM:
         # self.pcd.importparam(self.accuracy, self.condition)
         self.pcd = {"i": [], "xk": [], "fxk": [], "action": []}
         self.sm = sven_method_lc_cw.SM()
+        self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "s": 0.5}
         self.makedefault()
 
 
@@ -176,7 +177,7 @@ class NMM:
 
         # self.x_start = [[-0.023444155834422054 - 3, 1.203772072451931], [0.0, 1.203772072451931 + 3], [0.023444155834422054 + 3, 1.203772072451931]]
 
-        self.cof = {"a": 1.0, "g": 2.0, "b": 0.5}
+        self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "s": 0.5}
         self.result = {"i": [], "xk": [], "fx": [], "action": []}
         self.pcd = {"i": [], "xk": [], "fxk": [], "action": []}
 
@@ -595,7 +596,7 @@ class NMM:
         i = 1
         while i < len(x_w):
             x_w[i] = self.dif(x_w[i], x_w[vertex])
-            x_w[i] = self.mul(x_w[i], 0.5)
+            x_w[i] = self.mul(x_w[i], self.cof["s"])
             x_w[i] = self.sum(x_w[i], x_w[vertex])
             i += 1
 
