@@ -13,6 +13,7 @@ import matplotlib.patches as patches
 import matplotlib
 from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
+from mpl_toolkits.mplot3d import axes3d
 
 
 
@@ -66,11 +67,18 @@ class NMM:
         self.epsilon = [1, 1]
         self.mm = True
         self.msycle = 3
-        self.result = {"i": [], "xk": [], "fx": [], "action": []}
+        self.result = {"i": [], "xk": [], "fx": [], "action": [], "f_call": 0,
+                       "action_count": {
+                           "reflection": [0] * 2,
+                           "expansion": [0] * 2,
+                           "reduction": [0] * 2,
+                           "compression": [0] * 2
+                       }}
         # self.pcd = powell_method_conjugate_directions_cw_c.PMCD()
         # self.pcd.importparam(self.accuracy, self.condition)
-        self.pcd = {"i": [], "xk": [], "fxk": [], "action": []}
+        self.pcd = {"i": [], "xk": [], "fxk": [], "action": [], "f_call": 0}
         self.sm = sven_method_lc_cw.SM()
+        # self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "s": 0.5}
         self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "s": 0.5}
         self.makedefault()
 
@@ -115,22 +123,23 @@ class NMM:
         # self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
 
         # self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
-        self.condition = expression.Expression("Linear Condition", "a*(x1)+b*(x2) <= c")
-        self.condition.parameters["linear"] = True
-        self.condition.parameters["a"] = -1.0
-        self.condition.parameters["b"] = -1.0
-        self.condition.parameters["c"] = -6.0
+        # self.condition = expression.Expression("Linear Condition", "a*(x1)+b*(x2) <= c")
+        # self.condition.parameters["linear"] = True
+        # self.condition.parameters["a"] = -1.0
+        # self.condition.parameters["b"] = -1.0
+        # self.condition.parameters["c"] = -6.0
 
         # self.expression = expression.Expression("Function of Rozenbrok", "100*(x2-x1**2)**2+(1-x1)**2")
 
         self.start_point = [-1.2, 0.0]
 
         # self.condition = expression.Expression("Сondition", "(x-a)**2 + (y-b)**2 <= R**2")
-        # self.condition = expression.Expression("Сondition", "(x1-a)**2 + (x2-b)**2 <= R**2")
-        # self.condition.parameters["linear"] = False
-        # self.condition.parameters["a"] = self.start_point[0] + 10.0
-        # self.condition.parameters["b"] = self.start_point[1]
-        # self.condition.parameters["R"] = 15.0
+
+        self.condition = expression.Expression("Сondition", "(x1-a)**2 + (x2-b)**2 <= R**2")
+        self.condition.parameters["linear"] = False
+        self.condition.parameters["a"] = self.start_point[0] + 10.0
+        self.condition.parameters["b"] = self.start_point[1]
+        self.condition.parameters["R"] = 15.0
 
         self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
         # self.condition = expression.Expression("Linear Condition", "a*x1+b*x2+c <= 1")
@@ -166,7 +175,9 @@ class NMM:
         # self.start_point = [-1.2, 0.0]
 
         self.count_of_vertex = 3
-        self.simplex_border_length = 10.0
+        # self.simplex_border_length = 10.0
+
+        self.simplex_border_length = 1.5
 
         # self.x_start = [[-1.2, -1.2], [-1.2, 1.2], [1.2, 1.2], [1.2, -1.2]]
 
@@ -177,9 +188,19 @@ class NMM:
 
         # self.x_start = [[-0.023444155834422054 - 3, 1.203772072451931], [0.0, 1.203772072451931 + 3], [0.023444155834422054 + 3, 1.203772072451931]]
 
-        self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "s": 0.5}
-        self.result = {"i": [], "xk": [], "fx": [], "action": []}
-        self.pcd = {"i": [], "xk": [], "fxk": [], "action": []}
+        # self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "s": 0.5}
+        self.cof = {"a": 0.8, "g": 2.0, "b": 0.5, "s": 0.5}
+        #self.result = {"i": [], "xk": [], "fx": [], "action": [], "f_call": 0}
+
+        self.result = {"i": [], "xk": [], "fx": [], "action": [], "f_call": 0,
+                       "action_count": {
+                           "reflection": [0] * 2,
+                           "expansion": [0] * 2,
+                           "reduction": [0] * 2,
+                           "compression": [0] * 2
+                       }}
+
+        self.pcd = {"i": [], "xk": [], "fxk": [], "action": [], "f_call": 0}
 
         self.sm.importparam(self.accuracy, self.expression, self.condition)
 
@@ -250,6 +271,7 @@ class NMM:
 
     def resolve(self):
         self.makedefault()
+        self.result["f_call"] = self.count_of_vertex
         k = 0
         flag = False
         out_of_condition = False
@@ -598,24 +620,36 @@ class NMM:
             x_w[i] = self.dif(x_w[i], x_w[vertex])
             x_w[i] = self.mul(x_w[i], self.cof["s"])
             x_w[i] = self.sum(x_w[i], x_w[vertex])
+            self.result["f_call"] += 1
             i += 1
+        self.result["action_count"]["reduction"][0] += 1
+        self.result["action_count"]["reduction"][1] += i - 1
 
     def expansion(self, center, h_temp, x_w):
         h_temp = self.dif(h_temp, center)
         h_temp = self.mul(h_temp, self.cof["g"])
         h_temp = self.sum(h_temp, center)
+        self.result["f_call"] += 1
+        self.result["action_count"]["expansion"][0] += 1
+        self.result["action_count"]["expansion"][1] += 1
         return h_temp
 
     def compression(self, center, h_temp, x_w):
         h_temp = self.dif(x_w[-1], center)
         h_temp = self.mul(h_temp, self.cof["b"])
         h_temp = self.sum(h_temp, center)
+        self.result["f_call"] += 1
+        self.result["action_count"]["compression"][0] += 1
+        self.result["action_count"]["compression"][1] += 1
         return h_temp
 
     def reflection(self, center, x_w):
         h_temp = self.dif(center, x_w[-1])
         h_temp = self.mul(h_temp, self.cof["a"])
         h_temp = self.sum(h_temp, center)
+        self.result["f_call"] += 1
+        self.result["action_count"]["reflection"][0] += 1
+        self.result["action_count"]["reflection"][1] += 1
         return h_temp
 
     def par_sort(self, x, f, cycling):
@@ -795,7 +829,74 @@ class NMM:
         plt.show()
         pass
 
+    def printresult_3d_0(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        # Grab some test data.
+        delta = 0.05
+        radius = 10
+        sector = self.expression.parameters["global_min"].copy()
+        sector = [sector[0] - math.copysign(radius, sector[0]), sector[1] + math.copysign(radius, sector[1])]
+        x = np.arange(sector[0], sector[1], delta)
+        y = np.arange(sector[0], sector[1], delta)
+
+        X, Y = np.meshgrid(x, y)
+
+        # Z1 = mlab.bivariate_normal(X, Y, 1.0, 1.0, 0.0, 0.0)
+        # Z2 = mlab.bivariate_normal(X, Y, 1.5, 0.5, 1, 1)
+
+        # Z = 10.0 * (Z2 - Z1)
+        # "(10*(x1-x2)**2+(x1-1)**2)**0.25"
+        # Z = 10.0 * ((X - Y)**2 + (X - 1)**2)**0.25
+
+        Z = self.expression.execute_l([X, Y])
+
+        # X, Y, Z = axes3d.get_test_data(0.05)
+
+        # Plot a basic wireframe.
+        ax.plot_wireframe(X, Y, Z, rstride=10, cstride=10)
+
+        plt.show()
+        pass
+
     def printresult_3d(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        # Grab some test data.
+        delta = 0.025
+        radius = 5
+        sector = self.expression.parameters["global_min"].copy()
+        sector = [sector[0] - math.copysign(radius, sector[0]), sector[1] + math.copysign(radius, sector[1])]
+        x = np.arange(sector[0], sector[1], delta)
+        y = np.arange(sector[0], sector[1], delta)
+
+        X, Y = np.meshgrid(x, y)
+
+        # Z1 = mlab.bivariate_normal(X, Y, 1.0, 1.0, 0.0, 0.0)
+        # Z2 = mlab.bivariate_normal(X, Y, 1.5, 0.5, 1, 1)
+
+        # Z = 10.0 * (Z2 - Z1)
+        # "(10*(x1-x2)**2+(x1-1)**2)**0.25"
+        # Z = 10.0 * ((X - Y)**2 + (X - 1)**2)**0.25
+
+        Z = self.expression.execute_l([X, Y])
+
+        # X, Y, Z = axes3d.get_test_data(0.05)
+
+        # Plot a basic wireframe.
+        surf = ax.plot_surface(X, Y, Z, cmap=cm.jet,
+                               linewidth=0, antialiased=True)
+
+        ax.set_zlim(0.0, 25.0)
+        ax.zaxis.set_major_locator(LinearLocator(10))
+        ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+
+        # Add a color bar which maps values to colors.
+        fig.colorbar(surf, shrink=0.5, aspect=5)
+
+        plt.show()
         pass
 
     def print_boundary(self):
@@ -1027,4 +1128,14 @@ class NMM:
             print("f(x):", self.result["fx"][i])
             print("action:", self.result["action"][i])
             print("----------------------------------------")
+        print("Count of function calling:", self.result["f_call"])
+        print("Count of reflection\'s:", self.result["action_count"]["reflection"][0], "; function calling:", self.result["action_count"]["reflection"][1])
+        print("Count of expansion\'s:", self.result["action_count"]["expansion"][0], "; function calling:", self.result["action_count"]["expansion"][1])
+        print("Count of compression\'s:", self.result["action_count"]["compression"][0], "; function calling:", self.result["action_count"]["compression"][1])
+        print("Count of reduction\'s:", self.result["action_count"]["reduction"][0], "; function calling:", self.result["action_count"]["reduction"][1])
+        sum_of_o_call = self.result["action_count"]["reflection"][0] + self.result["action_count"]["expansion"][0] + self.result["action_count"]["compression"][0] + self.result["action_count"]["reduction"][0]
+        sum_of_f_call = self.result["action_count"]["reflection"][1] + self.result["action_count"]["expansion"][1] + self.result["action_count"]["compression"][1] + self.result["action_count"]["reduction"][1]
+        print("Sum of operations calling:", sum_of_o_call)
+        print("Sum of functions calling by operations calling:", sum_of_f_call)
+        # self.result["action_count"]["compression"] += 1
         pass
