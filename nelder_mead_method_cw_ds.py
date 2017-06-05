@@ -16,6 +16,10 @@ from matplotlib.collections import PatchCollection
 from mpl_toolkits.mplot3d import axes3d
 
 
+import openpyxl
+from openpyxl.utils import get_column_letter
+
+
 
 from resource import expression
 
@@ -42,7 +46,8 @@ class NMM:
                 "show result": 11,
                 "image 1": 12,
                 "image 2": 13,
-                "test 1": 14
+                "test 1": 14,
+                "start 1": 15,
             },
             "description": {
                 "none": "do nothing",
@@ -58,12 +63,13 @@ class NMM:
                 "start": "start calculation process",
                 "show result": "show result",
                 "image 1": "show 2D visualization",
-                "image 2": "show 3D visualization"
+                "image 2": "show 3D visualization",
+                "start 1": "start with condition"
             }
         }
         self.expression = expression.Expression("No name", "x**2")
         self.condition = expression.Expression("No name", "x < 5")
-        self.accuracy = 5
+        self.accuracy = 6
         self.epsilon = [1, 1]
         self.mm = True
         self.msycle = 3
@@ -78,8 +84,14 @@ class NMM:
         # self.pcd.importparam(self.accuracy, self.condition)
         self.pcd = {"i": [], "xk": [], "fxk": [], "action": [], "f_call": 0}
         self.sm = sven_method_lc_cw.SM()
-        # self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "s": 0.5}
-        self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "s": 0.5}
+        #self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "s": 0.5}
+        self.cof = {"a": 1.0, "g": 3.0, "b": 0.3, "s": 0.4}
+        self.amount_of_results = []
+        self.symbol = "s"
+        self.simplex_border_length = 1.1
+        self.one_dir = "gss_f_call"
+        self.d_for_sven = 0.1
+        # self.one_dir = "dskp_f_call"
         self.makedefault()
 
 
@@ -111,7 +123,7 @@ class NMM:
         self.showCommands()
 
     def makedefault(self):
-        self.accuracy = 5
+        # self.accuracy = 5
         self.epsilon[0] = 10.0 ** (-self.accuracy)
         self.epsilon[1] = self.epsilon[0]
         # a = 4 b = 2 c = 1
@@ -123,11 +135,12 @@ class NMM:
         # self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
 
         # self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
-        # self.condition = expression.Expression("Linear Condition", "a*(x1)+b*(x2) <= c")
-        # self.condition.parameters["linear"] = True
-        # self.condition.parameters["a"] = -1.0
-        # self.condition.parameters["b"] = -1.0
+        self.condition = expression.Expression("Linear Condition", "a*(x1)+b*(x2) >= c or False")
+        self.condition.parameters["linear"] = True
+        self.condition.parameters["a"] = -1.0
+        self.condition.parameters["b"] = -1.0
         # self.condition.parameters["c"] = -6.0
+        self.condition.parameters["c"] = -0.5
 
         # self.expression = expression.Expression("Function of Rozenbrok", "100*(x2-x1**2)**2+(1-x1)**2")
 
@@ -135,11 +148,16 @@ class NMM:
 
         # self.condition = expression.Expression("Сondition", "(x-a)**2 + (y-b)**2 <= R**2")
 
-        self.condition = expression.Expression("Сondition", "(x1-a)**2 + (x2-b)**2 <= R**2")
-        self.condition.parameters["linear"] = False
-        self.condition.parameters["a"] = self.start_point[0] + 10.0
-        self.condition.parameters["b"] = self.start_point[1]
-        self.condition.parameters["R"] = 15.0
+        # self.condition = expression.Expression("Сondition", "(x1-a)**2 + (x2-b)**2 <= R1**2 and (x1-a)**2 + (x2-b)**2 >= R2**2 or False")
+        # self.condition.parameters["linear"] = False
+        #     self.condition.parameters["a"] = self.start_point[0]
+        #     self.condition.parameters["b"] = self.start_point[1]
+
+        # self.condition.parameters["a"] = -0.1
+        # self.condition.parameters["b"] = 2.1
+
+        # self.condition.parameters["R1"] = 1.5
+        # self.condition.parameters["R2"] = 1.0
 
         self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
         # self.condition = expression.Expression("Linear Condition", "a*x1+b*x2+c <= 1")
@@ -177,7 +195,7 @@ class NMM:
         self.count_of_vertex = 3
         # self.simplex_border_length = 10.0
 
-        self.simplex_border_length = 1.5
+        # self.simplex_border_length = 1.5
 
         # self.x_start = [[-1.2, -1.2], [-1.2, 1.2], [1.2, 1.2], [1.2, -1.2]]
 
@@ -189,7 +207,7 @@ class NMM:
         # self.x_start = [[-0.023444155834422054 - 3, 1.203772072451931], [0.0, 1.203772072451931 + 3], [0.023444155834422054 + 3, 1.203772072451931]]
 
         # self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "s": 0.5}
-        self.cof = {"a": 0.8, "g": 2.0, "b": 0.5, "s": 0.5}
+        # self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "s": 0.5}
         #self.result = {"i": [], "xk": [], "fx": [], "action": [], "f_call": 0}
 
         self.result = {"i": [], "xk": [], "fx": [], "action": [], "f_call": 0,
@@ -205,8 +223,141 @@ class NMM:
         self.sm.importparam(self.accuracy, self.expression, self.condition)
 
 
+    def results_collector(self, result: type({})):
+        if self.condition.parameters["linear"] == False:
+            self.amount_of_results.append(
+                {"i": result["i"].copy(), "xk": self.deepcopy(result["xk"]), "fx": result["fx"].copy(), "action": result["action"].copy(), "f_call": result["f_call"],
+                 "action_count": {
+                     "reflection": result["action_count"]["reflection"].copy(),
+                     "expansion": result["action_count"]["expansion"].copy(),
+                     "reduction": result["action_count"]["reduction"].copy(),
+                     "compression": result["action_count"]["compression"].copy()
+                 },
+                 "cof": {"a": self.cof["a"], "g": self.cof["g"], "b": self.cof["b"], "s": self.cof["s"], "l": self.simplex_border_length, "ac": self.accuracy}
+                 }
+            )
+        else:
+            self.amount_of_results.append(
+                {"i": result["i"].copy(), "xk": self.deepcopy(result["xk"]), "fx": result["fx"].copy(),
+                 "action": result["action"].copy(), "f_call": result["f_call"],
+                 "action_count": {
+                     "reflection": result["action_count"]["reflection"].copy(),
+                     "expansion": result["action_count"]["expansion"].copy(),
+                     "reduction": result["action_count"]["reduction"].copy(),
+                     "compression": result["action_count"]["compression"].copy()
+                 },
+                 "cof": {"a": self.cof["a"], "g": self.cof["g"], "b": self.cof["b"], "s": self.cof["s"],
+                         "l": self.simplex_border_length, "ac": self.accuracy},
+                "pcd": {"sm_f_call": self.pcd["sm_f_call"], str(self.one_dir): self.pcd[str(self.one_dir)], "xk": self.deepcopy(self.pcd["xk"]), "fxk": self.pcd["fxk"].copy(), "d_lambda": self.d_for_sven}
+                }
+            )
+
+    def write_data(self, result: type([])):
+        wb = openpyxl.Workbook()
+        dest_filename = 'cw_nm.xlsx'
+        ws1 = wb.active
+        ws1.title = "range names"
+
+        for row in range(1, 40):
+            ws1.append(range(600))
+
+        ws2 = wb.create_sheet(title="Pi")
+
+        ws2['F5'] = 3.14
+
+        ws3 = wb.create_sheet(title="Data 1")
+        temp_row = []
+        if self.condition.parameters["linear"] == False:
+            for row in range(len(result)):
+                sum_of_o_call = result[row]["action_count"]["reflection"][0] + result[row]["action_count"]["expansion"][0] + \
+                                result[row]["action_count"]["compression"][0] + result[row]["action_count"]["reduction"][0]
+                sum_of_f_call = result[row]["action_count"]["reflection"][1] + result[row]["action_count"]["expansion"][1] + \
+                                result[row]["action_count"]["compression"][1] + result[row]["action_count"]["reduction"][1]
+
+                x = result[row]["xk"][-1][0]
+                f = result[row]["fx"][-1][0]
+                print(x, f)
+                print(result[row]["f_call"])
+                temp_row = [result[row]["cof"][self.symbol], result[row]["f_call"], str(x[0])+", "+str(x[1]), f]
+                for col in range(4):
+                    _ = ws3.cell(column=col + 1, row=row + 1, value="{0}".format(temp_row[col]))
+            print(ws3['AA10'].value)
+
+            ws4 = wb.create_sheet(title="Data 2")
+            temp_row = []
+            for row in range(len(result)):
+                sum_of_o_call = result[row]["action_count"]["reflection"][0] + result[row]["action_count"]["expansion"][0] + \
+                                result[row]["action_count"]["compression"][0] + result[row]["action_count"]["reduction"][0]
+                sum_of_f_call = result[row]["action_count"]["reflection"][1] + result[row]["action_count"]["expansion"][1] + \
+                                result[row]["action_count"]["compression"][1] + result[row]["action_count"]["reduction"][1]
+
+                x = result[row]["xk"][-1][0]
+                f = result[row]["fx"][-1][0]
+                print(x, f)
+                print(result[row]["f_call"])
+                temp_row = [result[row]["cof"][self.symbol], result[row]["action_count"]["reflection"][0], result[row]["action_count"]["expansion"][0], result[row]["action_count"]["compression"][0], result[row]["action_count"]["reduction"][0], sum_of_o_call]
+                for col in range(len(temp_row)):
+                    _ = ws4.cell(column=col + 1, row=row + 1, value="{0}".format(temp_row[col]))
+            print(ws4['AA10'].value)
+        else:
+            for row in range(len(result)):
+                sum_of_o_call = result[row]["action_count"]["reflection"][0] + result[row]["action_count"]["expansion"][
+                    0] + \
+                                result[row]["action_count"]["compression"][0] + \
+                                result[row]["action_count"]["reduction"][0]
+                sum_of_f_call = result[row]["action_count"]["reflection"][1] + result[row]["action_count"]["expansion"][
+                    1] + \
+                                result[row]["action_count"]["compression"][1] + \
+                                result[row]["action_count"]["reduction"][1]
+
+                # x = result[row]["xk"][-1][0]
+                # f = result[row]["fx"][-1][0]
+                x = result[row]["pcd"]["xk"]
+                f = result[row]["pcd"]["fxk"]
+                self.sm.par_sort(x, f)
+                print(x, f)
+                print(result[row]["f_call"])
+                temp_row = [result[row]["cof"][self.symbol], result[row]["f_call"], str(x[0][0]) + ", " + str(x[0][1]), f[0]]
+                for col in range(4):
+                    _ = ws3.cell(column=col + 1, row=row + 1, value="{0}".format(temp_row[col]))
+            print(ws3['AA10'].value)
+
+            ws4 = wb.create_sheet(title="Data 2")
+            temp_row = []
+            for row in range(len(result)):
+                sum_of_o_call = result[row]["action_count"]["reflection"][0] + result[row]["action_count"]["expansion"][
+                    0] + \
+                                result[row]["action_count"]["compression"][0] + \
+                                result[row]["action_count"]["reduction"][0]
+                sum_of_f_call = result[row]["action_count"]["reflection"][1] + result[row]["action_count"]["expansion"][
+                    1] + \
+                                result[row]["action_count"]["compression"][1] + \
+                                result[row]["action_count"]["reduction"][1]
+
+                # x = result[row]["xk"][-1][0]
+                # f = result[row]["fx"][-1][0]
+                x = result[row]["pcd"]["xk"]
+                f = result[row]["pcd"]["fxk"]
+                print(x, f)
+                print(result[row]["f_call"])
+                #temp_row = [result[row]["cof"][self.symbol], result[row]["action_count"]["reflection"][0],
+                #            result[row]["action_count"]["expansion"][0], result[row]["action_count"]["compression"][0],
+                #            result[row]["action_count"]["reduction"][0], sum_of_o_call]
+                temp_row = [result[row]["cof"][self.symbol], result[row]["f_call"], result[row]["pcd"]["d_lambda"], f[0]]
+                for col in range(len(temp_row)):
+                    _ = ws4.cell(column=col + 1, row=row + 1, value="{0}".format(temp_row[col]))
+            print(ws4['AA10'].value)
+        wb.save(filename=dest_filename)
+        #sum_of_o_call = result[j]["action_count"]["reflection"][0] + result[j]["action_count"]["expansion"][0] + \
+        #                result[j]["action_count"]["compression"][0] + result[j]["action_count"]["reduction"][0]
+        #sum_of_f_call = result[j]["action_count"]["reflection"][1] + result[j]["action_count"]["expansion"][1] + \
+        #                result[j]["action_count"]["compression"][1] + result[j]["action_count"]["reduction"][1]
+
+
+
     def importparam(self, accuracy):
-        self.accuracy = accuracy
+        # self.accuracy = accuracy
+        pass
 
     def setaccuracy(self):
         task = 0
@@ -263,6 +414,26 @@ class NMM:
                 self.printresult_3d()
             elif task == 14:
                 self.print_boundary_1()
+            elif task == 15:
+                self.one_dir == "gss_f_call"
+                self.cof = {"a": 1.0, "g": 3.0, "b": 0.3, "s": 0.4}
+                # self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "s": 0.5}
+                my_param = 2.0
+                self.symbol = "l"
+                self.amount_of_results = []
+                self.simplex_border_length = 1.1
+                self.accuracy = 6
+                while my_param > 0.95:
+                    self.cof[self.symbol] = round(my_param, 1)
+                    self.cof[self.symbol] = my_param
+                    self.simplex_border_length = round(my_param, 1)
+                    #self.accuracy = my_param
+                    self.resolve()
+                    # self.print_boundary_1()
+                    self.results_collector(self.result)
+                    my_param -= 0.1
+                self.printresult_m(self.amount_of_results)
+                self.write_data(self.amount_of_results)
         pass
 
     def print_raw_data(self):
@@ -383,9 +554,17 @@ class NMM:
             #k += 1
         self.par_sort(x_w, f_arr, cycling)
         if self.condition.parameters["linear"]:
-            self.do_linear_condition_p(x_w[0], f_arr[0])
-            self.printresult()
-            self.dskp.printresult()
+            if self.one_dir == "dskp_f_call":
+                self.do_linear_condition_p(x_w[0], f_arr[0])
+                self.printresult()
+                self.dskp.printresult()
+                self.d_for_sven = self.dskp.d_for_sven
+            elif self.one_dir == "gss_f_call":
+                self.do_linear_condition_g(x_w[0], f_arr[0])
+                self.printresult()
+                self.gss.printresult()
+                self.d_for_sven = self.gss.d_for_sven
+
         else:
             self.printresult()
 
@@ -399,7 +578,7 @@ class NMM:
         self.dm.d_for_sven = 0.1
         self.dm.importparam(self.accuracy, self.expression, self.condition, x)
         self.dm.makedefault()
-        self.dm.sm.printresult_graph()
+        # self.dm.sm.printresult_graph()
         self.dm.resolve()
         self.pcd["xk"] = [self.dm.result["x1"][-1].copy(), self.dm.result["x2"][-1].copy()]
         self.pcd["fxk"] = self.dm.result["fxk"][-1].copy()
@@ -413,11 +592,16 @@ class NMM:
         # self.sm.d = self.epsilon[0]
         # self.sm.resolve()
         self.gss = golden_section_search_lc_cw.GSS()
-        self.gss.d_for_sven = 0.1
+        # self.gss.d_for_sven = 0.1
+        self.gss.d_for_sven = self.gss.norm(x) / self.gss.norm(
+            [self.condition.parameters["a"], self.condition.parameters["b"]])
         self.gss.importparam(self.accuracy, self.expression, self.condition, x)
         self.gss.makedefault()
-        self.gss.sm.printresult_graph()
+        # self.gss.sm.printresult_graph()
         self.gss.resolve()
+        self.pcd["sm_f_call"] = len(self.gss.sm.result["xk"]) + 1
+        self.pcd["gss_f_call"] = len(self.gss.result["i"]) + 1
+        self.result["f_call"] += self.pcd["sm_f_call"] + self.pcd["gss_f_call"]
         self.pcd["xk"] = [self.gss.result["a"][-1].copy(), self.gss.result["b"][-1].copy()]
         self.pcd["fxk"] = [self.expression.execute_l(self.pcd["xk"][0]), self.expression.execute_l(self.pcd["xk"][1])]
         self.gss.printresult()
@@ -431,11 +615,16 @@ class NMM:
         # self.sm.d = self.epsilon[0]
         # self.sm.resolve()
         self.dskp = dsk_paula_lc_cw.DSKP()
-        self.dskp.d_for_sven = 0.1
+        # self.dskp.d_for_sven = 0.1
+        self.gss.d_for_sven = self.gss.norm(x) / self.gss.norm(
+            [self.condition.parameters["a"], self.condition.parameters["b"]])
         self.dskp.importparam(self.accuracy, self.expression, self.condition, x)
         self.dskp.makedefault()
-        self.dskp.sm.printresult_graph()
+        # self.dskp.sm.printresult_graph()
         self.dskp.resolve()
+        self.pcd["sm_f_call"] = len(self.gss.sm.result["xk"]) + 1
+        self.pcd["dskp_f_call"] = len(self.dskp.result["i"])
+        self.result["f_call"] += self.pcd["sm_f_call"] + self.pcd["dskp_f_call"]
         self.pcd["xk"] = [self.dskp.result["xst"][-1].copy()]
         self.pcd["fxk"] = [self.dskp.result["fsxt"][-1]]
         self.dskp.printresult()
@@ -712,6 +901,7 @@ class NMM:
         if math.sqrt(math.pow(sum([item - f_center for item in f_arr]), 2.0) / float(len(f_arr))) <= self.epsilon[0]:
             r = False
             print("Halting check! - True")
+        self.result["f_call"] += 1
         return r
 
     @staticmethod
@@ -962,7 +1152,7 @@ class NMM:
         i = 0
         while i < len(self.pcd["xk"]):
             verts.append((self.pcd["xk"][i][0], self.pcd["xk"][i][1]))
-            ax.text(self.pcd["xk"][i][0], self.pcd["xk"][i][1], "#" + str(self.result["i"][i]) + " ", color="red", fontsize="10",
+            ax.text(self.pcd["xk"][i][0], self.pcd["xk"][i][1], "#" + str(self.result["i"][i]) + " ", color="green", fontsize="10",
                     verticalalignment='bottom', horizontalalignment='right')
             i += 1
 
@@ -996,10 +1186,14 @@ class NMM:
             NV = self.mul(NV, 10)
             BX = [0 - NV[0]*2.0 - self.condition.parameters["c"], -self.condition.parameters["a"] + NV[0] - self.condition.parameters["c"]]
             BY = [0 - NV[1]*2.0, self.condition.parameters["b"] + NV[1]]
-            plt.plot(BX, BY)
+            plt.plot(BX, BY, color='r')
         else:
-            circle2 = plt.Circle((self.condition.parameters["a"], self.condition.parameters["b"]), self.condition.parameters["R"], color='r', fill=False)
+            circle2 = plt.Circle((self.condition.parameters["a"], self.condition.parameters["b"]),
+                                 self.condition.parameters["R1"], color='r', fill=False)
+            circle3 = plt.Circle((self.condition.parameters["a"], self.condition.parameters["b"]),
+                                 self.condition.parameters["R2"], color='r', fill=False)
             ax.add_artist(circle2)
+            ax.add_artist(circle3)
 
         CS = plt.contour(X, Y, Z)
         plt.clabel(CS, inline=1, fontsize=10)
@@ -1071,7 +1265,7 @@ class NMM:
         i = 0
         while i < len(self.pcd["xk"]):
             verts.append((self.pcd["xk"][i][0], self.pcd["xk"][i][1]))
-            ax.text(self.pcd["xk"][i][0], self.pcd["xk"][i][1], "#" + str(self.result["i"][i]) + " ", color="red",
+            ax.text(self.pcd["xk"][i][0], self.pcd["xk"][i][1], "#" + str(self.result["i"][i]) + " ", color="green",
                     fontsize="10",
                     verticalalignment='bottom', horizontalalignment='right')
             i += 1
@@ -1106,10 +1300,13 @@ class NMM:
                   -self.condition.parameters["a"] + NV[0] - self.condition.parameters["c"]]
             BY = [0 - NV[1] * 2.0, self.condition.parameters["b"] + NV[1]]
 
-            plt.plot(BX, BY)
+            plt.plot(BX, BY, color='r')
         else:
-            circle2 = plt.Circle((self.condition.parameters["a"], self.condition.parameters["b"]), self.condition.parameters["R"], color='r', fill=False)
+            circle2 = plt.Circle((self.condition.parameters["a"], self.condition.parameters["b"]), self.condition.parameters["R1"], color='r', fill=False)
+            circle3 = plt.Circle((self.condition.parameters["a"], self.condition.parameters["b"]),
+                                 self.condition.parameters["R2"], color='r', fill=False)
             ax.add_artist(circle2)
+            ax.add_artist(circle3)
 
         CS = plt.contour(X, Y, Z)
         plt.clabel(CS, inline=1, fontsize=10)
@@ -1121,6 +1318,10 @@ class NMM:
     def printresult(self):
         print('')
         print("Result:")
+        print("Coefficients: alpha", self.cof["a"], "beta:", self.cof["b"], "gamma:",
+              self.cof["g"], "sigma:", self.cof["s"])
+        print("Accuracy:", self.accuracy)
+        print("Side length:", self.simplex_border_length)
         for i in range(len(self.result["i"])):
             print("#" + str(i) + ":")
             print("itteration:", self.result["i"][i])
@@ -1138,4 +1339,53 @@ class NMM:
         print("Sum of operations calling:", sum_of_o_call)
         print("Sum of functions calling by operations calling:", sum_of_f_call)
         # self.result["action_count"]["compression"] += 1
+        pass
+
+    def printresult_m(self, result: type([])):
+        j = 0
+        while j < len(result):
+            print('')
+            print("----------------------------------------")
+            print("Result:")
+            i =len(result[j]["i"]) - 1
+            print("Coefficients: alpha", result[j]["cof"]["a"],"beta:", result[j]["cof"]["b"], "gamma:", result[j]["cof"]["g"],"sigma:", result[j]["cof"]["s"])
+            print("Accuracy:", result[j]["cof"]["ac"])
+            print("Side length:", result[j]["cof"]["l"])
+            # print("#" + str(i) + ":")
+            print("Itterations:", result[j]["i"][i])
+            print("x:", result[j]["xk"][i])
+            print("f(x):", result[j]["fx"][i])
+            print("action:", result[j]["action"][i])
+            print("----------------------------------------")
+            print("Count of function calling:", result[j]["f_call"])
+            print("Count of reflection\'s:", result[j]["action_count"]["reflection"][0], "; function calling:", result[j]["action_count"]["reflection"][1])
+            print("Count of expansion\'s:", result[j]["action_count"]["expansion"][0], "; function calling:", result[j]["action_count"]["expansion"][1])
+            print("Count of compression\'s:", result[j]["action_count"]["compression"][0], "; function calling:", result[j]["action_count"]["compression"][1])
+            print("Count of reduction\'s:", result[j]["action_count"]["reduction"][0], "; function calling:", result[j]["action_count"]["reduction"][1])
+            sum_of_o_call = result[j]["action_count"]["reflection"][0] + result[j]["action_count"]["expansion"][0] + result[j]["action_count"]["compression"][0] + result[j]["action_count"]["reduction"][0]
+            sum_of_f_call = result[j]["action_count"]["reflection"][1] + result[j]["action_count"]["expansion"][1] + result[j]["action_count"]["compression"][1] + result[j]["action_count"]["reduction"][1]
+            print("Sum of operations calling:", sum_of_o_call)
+            print("Sum of functions calling by operations calling:", sum_of_f_call)
+            # result[j]["action_count"]["compression"] += 1
+            if self.condition.parameters["linear"]:
+                # x = self.deepcopy(self.pcd["xk"])
+                x = self.deepcopy(result[j]["pcd"]["xk"])
+                costum = ""
+                i = 0
+                f = []
+                while i < len(x):
+                    f.append(self.expression.execute_l(x[i]))
+                    i += 1
+                if self.one_dir == "gss_f_call":
+                    costum = "Golden section method"
+                    self.gss.par_sort(x, f)
+                elif self.one_dir == "dskp_f_call":
+                    costum = "DSK Paula"
+                    self.dskp.par_sort(x, f)
+                print("Last point is:", x[0])
+                print("Last value is:", f[0])
+                print("Count of function calling by Sven method:", result[j]["pcd"]["sm_f_call"])
+                print("Count of function calling by "+costum+":", result[j]["pcd"][self.one_dir])
+                print("Lambda for Sven:", result[j]["pcd"]["d_lambda"])
+            j += 1
         pass

@@ -326,6 +326,14 @@ class SM:
                 xn[i].append(x[i][j])
         return xn
 
+    def par_sort(self, x, f):
+        f_temp = f.copy()
+        x_temp = self.deepcopy(x)
+        f.sort()
+        for i in range(len(x)):
+            x[i] = x_temp[f_temp.index(f[i])]
+            f_temp[f_temp.index(f[i])] = None
+
     def find_min(self):
         array = {"xk": [None, None, None], "fxk": [None, None, None]}
         pos = self.result["fxk"].index(min(self.result["fxk"]))
