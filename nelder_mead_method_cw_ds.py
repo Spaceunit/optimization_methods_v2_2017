@@ -419,18 +419,20 @@ class NMM:
                 self.cof = {"a": 1.0, "g": 3.0, "b": 0.3, "s": 0.4}
                 # self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "s": 0.5}
                 my_param = 2.0
+                # my_param = 10
                 self.symbol = "l"
                 self.amount_of_results = []
                 self.simplex_border_length = 1.1
                 self.accuracy = 6
                 while my_param > 0.95:
                     self.cof[self.symbol] = round(my_param, 1)
-                    self.cof[self.symbol] = my_param
+                    #self.cof[self.symbol] = my_param
                     self.simplex_border_length = round(my_param, 1)
-                    #self.accuracy = my_param
+                    # self.accuracy = my_param
                     self.resolve()
                     # self.print_boundary_1()
                     self.results_collector(self.result)
+                    # my_param -= 1
                     my_param -= 0.1
                 self.printresult_m(self.amount_of_results)
                 self.write_data(self.amount_of_results)
@@ -616,13 +618,13 @@ class NMM:
         # self.sm.resolve()
         self.dskp = dsk_paula_lc_cw.DSKP()
         # self.dskp.d_for_sven = 0.1
-        self.gss.d_for_sven = self.gss.norm(x) / self.gss.norm(
+        self.dskp.d_for_sven = self.dskp.norm(x) / self.dskp.norm(
             [self.condition.parameters["a"], self.condition.parameters["b"]])
         self.dskp.importparam(self.accuracy, self.expression, self.condition, x)
         self.dskp.makedefault()
         # self.dskp.sm.printresult_graph()
         self.dskp.resolve()
-        self.pcd["sm_f_call"] = len(self.gss.sm.result["xk"]) + 1
+        self.pcd["sm_f_call"] = len(self.dskp.sm.result["xk"]) + 1
         self.pcd["dskp_f_call"] = len(self.dskp.result["i"])
         self.result["f_call"] += self.pcd["sm_f_call"] + self.pcd["dskp_f_call"]
         self.pcd["xk"] = [self.dskp.result["xst"][-1].copy()]
