@@ -69,7 +69,7 @@ class NMM:
         }
         self.expression = expression.Expression("No name", "x**2")
         self.condition = expression.Expression("No name", "x < 5")
-        self.accuracy = 6
+        self.accuracy = 3
         self.epsilon = [1, 1]
         self.mm = True
         self.msycle = 3
@@ -135,12 +135,12 @@ class NMM:
         # self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
 
         # self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
-        self.condition = expression.Expression("Linear Condition", "a*(x1)+b*(x2) >= c or False")
-        self.condition.parameters["linear"] = True
-        self.condition.parameters["a"] = -1.0
-        self.condition.parameters["b"] = -1.0
+        # self.condition = expression.Expression("Linear Condition", "a*(x1)+b*(x2) >= c or False")
+        # self.condition.parameters["linear"] = True
+        # self.condition.parameters["a"] = -1.0
+        # self.condition.parameters["b"] = -1.0
         # self.condition.parameters["c"] = -6.0
-        self.condition.parameters["c"] = -0.5
+        # self.condition.parameters["c"] = -0.5
 
         # self.expression = expression.Expression("Function of Rozenbrok", "100*(x2-x1**2)**2+(1-x1)**2")
 
@@ -148,16 +148,16 @@ class NMM:
 
         # self.condition = expression.Expression("Сondition", "(x-a)**2 + (y-b)**2 <= R**2")
 
-        # self.condition = expression.Expression("Сondition", "(x1-a)**2 + (x2-b)**2 <= R1**2 and (x1-a)**2 + (x2-b)**2 >= R2**2 or False")
-        # self.condition.parameters["linear"] = False
+        self.condition = expression.Expression("Сondition", "(x1-a)**2 + (x2-b)**2 <= R1**2 and (x1-a)**2 + (x2-b)**2 >= R2**2 or True")
+        self.condition.parameters["linear"] = False
         #     self.condition.parameters["a"] = self.start_point[0]
         #     self.condition.parameters["b"] = self.start_point[1]
 
-        # self.condition.parameters["a"] = -0.1
-        # self.condition.parameters["b"] = 2.1
+        self.condition.parameters["a"] = -0.1
+        self.condition.parameters["b"] = 2.1
 
-        # self.condition.parameters["R1"] = 1.5
-        # self.condition.parameters["R2"] = 1.0
+        self.condition.parameters["R1"] = 1.5
+        self.condition.parameters["R2"] = 1.0
 
         self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
         # self.condition = expression.Expression("Linear Condition", "a*x1+b*x2+c <= 1")
@@ -418,22 +418,22 @@ class NMM:
                 self.one_dir == "gss_f_call"
                 self.cof = {"a": 1.0, "g": 3.0, "b": 0.3, "s": 0.4}
                 # self.cof = {"a": 1.0, "g": 2.0, "b": 0.5, "s": 0.5}
-                my_param = 2.0
-                # my_param = 10
-                self.symbol = "l"
+                # my_param = 2.0
+                my_param = 10
+                self.symbol = "ac"
                 self.amount_of_results = []
                 self.simplex_border_length = 1.1
                 self.accuracy = 6
                 while my_param > 0.95:
                     self.cof[self.symbol] = round(my_param, 1)
                     #self.cof[self.symbol] = my_param
-                    self.simplex_border_length = round(my_param, 1)
-                    # self.accuracy = my_param
+                    # self.simplex_border_length = round(my_param, 1)
+                    self.accuracy = my_param
                     self.resolve()
                     # self.print_boundary_1()
                     self.results_collector(self.result)
-                    # my_param -= 1
-                    my_param -= 0.1
+                    my_param -= 1
+                    # my_param -= 0.1
                 self.printresult_m(self.amount_of_results)
                 self.write_data(self.amount_of_results)
         pass
