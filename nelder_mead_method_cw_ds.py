@@ -142,7 +142,7 @@ class NMM:
         # self.condition.parameters["c"] = -6.0
         # self.condition.parameters["c"] = -0.5
 
-        # self.expression = expression.Expression("Function of Rozenbrok", "100*(x2-x1**2)**2+(1-x1)**2")
+        self.expression = expression.Expression("Function of Rozenbrok", "100*(x2-x1**2)**2+(1-x1)**2")
 
         self.start_point = [-1.2, 0.0]
 
@@ -159,7 +159,7 @@ class NMM:
         self.condition.parameters["R1"] = 1.5
         self.condition.parameters["R2"] = 1.0
 
-        self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
+        # self.expression = expression.Expression("Function", "(10*(x1-x2)**2+(x1-1)**2)**0.25")
         # self.condition = expression.Expression("Linear Condition", "a*x1+b*x2+c <= 1")
         # self.condition.parameters["a"] = 2.0
         # self.condition.parameters["b"] = 1.0
@@ -1057,8 +1057,8 @@ class NMM:
         ax = fig.add_subplot(111, projection='3d')
 
         # Grab some test data.
-        delta = 0.025
-        radius = 5
+        delta = 0.01
+        radius = 6
         sector = self.expression.parameters["global_min"].copy()
         sector = [sector[0] - math.copysign(radius, sector[0]), sector[1] + math.copysign(radius, sector[1])]
         x = np.arange(sector[0], sector[1], delta)
@@ -1081,8 +1081,8 @@ class NMM:
         surf = ax.plot_surface(X, Y, Z, cmap=cm.jet,
                                linewidth=0, antialiased=True)
 
-        ax.set_zlim(0.0, 25.0)
-        ax.zaxis.set_major_locator(LinearLocator(10))
+        ax.set_zlim(0.0, 100000.0)
+        ax.zaxis.set_major_locator(LinearLocator(500))
         ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
 
         # Add a color bar which maps values to colors.
